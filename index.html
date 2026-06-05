@@ -476,15 +476,7 @@
 <!-- ══ CHARGEMENT ══ -->
 <div id="loading-overlay" style="position:fixed;inset:0;background:#0A0E2A;display:flex;align-items:center;justify-content:center;z-index:1000;">
   <div style="text-align:center;">
-    <!-- Logo SVG blanc identique à la slide -->
-    <svg width="160" height="110" viewBox="0 0 160 110" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 18px;">
-      <!-- Bracket rectangle -->
-      <rect x="30" y="10" width="72" height="76" stroke="white" stroke-width="2.5" fill="none"/>
-      <!-- Lutecia -->
-      <text x="42" y="62" font-family="'Cormorant Garamond', Georgia, serif" font-size="28" font-weight="600" fill="white">Lutecia</text>
-      <!-- Care (décalé à droite, en dessous) -->
-      <text x="68" y="94" font-family="'Cormorant Garamond', Georgia, serif" font-size="28" font-weight="600" fill="white">Care</text>
-    </svg>
+    <img id="loading-logo" style="height:120px;width:auto;display:block;margin:0 auto 20px;" />
     <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Connexion en cours…</div>
   </div>
 </div>
@@ -1133,6 +1125,12 @@ function handleRowClick(id) {
 // INITIALISATION
 // ══════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', function() {
+  // Copier le vrai logo dans l'overlay de chargement
+  (function() {
+    var src = document.querySelector('.sidebar-logo img');
+    var dst = document.getElementById('loading-logo');
+    if (src && dst) dst.src = src.src;
+  })();
   // Date
   document.getElementById('topbar-date').textContent =
     new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });

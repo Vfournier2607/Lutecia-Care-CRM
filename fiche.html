@@ -355,11 +355,23 @@
     /* ══ Grille 3 colonnes ══ */
     .fiche-grid-3 {
       display: grid;
-      grid-template-columns: 220px 1fr 240px;
-      gap: 10px;
+      grid-template-columns: var(--fcol1,220px) 6px var(--fcol2,1fr) 6px var(--fcol3,240px);
+      gap: 10px 0;
       padding: 10px 14px;
       align-items: start;
+      column-gap: 0;
     }
+    .fiche-grid-3 .fiche-col { padding: 0 5px; }
+    .col-resizer {
+      width: 6px;
+      cursor: col-resize;
+      background: transparent;
+      position: relative;
+      align-self: stretch;
+      z-index: 10;
+      transition: background .15s;
+    }
+    .col-resizer:hover, .col-resizer.active { background: var(--blue); opacity: .4; }
     .fiche-col { display: flex; flex-direction: column; gap: 10px; }
     .notes-body { overflow-y: auto; max-height: 500px; }
     .fiche-full-row { padding: 0 14px 12px; }
@@ -387,7 +399,7 @@
       cursor: default;
       user-select: none;
       position: relative;
-      resize: vertical;
+      resize: both;
       overflow: auto;
       min-height: 80px;
     }
@@ -636,10 +648,10 @@
     <span id="bc-nom" class="hidden"></span>
 
     <!-- ══ Grille 3 colonnes ══ -->
-    <div class="fiche-grid-3">
+    <div class="fiche-grid-3" id="fiche-grid">
 
       <!-- Col 1 : Infos sur la structure -->
-      <div class="fiche-col">
+      <div class="fiche-col" id="fcol-1">
         <div class="card">
           <div class="card-header"><div class="card-title">Infos sur la structure</div></div>
           <div class="card-body">
@@ -663,7 +675,8 @@
       </div>
 
       <!-- Col 2 : Notes & actions -->
-      <div class="fiche-col">
+      <div class="col-resizer" data-col="1"></div>
+      <div class="fiche-col" id="fcol-2">
         <div class="card" style="height:100%;">
           <div class="card-header">
             <div class="card-title">Notes & actions</div>
@@ -681,7 +694,8 @@
       </div>
 
       <!-- Col 3 : Équipement + KPIs -->
-      <div class="fiche-col">
+      <div class="col-resizer" data-col="2"></div>
+      <div class="fiche-col" id="fcol-3">
 
         <div class="card">
           <div class="card-header"><div class="card-title">Équipement</div></div>
@@ -1726,6 +1740,74 @@ document.getElementById('popup-alerte').addEventListener('click', function(e) {
   }
   document.addEventListener('DOMContentLoaded', function() {
     setTimeout(initDrag, 500);
+  });
+})();
+
+
+// ══════════════════════════════════════
+// RESIZE DES COLONNES (drag horizontal)
+// ══════════════════════════════════════
+(function() {
+  var STORAGE_KEY_COLS = 'lutecia_col_widths';
+
+  function saveCols(w1, w3) {
+    try { localStorage.setItem(STORAGE_KEY_COLS, JSON.stringify({w1:w1,w3:w3})); } catch(_) {}
+  }
+  function loadCols() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY_COLS) || 'null'); } catch(_) { return null; }
+  }
+
+  function applyColWidths(grid, w1, w3) {
+    grid.style.gridTemplateColumns = w1+'px 6px 1fr 6px '+w3+'px';
+  }
+
+  function initColResizers() {
+    var grid = document.getElementById('fiche-grid');
+    if (!grid) return;
+
+    // Restore saved widths
+    var saved = loadCols();
+    if (saved) applyColWidths(grid, saved.w1, saved.w3);
+
+    grid.querySelectorAll('.col-resizer').forEach(function(handle) {
+      var colIdx = parseInt(handle.dataset.col); // 1 = between col1&col2, 2 = between col2&col3
+
+      handle.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        handle.classList.add('active');
+
+        var startX = e.clientX;
+        var gridRect = grid.getBoundingClientRect();
+        var cols = grid.style.gridTemplateColumns || '220px 6px 1fr 6px 240px';
+        var parts = cols.split(' ');
+        var w1 = parseInt(parts[0]) || 220;
+        var w3 = parseInt(parts[4]) || 240;
+
+        function onMove(ev) {
+          var dx = ev.clientX - startX;
+          if (colIdx === 1) {
+            w1 = Math.max(140, Math.min(400, w1 + dx));
+          } else {
+            w3 = Math.max(140, Math.min(400, w3 - dx));
+          }
+          applyColWidths(grid, w1, w3);
+          startX = ev.clientX;
+        }
+        function onUp() {
+          handle.classList.remove('active');
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+          var cols2 = grid.style.gridTemplateColumns.split(' ');
+          saveCols(parseInt(cols2[0])||w1, parseInt(cols2[4])||w3);
+        }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(initColResizers, 600);
   });
 })();
 
