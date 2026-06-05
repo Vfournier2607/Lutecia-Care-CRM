@@ -463,17 +463,11 @@
 </head>
 <body>
 
-<!-- ══ MODALE AUTH ══ -->
-<div id="auth-modal" class="modal-overlay">
-  <div class="modal-box">
-    <div class="modal-logo">Lutecia Care</div>
-    <div class="modal-sub">Deal Flow — Équipe M&amp;A</div>
-    <label class="modal-label" for="auth-input">Votre prénom</label>
-    <input id="auth-input" class="modal-input" type="text"
-           placeholder="ex : Vincent"
-           onkeydown="if(event.key==='Enter') validerAuth()" />
-    <button class="modal-btn" onclick="validerAuth()">Accéder à l'interface</button>
-    <div id="auth-error" class="modal-error"></div>
+<!-- ══ CHARGEMENT ══ -->
+<div id="loading-overlay" style="position:fixed;inset:0;background:rgba(10,14,42,0.92);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:1000;">
+  <div style="text-align:center;color:#fff;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;margin-bottom:10px;">Lutecia Care</div>
+    <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.6;">Connexion en cours…</div>
   </div>
 </div>
 
@@ -614,327 +608,9 @@
 </div>
 
 <script src="msal.min.js"></script>
-<script>
-// ════════════════════════════════════════════
-// MODULE GRAPH — output.xlsx
-// Lutecia Care Deal Flow
-// ════════════════════════════════════════════
-
-const GRAPH_CONFIG = {
-  clientId:    '8e1ee67e-a7d8-4362-bff0-e08f806e5404',
-  tenantId:    '968cbaab-6a7a-4e30-a00f-af1805e561b6',
-  redirectUri: 'https://black-plant-032cc4603.7.azurestaticapps.net',
-  scopes:      ['Files.ReadWrite.All', 'Sites.ReadWrite.All', 'User.Read'],
-  fileId:      '67B2C3FB-FFE6-442B-825D-C784B3223DF6',
-};
-
-// En-têtes journal (onglet "Journal")
-const JOURNAL_HEADERS = [
-  'timestamp', 'auteur', 'type_entite', 'id_entite',
-  'nom_entite', 'champ_modifie', 'ancienne_valeur', 'nouvelle_valeur', 'pays'
-];
-
-// En-têtes état actuel (onglet "Etat")
-const ETAT_HEADERS = [
-  'id_entite', 'nom_entite', 'pays',
-  'statut', 'label', 'responsable', 'contact', 'source', 'note',
-  'modifiedBy', 'modifiedAt'
-];
-
-var _msalApp  = null;
-var _account  = null;
-var _token    = null;
-var _siteId   = null;
-var GRAPH_READY = false;
-
-// ── Init MSAL ──
-async function graphInit() {
-  if (_msalApp) return true;
-  try {
-    _msalApp = new msal.PublicClientApplication({
-      auth: {
-        clientId:    GRAPH_CONFIG.clientId,
-        authority:   'https://login.microsoftonline.com/' + GRAPH_CONFIG.tenantId,
-        redirectUri: GRAPH_CONFIG.redirectUri,
-      },
-      cache: { cacheLocation: 'sessionStorage' }
-    });
-    await _msalApp.initialize();
-    return true;
-  } catch(e) {
-    console.warn('MSAL init:', e.message);
-    return false;
-  }
-}
-
-// ── Token silencieux ou popup ──
-async function graphGetToken() {
-  if (_token) return _token;
-  var accounts = _msalApp.getAllAccounts();
-  if (accounts.length > 0) {
-    _account = accounts[0];
-    try {
-      var r = await _msalApp.acquireTokenSilent({ account: _account, scopes: GRAPH_CONFIG.scopes });
-      _token = r.accessToken;
-      return _token;
-    } catch(e) { /* expiré → popup */ }
-  }
-  var r = await _msalApp.loginPopup({ scopes: GRAPH_CONFIG.scopes });
-  _account = r.account;
-  _token   = r.accessToken;
-  return _token;
-}
-
-function graphGetUserName() {
-  if (_account) return _account.name || _account.username || '';
-  return sessionStorage.getItem('lutecia_user') || '';
-}
-
-// ── Appel Graph générique ──
-async function graphCall(method, endpoint, body) {
-  var token = await graphGetToken();
-  var opts = {
-    method: method,
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Content-Type':  'application/json'
-    }
-  };
-  if (body) opts.body = JSON.stringify(body);
-  var res = await fetch('https://graph.microsoft.com/v1.0' + endpoint, opts);
-  if (res.status === 204) return null;
-  if (!res.ok) {
-    var err = await res.json().catch(function() { return {}; });
-    throw new Error(err.error ? err.error.message : 'Graph ' + res.status);
-  }
-  return res.json();
-}
-
-// ── Obtenir l'ID du site SharePoint ──
-async function graphGetSiteId() {
-  if (_siteId) return _siteId;
-  var data = await graphCall('GET', '/sites/lutetiacare.sharepoint.com:/sites/MALutecia');
-  _siteId = data.id;
-  return _siteId;
-}
-
-// ── Lire un onglet complet ──
-async function graphReadSheet(sheetName) {
-  try {
-    var siteId = await graphGetSiteId();
-    var data = await graphCall('GET',
-      '/sites/' + siteId + '/drive/items/' + GRAPH_CONFIG.fileId +
-      '/workbook/worksheets/' + encodeURIComponent(sheetName) + '/usedRange'
-    );
-    if (!data || !data.values || data.values.length < 2) return [];
-    var headers = data.values[0];
-    return data.values.slice(1)
-      .map(function(row) {
-        var obj = {};
-        headers.forEach(function(h, i) { obj[h] = row[i] !== null ? String(row[i]) : ''; });
-        return obj;
-      })
-      .filter(function(r) { return Object.values(r).some(function(v) { return v !== ''; }); });
-  } catch(e) {
-    console.warn('graphReadSheet ' + sheetName + ':', e.message);
-    return [];
-  }
-}
-
-// ── Écrire dans un onglet (remplace tout) ──
-async function graphWriteSheet(sheetName, headers, rows) {
-  try {
-    var siteId = await graphGetSiteId();
-    var values = [headers].concat(rows.map(function(r) {
-      return headers.map(function(h) { return r[h] !== undefined ? String(r[h]) : ''; });
-    }));
-    var lastCol = String.fromCharCode(64 + headers.length);
-    var lastRow = values.length;
-    await graphCall('PATCH',
-      '/sites/' + siteId + '/drive/items/' + GRAPH_CONFIG.fileId +
-      '/workbook/worksheets/' + encodeURIComponent(sheetName) +
-      '/range(address=\'A1:' + lastCol + lastRow + '\')',
-      { values: values }
-    );
-    return true;
-  } catch(e) {
-    console.error('graphWriteSheet ' + sheetName + ':', e.message);
-    return false;
-  }
-}
-
-// ── Ajouter une ligne au journal (append) ──
-async function graphAppendJournal(ligne) {
-  try {
-    var rows = await graphReadSheet('Journal');
-    rows.push(ligne);
-    await graphWriteSheet('Journal', JOURNAL_HEADERS, rows);
-    return true;
-  } catch(e) {
-    console.warn('graphAppendJournal:', e.message);
-    return false;
-  }
-}
-
-// ── Mettre à jour l'état d'une structure ──
-async function graphUpdateEtat(id, data) {
-  try {
-    var rows = await graphReadSheet('Etat');
-    var idx  = rows.findIndex(function(r) { return r.id_entite === id; });
-    var row  = Object.assign({}, idx >= 0 ? rows[idx] : {}, data, {
-      id_entite:  id,
-      modifiedBy: graphGetUserName(),
-      modifiedAt: new Date().toISOString()
-    });
-    if (idx >= 0) rows[idx] = row;
-    else          rows.push(row);
-    await graphWriteSheet('Etat', ETAT_HEADERS, rows);
-    return true;
-  } catch(e) {
-    console.warn('graphUpdateEtat:', e.message);
-    return false;
-  }
-}
-
-// ── Initialiser les onglets si nécessaire ──
-async function graphInitSheets() {
-  try {
-    var siteId = await graphGetSiteId();
-    var sheets = await graphCall('GET',
-      '/sites/' + siteId + '/drive/items/' + GRAPH_CONFIG.fileId + '/workbook/worksheets'
-    );
-    var names = sheets.value.map(function(s) { return s.name; });
-
-    for (var i = 0; i < ['Journal', 'Etat', 'KPIs', 'Actions'].length; i++) {
-      var name = ['Journal', 'Etat', 'KPIs', 'Actions'][i];
-      if (names.indexOf(name) < 0) {
-        await graphCall('POST',
-          '/sites/' + siteId + '/drive/items/' + GRAPH_CONFIG.fileId + '/workbook/worksheets',
-          { name: name }
-        );
-      }
-    }
-
-    // En-têtes si vides
-    await graphEnsureHeaders('Journal', JOURNAL_HEADERS);
-    await graphEnsureHeaders('Etat',    ETAT_HEADERS);
-    await graphEnsureHeaders('KPIs',    ['id_entite', 'lignes', 'valeurs', 'annees', 'modifiedBy', 'modifiedAt']);
-    await graphEnsureHeaders('Actions', ['id_entite', 'type', 'date', 'note', 'auteur', 'createdAt']);
-
-    GRAPH_READY = true;
-    console.log('Graph output.xlsx OK');
-    return true;
-  } catch(e) {
-    console.warn('graphInitSheets:', e.message);
-    return false;
-  }
-}
-
-async function graphEnsureHeaders(sheetName, headers) {
-  try {
-    var siteId = await graphGetSiteId();
-    var data = await graphCall('GET',
-      '/sites/' + siteId + '/drive/items/' + GRAPH_CONFIG.fileId +
-      '/workbook/worksheets/' + encodeURIComponent(sheetName) + '/usedRange'
-    );
-    if (!data || !data.values || data.values.length === 0) {
-      var lastCol = String.fromCharCode(64 + headers.length);
-      await graphCall('PATCH',
-        '/sites/' + siteId + '/drive/items/' + GRAPH_CONFIG.fileId +
-        '/workbook/worksheets/' + encodeURIComponent(sheetName) +
-        '/range(address=\'A1:' + lastCol + '1\')',
-        { values: [headers] }
-      );
-    }
-  } catch(e) { /* onglet vide */ }
-}
-
-// ════════════════════════════════════════════
-// API PUBLIQUE
-// ════════════════════════════════════════════
-
-// Charger tout l'état depuis Graph (onglet Etat)
-async function graphLoadEtat() {
-  var rows = await graphReadSheet('Etat');
-  var out  = {};
-  rows.forEach(function(r) { if (r.id_entite) out[r.id_entite] = r; });
-  return out;
-}
-
-// Charger les actions d'une structure
-async function graphLoadActions(id) {
-  var rows = await graphReadSheet('Actions');
-  return rows.filter(function(r) { return r.id_entite === id; });
-}
-
-// Ajouter une action dans Graph
-async function graphSaveAction(id, action) {
-  try {
-    var rows = await graphReadSheet('Actions');
-    rows.push(Object.assign({ id_entite: id }, action));
-    await graphWriteSheet('Actions',
-      ['id_entite', 'type', 'date', 'note', 'auteur', 'createdAt'], rows);
-    return true;
-  } catch(e) {
-    console.warn('graphSaveAction:', e.message);
-    return false;
-  }
-}
-
-// Charger les KPIs d'une structure
-async function graphLoadKpi(id) {
-  var rows = await graphReadSheet('KPIs');
-  var row  = rows.find(function(r) { return r.id_entite === id; });
-  if (!row) return null;
-  try {
-    return {
-      lignes:  JSON.parse(row.lignes  || '[]'),
-      valeurs: JSON.parse(row.valeurs || '{}'),
-      annees:  JSON.parse(row.annees  || '[]'),
-    };
-  } catch(e) { return null; }
-}
-
-// Sauvegarder les KPIs d'une structure
-async function graphSaveKpi(id, kpiData) {
-  try {
-    var rows = await graphReadSheet('KPIs');
-    var idx  = rows.findIndex(function(r) { return r.id_entite === id; });
-    var row  = {
-      id_entite:  id,
-      lignes:     JSON.stringify(kpiData.lignes),
-      valeurs:    JSON.stringify(kpiData.valeurs),
-      annees:     JSON.stringify(kpiData.annees || []),
-      modifiedBy: graphGetUserName(),
-      modifiedAt: new Date().toISOString()
-    };
-    if (idx >= 0) rows[idx] = row;
-    else          rows.push(row);
-    await graphWriteSheet('KPIs',
-      ['id_entite', 'lignes', 'valeurs', 'annees', 'modifiedBy', 'modifiedAt'], rows);
-    return true;
-  } catch(e) {
-    console.warn('graphSaveKpi:', e.message);
-    return false;
-  }
-}
-
-// Connexion silencieuse au démarrage
-async function graphConnect() {
-  try {
-    var ok = await graphInit();
-    if (!ok) return false;
-    await graphGetToken();
-    await graphInitSheets();
-    return true;
-  } catch(e) {
-    console.warn('Graph non disponible:', e.message);
-    GRAPH_READY = false;
-    return false;
-  }
-}
-
-</script>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/graph.js"></script>
 <script>
 // ══════════════════════════════════════════
 // DONNÉES — Excel Screening Master intégré
@@ -1007,6 +683,16 @@ let currentUser  = '';
 let currentSort  = { key: 'nom', dir: 'asc' };
 let GROUPES      = [];
 
+// Helper: échapper le HTML pour éviter les XSS dans les gabarits innerHTML
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // ══════════════════════════════════════════
 // STORAGE LOCAL (remplacé par Graph au Jalon 4)
 // ══════════════════════════════════════════
@@ -1067,37 +753,7 @@ function appendJournal(id, champ, ancienne, nouvelle) {
   try { localStorage.setItem('lutecia_journal', JSON.stringify(journal)); } catch {}
 }
 
-// ══════════════════════════════════════════
-// AUTH
-// ══════════════════════════════════════════
-function validerAuth() {
-  var val = (document.getElementById('auth-input').value || '').trim();
-  var err = document.getElementById('auth-error');
-  if (!val || val.length < 2) {
-    err.textContent = 'Merci de saisir votre pr\u00e9nom.';
-    return;
-  }
-  currentUser = val;
-  sessionStorage.setItem('lutecia_user', val);
-  localStorage.setItem('lutecia_user_persist', val);
-  document.getElementById('auth-modal').classList.add('hidden');
-  majSidebar(val);
-  // Connexion Graph + chargement état
-  graphConnect().then(function(ok) {
-    if (!ok) return;
-    graphLoadEtat().then(function(etat) {
-      var local = loadOutput();
-      Object.keys(etat).forEach(function(id) {
-        if (!local[id]) local[id] = {};
-        Object.assign(local[id], etat[id]);
-      });
-      saveOutput(local);
-      renderTable();
-      renderStats();
-    }).catch(function(e) { console.warn('graphLoadEtat:', e.message); });
-  });
-}
-
+// ── Mise à jour sidebar avec l'identité Microsoft ──────────────────
 function majSidebar(nom) {
   document.getElementById('sidebar-avatar').textContent = nom[0].toUpperCase();
   document.getElementById('sidebar-name').textContent   = nom;
@@ -1250,8 +906,7 @@ function renderClocheAlerte(id) {
   });
   var color = enRetard ? '#0a0a0a' : '#DC2626';
   var n = actifs.length;
-  var nomEsc = (id || '').replace(/'/g, "\\'");
-  return '<button onclick="ouvrirPopupAlertes(\'' + nomEsc + '\')" title="' + n + ' alerte(s) — cliquer pour voir" '
+  return '<button data-alert-id="' + esc(id) + '" title="' + n + ' alerte(s) — cliquer pour voir" '
        + 'style="background:transparent;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:3px;padding:2px 4px;">'
        + '<svg width="16" height="16" viewBox="0 0 24 24" fill="' + color + '" stroke="none">'
        + '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>'
@@ -1356,24 +1011,24 @@ function renderTable() {
       ? '<span class="status-badge s-' + statut + '">' + STATUT_LABELS[statut] + '</span>'
       : '';
 
-    return '<tr onclick="ouvrirFiche(\'' + g.id + '\')">'
-      + '<td class="cell-nom">' + (isModifie(g, output) ? '<span class="dot-modifie" title="Structure modifiée"></span>' : '') + g.nom
-        + (g.estReseau ? '' : '<br><span style="font-size:10px;color:var(--text-soft);font-style:italic">Ind\u00e9pendant</span>')
+    return '<tr data-id="' + esc(g.id) + '">'
+      + '<td class="cell-nom">' + (isModifie(g, output) ? '<span class="dot-modifie" title="Structure modifiée"></span>' : '') + esc(g.nom)
+        + (g.estReseau ? '' : '<br><span style="font-size:10px;color:var(--text-soft);font-style:italic">Indépendant</span>')
         + '</td>'
-      + '<td style="font-size:11px;color:var(--text-soft)">' + g.mapping + '</td>'
-      + '<td style="font-size:11px">' + g.pays + '</td>'
+      + '<td style="font-size:11px;color:var(--text-soft)">' + esc(g.mapping) + '</td>'
+      + '<td style="font-size:11px">' + esc(g.pays) + '</td>'
       + '<td style="text-align:center;font-weight:500">' + g.nb_centres + '</td>'
       + '<td style="text-align:center">' + badgeVal(g.tep) + '</td>'
       + '<td style="text-align:center">' + badgeVal(g.gamma_cam) + '</td>'
       + '<td style="text-align:center">' + badgeVal(g.radiotherapie) + '</td>'
       + '<td onclick="event.stopPropagation()">'
-        + '<input class="inline-input" type="text" value="' + label.replace(/"/g, '&quot;') + '"'
+        + '<input class="inline-input" type="text" value="' + esc(label) + '"'
         + ' placeholder="Nom de code..."'
-        + ' onchange="setRecord(\'' + g.id + '\', \'label\', this.value); renderTable();"'
+        + ' onchange="setRecord(this.closest(\'tr\').dataset.id, \'label\', this.value); renderTable();"'
         + ' onfocus="event.stopPropagation()" />'
         + '</td>'
       + '<td onclick="event.stopPropagation()">'
-        + '<select class="inline-select" onchange="setRecord(\'' + g.id + '\', \'statut\', this.value); renderTable();">'
+        + '<select class="inline-select" onchange="setRecord(this.closest(\'tr\').dataset.id, \'statut\', this.value); renderTable();">'
         + '<option value=""' + (!statut ? ' selected' : '') + '>\u2014 Aucun \u2014</option>'
         + '<option value="contact"' + (statut==='contact' ? ' selected' : '') + '>Prise de contact</option>'
         + '<option value="discussion"' + (statut==='discussion' ? ' selected' : '') + '>Discussion</option>'
@@ -1417,9 +1072,9 @@ function ouvrirPopupAlertes(id) {
       + '<span style="font-size:13px;font-weight:600;color:' + color + ';">' + new Date(a.echeance).toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}) + '</span>'
       + '<span style="font-size:10px;color:' + color + ';font-weight:600;text-transform:uppercase;letter-spacing:.05em;">' + libelle + '</span>'
       + '</div>'
-      + '<span style="font-size:10px;color:var(--text-soft);">par ' + (a.auteur || '—') + '</span>'
+      + '<span style="font-size:10px;color:var(--text-soft);">par ' + esc(a.auteur || '—') + '</span>'
       + '</div>'
-      + '<div style="font-size:12px;color:var(--text);line-height:1.4;">' + (a.note || '') + '</div>'
+      + '<div style="font-size:12px;color:var(--text);line-height:1.4;">' + esc(a.note || '') + '</div>'
       + '</div>';
   }).join('') || '<div style="text-align:center;color:var(--text-soft);padding:20px;font-size:12px;">Aucune alerte active.</div>';
 
@@ -1474,39 +1129,54 @@ document.addEventListener('DOMContentLoaded', function() {
   renderStats();
   renderTable();
 
+  // Délégation de clic sur le tableau (remplace onclick inline sur <tr>)
+  document.getElementById('tbody').addEventListener('click', function(e) {
+    var tr = e.target.closest('tr');
+    if (!tr) return;
+    // Ignorer les clics dans les cellules interactives (input, select, button)
+    if (e.target.closest('td[onclick]') || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') return;
+    var id = tr.dataset.id;
+    if (id) ouvrirFiche(id);
+  });
+
+  // Délégation pour les boutons d'alerte (data-alert-id)
+  document.getElementById('tbody').addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-alert-id]');
+    if (!btn) return;
+    e.stopPropagation();
+    ouvrirPopupAlertes(btn.dataset.alertId);
+  });
+
   // Pack 7 : fermeture popup alertes au clic hors box
   var palEl = document.getElementById('popup-alertes-list');
   if (palEl) palEl.addEventListener('click', function(e) {
     if (e.target === this) fermerPopupAlertes();
   });
 
-  // Auth
-  var user = sessionStorage.getItem('lutecia_user');
-  if (user) {
-    currentUser = user;
-    document.getElementById('auth-modal').classList.add('hidden');
-    majSidebar(user);
-    // Connexion Graph + chargement état
-    graphConnect().then(function(ok) {
-      if (!ok) return;
-      graphLoadEtat().then(function(etat) {
-        // Fusionner état Graph avec localStorage
-        var local = loadOutput();
-        Object.keys(etat).forEach(function(id) {
-          if (!local[id]) local[id] = {};
-          Object.assign(local[id], etat[id]);
-        });
-        saveOutput(local);
-        renderTable();
-        renderStats();
-        console.log('Etat chargé depuis output.xlsx');
-      }).catch(function(e) { console.warn('graphLoadEtat:', e.message); });
-    });
-  } else {
-    setTimeout(function() {
-      document.getElementById('auth-input').focus();
-    }, 100);
-  }
+  // Authentification MSAL — identité tirée du compte Microsoft, pas d'une saisie manuelle
+  graphConnect().then(function(ok) {
+    var overlay = document.getElementById('loading-overlay');
+    if (overlay) overlay.style.display = 'none';
+    if (!ok) {
+      if (overlay) {
+        overlay.style.display = 'flex';
+        overlay.querySelector('div > div:last-child').textContent = 'Connexion impossible. Rechargez la page.';
+      }
+      return;
+    }
+    currentUser = graphGetUserName();
+    majSidebar(currentUser);
+    graphLoadEtat().then(function(etat) {
+      var local = loadOutput();
+      Object.keys(etat).forEach(function(id) {
+        if (!local[id]) local[id] = {};
+        Object.assign(local[id], etat[id]);
+      });
+      saveOutput(local);
+      renderTable();
+      renderStats();
+    }).catch(function(e) { /* état non disponible, on continue */ });
+  });
 });
 </script>
 <!-- Popup Alertes (Pack 7) -->
