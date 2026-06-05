@@ -474,10 +474,10 @@
 <body>
 
 <!-- ══ CHARGEMENT ══ -->
-<div id="loading-overlay" style="position:fixed;inset:0;background:rgba(10,14,42,0.92);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:1000;">
+<div id="loading-overlay" style="position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:1000;">
   <div style="text-align:center;color:#fff;">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;margin-bottom:10px;">Lutecia Care</div>
-    <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.6;">Connexion en cours…</div>
+    <img id="loading-logo" style="height:100px;width:auto;margin-bottom:20px;display:block;margin-left:auto;margin-right:auto;" />
+    <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.5;">Connexion en cours…</div>
   </div>
 </div>
 
@@ -1125,6 +1125,12 @@ function handleRowClick(id) {
 // INITIALISATION
 // ══════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', function() {
+  // Copie le logo dans l'overlay de chargement
+  (function() {
+    var sidebarImg = document.querySelector('.sidebar-logo img');
+    var loadingLogo = document.getElementById('loading-logo');
+    if (sidebarImg && loadingLogo) loadingLogo.src = sidebarImg.src;
+  })();
   // Date
   document.getElementById('topbar-date').textContent =
     new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
