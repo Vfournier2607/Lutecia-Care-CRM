@@ -693,327 +693,9 @@
 </div>
 
 <script src="msal.min.js"></script>
-<script>
-// ════════════════════════════════════════════
-// MODULE GRAPH — output.xlsx
-// Lutecia Care Deal Flow
-// ════════════════════════════════════════════
-
-const GRAPH_CONFIG = {
-  clientId:    '8e1ee67e-a7d8-4362-bff0-e08f806e5404',
-  tenantId:    '968cbaab-6a7a-4e30-a00f-af1805e561b6',
-  redirectUri: 'https://black-plant-032cc4603.7.azurestaticapps.net',
-  scopes:      ['Files.ReadWrite.All', 'Sites.ReadWrite.All', 'User.Read'],
-  fileId:      '67B2C3FB-FFE6-442B-825D-C784B3223DF6',
-};
-
-// En-têtes journal (onglet "Journal")
-const JOURNAL_HEADERS = [
-  'timestamp', 'auteur', 'type_entite', 'id_entite',
-  'nom_entite', 'champ_modifie', 'ancienne_valeur', 'nouvelle_valeur', 'pays'
-];
-
-// En-têtes état actuel (onglet "Etat")
-const ETAT_HEADERS = [
-  'id_entite', 'nom_entite', 'pays',
-  'statut', 'label', 'responsable', 'contact', 'source', 'note',
-  'modifiedBy', 'modifiedAt'
-];
-
-var _msalApp  = null;
-var _account  = null;
-var _token    = null;
-var _siteId   = null;
-var GRAPH_READY = false;
-
-// ── Init MSAL ──
-async function graphInit() {
-  if (_msalApp) return true;
-  try {
-    _msalApp = new msal.PublicClientApplication({
-      auth: {
-        clientId:    GRAPH_CONFIG.clientId,
-        authority:   'https://login.microsoftonline.com/' + GRAPH_CONFIG.tenantId,
-        redirectUri: GRAPH_CONFIG.redirectUri,
-      },
-      cache: { cacheLocation: 'sessionStorage' }
-    });
-    await _msalApp.initialize();
-    return true;
-  } catch(e) {
-    console.warn('MSAL init:', e.message);
-    return false;
-  }
-}
-
-// ── Token silencieux ou popup ──
-async function graphGetToken() {
-  if (_token) return _token;
-  var accounts = _msalApp.getAllAccounts();
-  if (accounts.length > 0) {
-    _account = accounts[0];
-    try {
-      var r = await _msalApp.acquireTokenSilent({ account: _account, scopes: GRAPH_CONFIG.scopes });
-      _token = r.accessToken;
-      return _token;
-    } catch(e) { /* expiré → popup */ }
-  }
-  var r = await _msalApp.loginPopup({ scopes: GRAPH_CONFIG.scopes });
-  _account = r.account;
-  _token   = r.accessToken;
-  return _token;
-}
-
-function graphGetUserName() {
-  if (_account) return _account.name || _account.username || '';
-  return sessionStorage.getItem('lutecia_user') || '';
-}
-
-// ── Appel Graph générique ──
-async function graphCall(method, endpoint, body) {
-  var token = await graphGetToken();
-  var opts = {
-    method: method,
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Content-Type':  'application/json'
-    }
-  };
-  if (body) opts.body = JSON.stringify(body);
-  var res = await fetch('https://graph.microsoft.com/v1.0' + endpoint, opts);
-  if (res.status === 204) return null;
-  if (!res.ok) {
-    var err = await res.json().catch(function() { return {}; });
-    throw new Error(err.error ? err.error.message : 'Graph ' + res.status);
-  }
-  return res.json();
-}
-
-// ── Obtenir l'ID du site SharePoint ──
-async function graphGetSiteId() {
-  if (_siteId) return _siteId;
-  var data = await graphCall('GET', '/sites/lutetiacare.sharepoint.com:/sites/MALutecia');
-  _siteId = data.id;
-  return _siteId;
-}
-
-// ── Lire un onglet complet ──
-async function graphReadSheet(sheetName) {
-  try {
-    var siteId = await graphGetSiteId();
-    var data = await graphCall('GET',
-      '/sites/' + siteId + '/drive/items/' + GRAPH_CONFIG.fileId +
-      '/workbook/worksheets/' + encodeURIComponent(sheetName) + '/usedRange'
-    );
-    if (!data || !data.values || data.values.length < 2) return [];
-    var headers = data.values[0];
-    return data.values.slice(1)
-      .map(function(row) {
-        var obj = {};
-        headers.forEach(function(h, i) { obj[h] = row[i] !== null ? String(row[i]) : ''; });
-        return obj;
-      })
-      .filter(function(r) { return Object.values(r).some(function(v) { return v !== ''; }); });
-  } catch(e) {
-    console.warn('graphReadSheet ' + sheetName + ':', e.message);
-    return [];
-  }
-}
-
-// ── Écrire dans un onglet (remplace tout) ──
-async function graphWriteSheet(sheetName, headers, rows) {
-  try {
-    var siteId = await graphGetSiteId();
-    var values = [headers].concat(rows.map(function(r) {
-      return headers.map(function(h) { return r[h] !== undefined ? String(r[h]) : ''; });
-    }));
-    var lastCol = String.fromCharCode(64 + headers.length);
-    var lastRow = values.length;
-    await graphCall('PATCH',
-      '/sites/' + siteId + '/drive/items/' + GRAPH_CONFIG.fileId +
-      '/workbook/worksheets/' + encodeURIComponent(sheetName) +
-      '/range(address=\'A1:' + lastCol + lastRow + '\')',
-      { values: values }
-    );
-    return true;
-  } catch(e) {
-    console.error('graphWriteSheet ' + sheetName + ':', e.message);
-    return false;
-  }
-}
-
-// ── Ajouter une ligne au journal (append) ──
-async function graphAppendJournal(ligne) {
-  try {
-    var rows = await graphReadSheet('Journal');
-    rows.push(ligne);
-    await graphWriteSheet('Journal', JOURNAL_HEADERS, rows);
-    return true;
-  } catch(e) {
-    console.warn('graphAppendJournal:', e.message);
-    return false;
-  }
-}
-
-// ── Mettre à jour l'état d'une structure ──
-async function graphUpdateEtat(id, data) {
-  try {
-    var rows = await graphReadSheet('Etat');
-    var idx  = rows.findIndex(function(r) { return r.id_entite === id; });
-    var row  = Object.assign({}, idx >= 0 ? rows[idx] : {}, data, {
-      id_entite:  id,
-      modifiedBy: graphGetUserName(),
-      modifiedAt: new Date().toISOString()
-    });
-    if (idx >= 0) rows[idx] = row;
-    else          rows.push(row);
-    await graphWriteSheet('Etat', ETAT_HEADERS, rows);
-    return true;
-  } catch(e) {
-    console.warn('graphUpdateEtat:', e.message);
-    return false;
-  }
-}
-
-// ── Initialiser les onglets si nécessaire ──
-async function graphInitSheets() {
-  try {
-    var siteId = await graphGetSiteId();
-    var sheets = await graphCall('GET',
-      '/sites/' + siteId + '/drive/items/' + GRAPH_CONFIG.fileId + '/workbook/worksheets'
-    );
-    var names = sheets.value.map(function(s) { return s.name; });
-
-    for (var i = 0; i < ['Journal', 'Etat', 'KPIs', 'Actions'].length; i++) {
-      var name = ['Journal', 'Etat', 'KPIs', 'Actions'][i];
-      if (names.indexOf(name) < 0) {
-        await graphCall('POST',
-          '/sites/' + siteId + '/drive/items/' + GRAPH_CONFIG.fileId + '/workbook/worksheets',
-          { name: name }
-        );
-      }
-    }
-
-    // En-têtes si vides
-    await graphEnsureHeaders('Journal', JOURNAL_HEADERS);
-    await graphEnsureHeaders('Etat',    ETAT_HEADERS);
-    await graphEnsureHeaders('KPIs',    ['id_entite', 'lignes', 'valeurs', 'annees', 'modifiedBy', 'modifiedAt']);
-    await graphEnsureHeaders('Actions', ['id_entite', 'type', 'date', 'note', 'auteur', 'createdAt']);
-
-    GRAPH_READY = true;
-    console.log('Graph output.xlsx OK');
-    return true;
-  } catch(e) {
-    console.warn('graphInitSheets:', e.message);
-    return false;
-  }
-}
-
-async function graphEnsureHeaders(sheetName, headers) {
-  try {
-    var siteId = await graphGetSiteId();
-    var data = await graphCall('GET',
-      '/sites/' + siteId + '/drive/items/' + GRAPH_CONFIG.fileId +
-      '/workbook/worksheets/' + encodeURIComponent(sheetName) + '/usedRange'
-    );
-    if (!data || !data.values || data.values.length === 0) {
-      var lastCol = String.fromCharCode(64 + headers.length);
-      await graphCall('PATCH',
-        '/sites/' + siteId + '/drive/items/' + GRAPH_CONFIG.fileId +
-        '/workbook/worksheets/' + encodeURIComponent(sheetName) +
-        '/range(address=\'A1:' + lastCol + '1\')',
-        { values: [headers] }
-      );
-    }
-  } catch(e) { /* onglet vide */ }
-}
-
-// ════════════════════════════════════════════
-// API PUBLIQUE
-// ════════════════════════════════════════════
-
-// Charger tout l'état depuis Graph (onglet Etat)
-async function graphLoadEtat() {
-  var rows = await graphReadSheet('Etat');
-  var out  = {};
-  rows.forEach(function(r) { if (r.id_entite) out[r.id_entite] = r; });
-  return out;
-}
-
-// Charger les actions d'une structure
-async function graphLoadActions(id) {
-  var rows = await graphReadSheet('Actions');
-  return rows.filter(function(r) { return r.id_entite === id; });
-}
-
-// Ajouter une action dans Graph
-async function graphSaveAction(id, action) {
-  try {
-    var rows = await graphReadSheet('Actions');
-    rows.push(Object.assign({ id_entite: id }, action));
-    await graphWriteSheet('Actions',
-      ['id_entite', 'type', 'date', 'note', 'auteur', 'createdAt'], rows);
-    return true;
-  } catch(e) {
-    console.warn('graphSaveAction:', e.message);
-    return false;
-  }
-}
-
-// Charger les KPIs d'une structure
-async function graphLoadKpi(id) {
-  var rows = await graphReadSheet('KPIs');
-  var row  = rows.find(function(r) { return r.id_entite === id; });
-  if (!row) return null;
-  try {
-    return {
-      lignes:  JSON.parse(row.lignes  || '[]'),
-      valeurs: JSON.parse(row.valeurs || '{}'),
-      annees:  JSON.parse(row.annees  || '[]'),
-    };
-  } catch(e) { return null; }
-}
-
-// Sauvegarder les KPIs d'une structure
-async function graphSaveKpi(id, kpiData) {
-  try {
-    var rows = await graphReadSheet('KPIs');
-    var idx  = rows.findIndex(function(r) { return r.id_entite === id; });
-    var row  = {
-      id_entite:  id,
-      lignes:     JSON.stringify(kpiData.lignes),
-      valeurs:    JSON.stringify(kpiData.valeurs),
-      annees:     JSON.stringify(kpiData.annees || []),
-      modifiedBy: graphGetUserName(),
-      modifiedAt: new Date().toISOString()
-    };
-    if (idx >= 0) rows[idx] = row;
-    else          rows.push(row);
-    await graphWriteSheet('KPIs',
-      ['id_entite', 'lignes', 'valeurs', 'annees', 'modifiedBy', 'modifiedAt'], rows);
-    return true;
-  } catch(e) {
-    console.warn('graphSaveKpi:', e.message);
-    return false;
-  }
-}
-
-// Connexion silencieuse au démarrage
-async function graphConnect() {
-  try {
-    var ok = await graphInit();
-    if (!ok) return false;
-    await graphGetToken();
-    await graphInitSheets();
-    return true;
-  } catch(e) {
-    console.warn('Graph non disponible:', e.message);
-    GRAPH_READY = false;
-    return false;
-  }
-}
-
-</script>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/graph.js"></script>
 <script>
 // ══════════════════════════════════════
 // CONSTANTES
@@ -1043,6 +725,16 @@ var currentGroupe = null;
 var currentUser   = '';
 var anneesActives = TOUTES_ANNEES.slice();
 var kpiLignes     = KPI_DEFAUT.slice();
+
+// Helper: échapper le HTML pour éviter les XSS dans les gabarits innerHTML
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 // ══════════════════════════════════════
 // STORAGE
@@ -1171,11 +863,15 @@ function chargerFiche() {
       if (ficheGrid) ficheGrid.classList.add('has-centres');
       cardCentres.style.display = 'block';
       listCentres.innerHTML = currentGroupe.centres.map(function(c, idx) {
-        var nomEsc = String(c.nom).replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        return '<div class="centre-row-clickable" ondblclick="ouvrirPopupCentre(' + idx + ')" title="Double-cliquez pour voir/modifier les détails">'
-          + '<div class="info-label">' + c.nom + '</div>'
-          + '<div class="info-value" style="font-size:11px;color:var(--text-soft)">' + (c.adresse || '—') + '</div></div>';
+        return '<div class="centre-row-clickable" data-centre-idx="' + idx + '" title="Double-cliquez pour voir/modifier les détails">'
+          + '<div class="info-label">' + esc(c.nom) + '</div>'
+          + '<div class="info-value" style="font-size:11px;color:var(--text-soft)">' + esc(c.adresse || '—') + '</div></div>';
       }).join('');
+      // Délégation de dblclick sur les centres (remplace ondblclick inline)
+      listCentres.addEventListener('dblclick', function(e) {
+        var row = e.target.closest('[data-centre-idx]');
+        if (row) ouvrirPopupCentre(parseInt(row.dataset.centreIdx, 10));
+      });
     }
   }
 
@@ -1207,7 +903,7 @@ function majBadgeStatut(val) {
   var el = document.getElementById('hero-badge');
   if (!el) return;
   el.innerHTML = val && STATUT_LABELS[val]
-    ? '<span class="status-badge s-' + val + '">' + STATUT_LABELS[val] + '</span>'
+    ? '<span class="status-badge s-' + esc(val) + '">' + esc(STATUT_LABELS[val]) + '</span>'
     : '';
 }
 
@@ -1488,21 +1184,19 @@ function renderActions() {
   var sorted = actifs.concat(autres);
 
   list.innerHTML = sorted.map(function(a) {
-    // Couleur de la pastille
-    var dotColor = 'var(--blue)'; // bleu par défaut (action standard ou alerte réalisée)
+    var dotColor = 'var(--blue)';
     var labelEcheance = '';
     var btnRealise = '';
     if (a.echeance && !a.realise) {
       var ech = new Date(a.echeance); ech.setHours(0,0,0,0);
       dotColor = (ech.getTime() < today.getTime()) ? '#0a0a0a' : '#DC2626';
-      labelEcheance = ' — Échéance : ' + formatDate(a.echeance);
-      btnRealise = '<button onclick="marquerRealise(' + a._idx + ')" title="Marquer comme réalisée" '
+      labelEcheance = ' — Échéance : ' + esc(formatDate(a.echeance));
+      btnRealise = '<button data-realise="' + a._idx + '" title="Marquer comme réalisée" '
                  + 'style="font-family:Jost,sans-serif;font-size:10px;padding:3px 9px;border:1px solid #15803D;'
                  + 'border-radius:20px;background:transparent;color:#15803D;cursor:pointer;margin-left:8px;">'
                  + '✓ Réalisé</button>';
     }
-    // Bouton modifier (crayon) - toujours présent
-    var btnEdit = '<button class="btn-edit-action" onclick="editerAction(' + a._idx + ')" title="Modifier">'
+    var btnEdit = '<button class="btn-edit-action" data-edit="' + a._idx + '" title="Modifier">'
                 + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
                 + '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>'
                 + '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
@@ -1511,13 +1205,13 @@ function renderActions() {
       + '<div class="action-dot" style="background:' + dotColor + ';"></div>'
       + '<div style="flex:1">'
       + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
-      + '<span class="action-type">' + a.type + labelEcheance + '</span>'
-      + '<span class="action-meta">' + formatDate(a.date) + '</span>'
-      + '<span class="action-author">' + (a.auteur || '\u2014') + '</span>'
+      + '<span class="action-type">' + esc(a.type) + labelEcheance + '</span>'
+      + '<span class="action-meta">' + esc(formatDate(a.date)) + '</span>'
+      + '<span class="action-author">' + esc(a.auteur || '—') + '</span>'
       + btnRealise
       + btnEdit
       + '</div>'
-      + '<div class="action-note">' + (a.note || '') + '</div>'
+      + '<div class="action-note">' + esc(a.note || '') + '</div>'
       + '</div></div>';
   }).join('');
 
@@ -1541,14 +1235,22 @@ function majAlertesPreview(actifs) {
     var d = new Date(a.echeance); d.setHours(0,0,0,0);
     var today = new Date(); today.setHours(0,0,0,0);
     var color = d.getTime() < today.getTime() ? '#0a0a0a' : '#DC2626';
-    var note = (a.note || '').slice(0, 50) + ((a.note || '').length > 50 ? '...' : '');
+    var note = esc((a.note || '').slice(0, 50) + ((a.note || '').length > 50 ? '...' : ''));
     return '<div style="font-size:11px;display:flex;align-items:center;gap:6px;padding:4px 6px;background:var(--grey-lt);border-radius:4px;">'
       + '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:' + color + ';"></span>'
-      + '<span style="color:' + color + ';font-weight:600;white-space:nowrap;">' + formatDate(a.echeance) + '</span>'
+      + '<span style="color:' + color + ';font-weight:600;white-space:nowrap;">' + esc(formatDate(a.echeance)) + '</span>'
       + '<span style="color:var(--text-mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">— ' + note + '</span>'
       + '</div>';
   }).join('');
 }
+
+// Délégation de clics sur la liste d'actions (remplace onclick inline sur buttons)
+document.addEventListener('click', function(e) {
+  var btnRealise = e.target.closest('[data-realise]');
+  if (btnRealise) { marquerRealise(parseInt(btnRealise.dataset.realise, 10)); return; }
+  var btnEdit = e.target.closest('[data-edit]');
+  if (btnEdit) { editerAction(parseInt(btnEdit.dataset.edit, 10)); return; }
+});
 
 function marquerRealise(idx) {
   var actions = getActions(currentId);
@@ -1822,20 +1524,17 @@ function annulerEdition() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  currentUser = sessionStorage.getItem('lutecia_user') || localStorage.getItem('lutecia_user_persist') || '';
-  if (!currentUser) { window.location.href = 'index.html'; return; }
-  document.getElementById('sidebar-avatar').textContent = currentUser[0].toUpperCase();
-  document.getElementById('sidebar-name').textContent   = currentUser;
-
-  // Charger la fiche d'abord depuis localStorage
+  // Charger la fiche depuis localStorage pendant que MSAL s'authentifie
   chargerFiche();
-
-  // Mode lecture par défaut (Pack 4)
   setTimeout(appliquerModeLecture, 50);
 
-  // Puis enrichir depuis Graph en arrière-plan
+  // Authentification MSAL — identité tirée du compte Microsoft
   graphConnect().then(function(ok) {
-    if (!ok || !currentId) return;
+    if (!ok) { window.location.href = 'index.html'; return; }
+    currentUser = graphGetUserName();
+    document.getElementById('sidebar-avatar').textContent = currentUser[0].toUpperCase();
+    document.getElementById('sidebar-name').textContent   = currentUser;
+    if (!currentId) return;
     // Actions depuis Graph
     graphLoadActions(currentId).then(function(graphActions) {
       if (graphActions && graphActions.length > 0) {

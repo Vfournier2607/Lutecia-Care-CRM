@@ -1,5 +1,7 @@
+// ═══════════════════════════════════════════════════════════════════
 // auth.js — Authentification MSAL
 // Dépend de : config.js (doit être chargé avant)
+// ═══════════════════════════════════════════════════════════════════
 
 const Auth = (function() {
   let _msal    = null;
@@ -23,13 +25,15 @@ const Auth = (function() {
     if (accounts.length > 0) _account = accounts[0];
   }
 
+  // Connexion : silent en priorité, popup en fallback.
+  // Toujours retourner l'account Microsoft réel — jamais un nom saisi manuellement.
   async function login() {
     await init();
     if (_account) {
       try {
         await _msal.acquireTokenSilent({ scopes: GRAPH_SCOPES, account: _account });
         return _account;
-      } catch (_) {}
+      } catch (_) { /* token expiré → popup */ }
     }
     const result = await _msal.loginPopup({ scopes: GRAPH_SCOPES, prompt: 'select_account' });
     _account = result.account;
@@ -37,7 +41,7 @@ const Auth = (function() {
   }
 
   async function getToken() {
-    if (!_account) throw new Error("Non authentifié.");
+    if (!_account) throw new Error('Non authentifié — appeler login() d\'abord.');
     try {
       const r = await _msal.acquireTokenSilent({ scopes: GRAPH_SCOPES, account: _account });
       return r.accessToken;
@@ -48,9 +52,14 @@ const Auth = (function() {
     }
   }
 
+  // Retourne le nom d'affichage tiré du compte Microsoft (jamais une saisie manuelle).
   function getUser() {
     if (!_account) return null;
-    return { name: _account.name || _account.username, email: _account.username, id: _account.localAccountId };
+    return {
+      name:  _account.name || _account.username,
+      email: _account.username,
+      id:    _account.localAccountId
+    };
   }
 
   async function logout() {

@@ -1,18 +1,25 @@
-// graph.js — Couche réseau Microsoft Graph
-// Dépend de : config.js, auth.js
+// ═══════════════════════════════════════════════════════════════════
+// graph.js — Couche réseau Microsoft Graph + initialisation MSAL
+// Dépend de : config.js, auth.js (chargés avant)
+// ═══════════════════════════════════════════════════════════════════
 
+// Indicateur lisible par le code applicatif
 let GRAPH_READY = false;
 
 const Graph = (function() {
   const BASE = 'https://graph.microsoft.com/v1.0';
   let _siteId = null;
 
+  // ── Appel HTTP avec token Bearer ────────────────────────────────
   async function _fetch(method, endpoint, body) {
     const token = await Auth.getToken();
     if (DEBUG.logGraphCalls) console.log('[graph]', method, endpoint);
     const res = await fetch(BASE + endpoint, {
       method,
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type':  'application/json'
+      },
       body: body !== undefined ? JSON.stringify(body) : undefined
     });
     if (res.status === 204) return null;
@@ -23,6 +30,7 @@ const Graph = (function() {
     return res.json();
   }
 
+  // ── siteId SharePoint (mis en cache) ────────────────────────────
   async function _siteIdGet() {
     if (_siteId) return _siteId;
     const data = await _fetch('GET', '/sites/' + SHAREPOINT.hostname + ':' + SHAREPOINT.sitePath);
@@ -30,42 +38,67 @@ const Graph = (function() {
     return _siteId;
   }
 
+  // ── URL de base du workbook ─────────────────────────────────────
   async function _wbUrl() {
-    return '/sites/' + (await _siteIdGet()) + '/drive/items/' + OUTPUT_FILE_ID + '/workbook';
+    const siteId = await _siteIdGet();
+    return '/sites/' + siteId + '/drive/items/' + OUTPUT_FILE_ID + '/workbook';
   }
 
+  // ── Lire un onglet ──────────────────────────────────────────────
+  // Retourne un tableau d'objets {header: valeur}
   async function readSheet(sheetName) {
     try {
-      const data = await _fetch('GET', (await _wbUrl()) + '/worksheets/' + encodeURIComponent(sheetName) + '/usedRange');
+      const wb  = await _wbUrl();
+      const data = await _fetch('GET', wb + '/worksheets/' + encodeURIComponent(sheetName) + '/usedRange');
       if (!data || !data.values || data.values.length < 2) return [];
-      const h = data.values[0];
+      const headers = data.values[0];
       return data.values.slice(1)
-        .map(row => { const o = {}; h.forEach((k,i) => { o[k] = row[i] !== null ? String(row[i]) : ''; }); return o; })
+        .map(row => {
+          const obj = {};
+          headers.forEach((h, i) => { obj[h] = row[i] !== null ? String(row[i]) : ''; });
+          return obj;
+        })
         .filter(r => Object.values(r).some(v => v !== ''));
-    } catch(e) { if (DEBUG.enabled) console.warn('[graph] readSheet', sheetName, e.message); return []; }
+    } catch(e) {
+      if (DEBUG.enabled) console.warn('[graph] readSheet', sheetName, e.message);
+      return [];
+    }
   }
 
+  // ── Écrire un onglet en entier ──────────────────────────────────
   async function writeSheet(sheetName, headers, rows) {
-    const vals = [headers].concat(rows.map(r => headers.map(h => r[h] !== undefined ? String(r[h]) : '')));
-    const lc   = String.fromCharCode(64 + headers.length);
+    const wb     = await _wbUrl();
+    const values = [headers].concat(rows.map(r => headers.map(h => r[h] !== undefined ? String(r[h]) : '')));
+    const lastCol = String.fromCharCode(64 + headers.length);
+    const lastRow = values.length;
     await _fetch('PATCH',
-      (await _wbUrl()) + '/worksheets/' + encodeURIComponent(sheetName) + "/range(address='A1:" + lc + vals.length + "')",
-      { values: vals });
+      wb + '/worksheets/' + encodeURIComponent(sheetName) + '/range(address=\'A1:' + lastCol + lastRow + '\')',
+      { values }
+    );
   }
 
+  // ── Créer un onglet si absent et poser les en-têtes ─────────────
   async function _ensureSheet(sheetName, headers) {
-    const wb = await _wbUrl();
+    const wb     = await _wbUrl();
     const sheets = await _fetch('GET', wb + '/worksheets');
-    if (!sheets.value.some(s => s.name === sheetName)) await _fetch('POST', wb + '/worksheets', { name: sheetName });
+    const exists = sheets.value.some(s => s.name === sheetName);
+    if (!exists) {
+      await _fetch('POST', wb + '/worksheets', { name: sheetName });
+    }
+    // Vérifier si la ligne 1 est vide
     try {
       const data = await _fetch('GET', wb + '/worksheets/' + encodeURIComponent(sheetName) + '/usedRange');
-      if (!data || !data.values || !data.values.length) {
-        const lc = String.fromCharCode(64 + headers.length);
-        await _fetch('PATCH', wb + '/worksheets/' + encodeURIComponent(sheetName) + "/range(address='A1:" + lc + "1')", { values: [headers] });
+      if (!data || !data.values || data.values.length === 0) {
+        const lastCol = String.fromCharCode(64 + headers.length);
+        await _fetch('PATCH',
+          wb + '/worksheets/' + encodeURIComponent(sheetName) + '/range(address=\'A1:' + lastCol + '1\')',
+          { values: [headers] }
+        );
       }
-    } catch(_) {}
+    } catch(_) { /* onglet vide, en-têtes déjà posés ci-dessus */ }
   }
 
+  // ── Initialiser les onglets nécessaires ─────────────────────────
   async function initSheets() {
     await _ensureSheet('Journal', JOURNAL_HEADERS);
     await _ensureSheet('Etat',    ETAT_HEADERS);
@@ -74,51 +107,100 @@ const Graph = (function() {
     GRAPH_READY = true;
   }
 
+  // ════════════════════════════════════════════════════════════════
+  // API publique
+  // ════════════════════════════════════════════════════════════════
+
   async function loadEtat() {
-    const out = {}; (await readSheet('Etat')).forEach(r => { if (r.id_entite) out[r.id_entite] = r; }); return out;
+    const rows = await readSheet('Etat');
+    const out  = {};
+    rows.forEach(r => { if (r.id_entite) out[r.id_entite] = r; });
+    return out;
   }
 
   async function updateEtat(id, data) {
-    const rows = await readSheet('Etat'), idx = rows.findIndex(r => r.id_entite === id), user = Auth.getUser();
-    const row  = Object.assign({}, idx >= 0 ? rows[idx] : {}, data, { id_entite: id, modifiedBy: user?user.name:'', modifiedAt: new Date().toISOString() });
-    if (idx >= 0) rows[idx] = row; else rows.push(row);
+    const rows = await readSheet('Etat');
+    const idx  = rows.findIndex(r => r.id_entite === id);
+    const user = Auth.getUser();
+    const row  = Object.assign({}, idx >= 0 ? rows[idx] : {}, data, {
+      id_entite:  id,
+      modifiedBy: user ? user.name : '',
+      modifiedAt: new Date().toISOString()
+    });
+    if (idx >= 0) rows[idx] = row;
+    else          rows.push(row);
     await writeSheet('Etat', ETAT_HEADERS, rows);
   }
 
-  async function loadActions(id) { return (await readSheet('Actions')).filter(r => r.id_entite === id); }
+  async function loadActions(id) {
+    const rows = await readSheet('Actions');
+    return rows.filter(r => r.id_entite === id);
+  }
 
   async function saveAction(id, action) {
-    const rows = await readSheet('Actions'); rows.push(Object.assign({ id_entite: id }, action));
+    const rows = await readSheet('Actions');
+    rows.push(Object.assign({ id_entite: id }, action));
     await writeSheet('Actions', ACTIONS_HEADERS, rows);
   }
 
   async function loadKpi(id) {
-    const row = (await readSheet('KPIs')).find(r => r.id_entite === id);
+    const rows = await readSheet('KPIs');
+    const row  = rows.find(r => r.id_entite === id);
     if (!row) return null;
-    try { return { lignes: JSON.parse(row.lignes||'[]'), valeurs: JSON.parse(row.valeurs||'{}'), annees: JSON.parse(row.annees||'[]') }; }
-    catch(_) { return null; }
+    try {
+      return {
+        lignes:  JSON.parse(row.lignes  || '[]'),
+        valeurs: JSON.parse(row.valeurs || '{}'),
+        annees:  JSON.parse(row.annees  || '[]')
+      };
+    } catch(_) { return null; }
   }
 
-  async function saveKpi(id, k) {
-    const rows = await readSheet('KPIs'), idx = rows.findIndex(r => r.id_entite === id), user = Auth.getUser();
-    const row = { id_entite: id, lignes: JSON.stringify(k.lignes), valeurs: JSON.stringify(k.valeurs), annees: JSON.stringify(k.annees||[]), modifiedBy: user?user.name:'', modifiedAt: new Date().toISOString() };
-    if (idx >= 0) rows[idx] = row; else rows.push(row);
+  async function saveKpi(id, kpiData) {
+    const rows = await readSheet('KPIs');
+    const idx  = rows.findIndex(r => r.id_entite === id);
+    const user = Auth.getUser();
+    const row  = {
+      id_entite:  id,
+      lignes:     JSON.stringify(kpiData.lignes),
+      valeurs:    JSON.stringify(kpiData.valeurs),
+      annees:     JSON.stringify(kpiData.annees || []),
+      modifiedBy: user ? user.name : '',
+      modifiedAt: new Date().toISOString()
+    };
+    if (idx >= 0) rows[idx] = row;
+    else          rows.push(row);
     await writeSheet('KPIs', KPI_HEADERS, rows);
   }
 
   async function appendJournal(ligne) {
-    const rows = await readSheet('Journal'); rows.push(ligne); await writeSheet('Journal', JOURNAL_HEADERS, rows);
+    const rows = await readSheet('Journal');
+    rows.push(ligne);
+    await writeSheet('Journal', JOURNAL_HEADERS, rows);
   }
 
   return { readSheet, writeSheet, initSheets, loadEtat, updateEtat, loadActions, saveAction, loadKpi, saveKpi, appendJournal };
 })();
 
+// ── Connexion principale appelée au démarrage de chaque page ────────
+// Lance le login MSAL (silent puis popup si nécessaire) et initialise les onglets.
 async function graphConnect() {
-  try { await Auth.login(); await Graph.initSheets(); return true; }
-  catch(e) { if (DEBUG.enabled) console.warn('[graph]', e.message); GRAPH_READY = false; return false; }
+  try {
+    await Auth.login();
+    await Graph.initSheets();
+    return true;
+  } catch(e) {
+    if (DEBUG.enabled) console.warn('[graph] connect:', e.message);
+    GRAPH_READY = false;
+    return false;
+  }
 }
 
-function graphGetUserName()            { const u = Auth.getUser(); return u ? u.name : ''; }
+// Raccourcis globaux (compatibilité avec le code applicatif existant)
+function graphGetUserName() {
+  const u = Auth.getUser();
+  return u ? u.name : '';
+}
 async function graphLoadEtat()         { return Graph.loadEtat(); }
 async function graphUpdateEtat(id, d)  { return Graph.updateEtat(id, d); }
 async function graphLoadActions(id)    { return Graph.loadActions(id); }

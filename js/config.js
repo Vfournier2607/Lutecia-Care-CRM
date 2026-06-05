@@ -1,5 +1,7 @@
+// ═══════════════════════════════════════════════════════════════════
 // config.js — Constantes du projet Lutecia Care Deal Flow
 // Source unique de vérité pour toute la configuration.
+// ═══════════════════════════════════════════════════════════════════
 
 const AZURE = {
   clientId:    '8e1ee67e-a7d8-4362-bff0-e08f806e5404',
@@ -18,8 +20,10 @@ const SHAREPOINT = {
   sitePath: '/sites/MALutecia'
 };
 
+// Fichier Excel unique (output.xlsx) contenant tous les onglets
 const OUTPUT_FILE_ID = '67B2C3FB-FFE6-442B-825D-C784B3223DF6';
 
+// En-têtes des onglets
 const JOURNAL_HEADERS = [
   'timestamp', 'auteur', 'type_entite', 'id_entite',
   'nom_entite', 'champ_modifie', 'ancienne_valeur', 'nouvelle_valeur', 'pays'
