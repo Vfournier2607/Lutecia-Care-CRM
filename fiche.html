@@ -381,6 +381,33 @@
     .info-textarea:focus { border-color: var(--blue); }
     #centres-list { max-height: 200px; overflow-y: auto; }
 
+  
+    /* ══ Cartes déplaçables / redimensionnables ══ */
+    .card-draggable {
+      cursor: default;
+      user-select: none;
+      position: relative;
+      resize: vertical;
+      overflow: auto;
+      min-height: 80px;
+    }
+    .drag-handle {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 36px;
+      cursor: grab;
+      z-index: 2;
+    }
+    .drag-handle:active { cursor: grabbing; }
+    .card-dragging {
+      opacity: .55;
+      box-shadow: 0 8px 24px rgba(10,14,42,0.18) !important;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .drop-zone-over { outline: 2px dashed var(--blue); outline-offset: 2px; }
+    .fiche-grid-3 .fiche-col { min-height: 60px; }
+
   </style>
 </head>
 <body>
@@ -1597,6 +1624,111 @@ document.getElementById('popup-centre').addEventListener('click', function(e) {
 document.getElementById('popup-alerte').addEventListener('click', function(e) {
   if (e.target === this) fermerPopupAlerte();
 });
+
+// ══════════════════════════════════════
+// DRAG & DROP / RESIZE DES CARTES
+// ══════════════════════════════════════
+(function() {
+  var dragging = null, ghost = null, srcCol = null, srcIdx = null;
+
+  function initDrag() {
+    var grid = document.querySelector('.fiche-grid-3');
+    if (!grid) return;
+
+    // Rendre chaque .card dans la grille draggable
+    grid.querySelectorAll('.card').forEach(function(card) {
+      if (card.querySelector('.drag-handle')) return; // déjà initialisé
+      card.classList.add('card-draggable');
+
+      var handle = document.createElement('div');
+      handle.className = 'drag-handle';
+      handle.title = 'Glisser pour déplacer';
+      card.insertBefore(handle, card.firstChild);
+
+      handle.addEventListener('mousedown', function(e) {
+        if (e.button !== 0) return;
+        e.preventDefault();
+
+        dragging = card;
+        srcCol = card.closest('.fiche-col');
+        srcIdx = Array.from(srcCol.children).indexOf(card);
+
+        var rect = card.getBoundingClientRect();
+        var offX = e.clientX - rect.left;
+        var offY = e.clientY - rect.top;
+
+        // Ghost
+        ghost = card.cloneNode(true);
+        ghost.style.cssText = 'position:fixed;width:' + rect.width + 'px;opacity:.45;pointer-events:none;z-index:999;box-shadow:0 8px 24px rgba(10,14,42,0.2);transition:none;';
+        ghost.style.left = rect.left + 'px';
+        ghost.style.top  = rect.top  + 'px';
+        document.body.appendChild(ghost);
+        card.classList.add('card-dragging');
+
+        function onMove(ev) {
+          ghost.style.left = (ev.clientX - offX) + 'px';
+          ghost.style.top  = (ev.clientY - offY) + 'px';
+
+          // Highlight drop targets
+          grid.querySelectorAll('.fiche-col').forEach(function(col) {
+            var r = col.getBoundingClientRect();
+            if (ev.clientX >= r.left && ev.clientX <= r.right &&
+                ev.clientY >= r.top  && ev.clientY <= r.bottom) {
+              col.classList.add('drop-zone-over');
+            } else {
+              col.classList.remove('drop-zone-over');
+            }
+          });
+        }
+
+        function onUp(ev) {
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+          if (ghost) { ghost.remove(); ghost = null; }
+          card.classList.remove('card-dragging');
+
+          // Find target col
+          grid.querySelectorAll('.fiche-col').forEach(function(col) {
+            col.classList.remove('drop-zone-over');
+            var r = col.getBoundingClientRect();
+            if (ev.clientX >= r.left && ev.clientX <= r.right &&
+                ev.clientY >= r.top  && ev.clientY <= r.bottom &&
+                col !== srcCol) {
+              // Find insertion point
+              var insertBefore = null;
+              col.querySelectorAll('.card').forEach(function(c) {
+                var cr = c.getBoundingClientRect();
+                if (ev.clientY < cr.top + cr.height / 2 && !insertBefore) {
+                  insertBefore = c;
+                }
+              });
+              if (insertBefore) col.insertBefore(card, insertBefore);
+              else col.appendChild(card);
+            }
+          });
+
+          dragging = null; srcCol = null;
+        }
+
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
+    });
+  }
+
+  // Init après le chargement de la fiche
+  var origChargerFiche = window.chargerFiche;
+  if (typeof origChargerFiche === 'function') {
+    window.chargerFiche = function() {
+      origChargerFiche.apply(this, arguments);
+      setTimeout(initDrag, 100);
+    };
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(initDrag, 500);
+  });
+})();
+
 </script>
 </body>
 </html>
