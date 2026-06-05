@@ -328,6 +328,70 @@
     .hidden { display: none !important; }
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: var(--grey); border-radius: 10px; }
+
+    /* ══════════════════════════════════════
+       FICHE TOPBAR (nouvelle version)
+    ══════════════════════════════════════ */
+    .fiche-topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--grey);
+      box-shadow: var(--shadow);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      position: sticky; top: 0; z-index: 10;
+      flex-shrink: 0;
+    }
+    .fiche-topbar-left { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+    .fiche-project-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px; font-weight: 700;
+      color: var(--navy); line-height: 1.1;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .fiche-project-label:empty { display: none; }
+    .fiche-structure-name {
+      font-family: 'Jost', sans-serif;
+      font-size: 13px; font-weight: 500;
+      color: var(--text-mid);
+    }
+    .fiche-meta { font-size: 11px; color: var(--text-soft); }
+    .fiche-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+    .fiche-tag { font-size: 9px; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--grey); color: var(--text-soft); background: var(--grey-lt); }
+    .fiche-topbar-right {
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0; flex-wrap: wrap;
+    }
+    .statut-wrap { display: flex; flex-direction: column; gap: 2px; }
+    .statut-lbl { font-size: 9px; font-weight: 600; letter-spacing: .10em; text-transform: uppercase; color: var(--text-soft); }
+
+    /* ══════════════════════════════════════
+       NOUVELLE GRILLE 3 COLONNES
+    ══════════════════════════════════════ */
+    .fiche-grid-3 {
+      display: grid;
+      grid-template-columns: 260px 1fr 280px;
+      gap: 20px;
+      padding: 20px 28px;
+      align-items: start;
+    }
+    .fiche-col-infos { display: flex; flex-direction: column; gap: 16px; }
+    .fiche-col-notes { display: flex; flex-direction: column; }
+    .fiche-col-kpi   { display: flex; flex-direction: column; gap: 16px; }
+    .notes-body {
+      overflow-y: auto;
+      max-height: 520px;
+    }
+    .fiche-full-row { padding: 0 28px 20px; }
+
+    /* Machines plus compactes */
+    .machine-val { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; color: var(--navy); line-height: 1; }
+    .machine-box { background: var(--grey-lt); border-radius: var(--r); padding: 8px 10px; display: flex; align-items: center; gap: 10px; }
+    .machines { display: flex; flex-direction: column; gap: 8px; }
+
+    /* Centres liste scrollable */
+    #centres-list { max-height: 220px; overflow-y: auto; }
   </style>
 </head>
 <body>
@@ -513,12 +577,36 @@
   <div style="display:flex;flex-direction:column;overflow-y:auto;grid-column:2;grid-row:1/3;">
 
     <!-- Topbar -->
-    <header class="topbar" style="position:sticky;top:0;z-index:10;flex-shrink:0;">
-      <div class="topbar-left">
-        <div class="topbar-title" id="topbar-nom">Fiche structure</div>
-        <div class="topbar-meta" id="topbar-meta"></div>
+    <header class="fiche-topbar">
+      <div class="fiche-topbar-left">
+        <div id="hero-label" class="fiche-project-label"></div>
+        <div id="topbar-nom" class="fiche-structure-name">Fiche structure</div>
+        <div id="topbar-meta" class="fiche-meta"></div>
+        <div class="fiche-tags" id="hero-tags"></div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;">
+      <div class="fiche-topbar-right">
+        <div id="hero-badge"></div>
+        <div class="statut-wrap">
+          <span class="statut-lbl">Statut du deal</span>
+          <select class="statut-select" id="statut-select" onchange="changerStatut(this.value)">
+            <option value="">— Aucun —</option>
+            <option value="contact">Prise de contact</option>
+            <option value="discussion">Discussion</option>
+            <option value="advanced">Discussion avancée</option>
+            <option value="loi">LOI signée</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button id="btn-modifier" class="btn-edit" onclick="passerEnEdition()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Modifier
+          </button>
+          <button id="btn-enregistrer" class="btn-edit save hidden" onclick="enregistrerModifs()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Enregistrer
+          </button>
+          <button id="btn-annuler" class="btn-edit cancel hidden" onclick="annulerEdition()">Annuler</button>
+        </div>
         <span class="save-ind" id="save-ind">✓ Sauvegardé</span>
         <a href="index.html" class="btn-retour">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -528,57 +616,19 @@
         </a>
       </div>
     </header>
+    <span id="hero-nom" class="hidden"></span>
+    <span id="bc-nom" class="hidden"></span>
 
-    <!-- Breadcrumb -->
-    <div class="breadcrumb">
-      <a href="index.html">Deal Flow</a> › <span id="bc-nom">—</span>
-    </div>
 
-    <!-- Toolbar édition -->
-    <div class="edit-toolbar">
-      <button id="btn-modifier" class="btn-edit" onclick="passerEnEdition()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Modifier
-      </button>
-      <button id="btn-enregistrer" class="btn-edit save hidden" onclick="enregistrerModifs()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-        Enregistrer
-      </button>
-      <button id="btn-annuler" class="btn-edit cancel hidden" onclick="annulerEdition()">
-        Annuler
-      </button>
-      <span id="edit-hint" class="edit-hint">Mode lecture — cliquez sur Modifier pour éditer la fiche</span>
-    </div>
 
-    <!-- Hero -->
-    <div class="hero" id="hero">
-      <div class="hero-left">
-        <div id="hero-label" style="font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:700;color:#E8B4C8;line-height:1;margin-bottom:6px;letter-spacing:.01em;"></div>
-        <h1 id="hero-nom">—</h1>
-        <div class="hero-tags" id="hero-tags"></div>
-      </div>
-      <div class="hero-right">
-        <div id="hero-badge"></div>
-        <div>
-          <div style="font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">Statut du deal</div>
-          <select class="statut-select" id="statut-select" onchange="changerStatut(this.value)">
-            <option value="">— Aucun —</option>
-            <option value="contact">Prise de contact</option>
-            <option value="discussion">Discussion</option>
-            <option value="advanced">Discussion avancée</option>
-            <option value="loi">LOI signée</option>
-          </select>
-        </div>
-      </div>
-    </div>
 
-    <!-- Grille principale -->
-    <div class="fiche-grid">
+    <!-- ══ Grille principale 3 colonnes ══ -->
+    <div class="fiche-grid fiche-grid-3">
 
-      <!-- Col gauche : infos -->
-      <div style="display:flex;flex-direction:column;gap:16px;">
+      <!-- Col 1 : Infos sur la structure -->
+      <div class="fiche-col-infos">
         <div class="card">
-          <div class="card-header"><div class="card-title">Informations</div></div>
+          <div class="card-header"><div class="card-title">Infos sur la structure</div></div>
           <div class="card-body">
             <div class="info-row"><div class="info-label">Pays</div><div class="info-value" id="i-pays">—</div></div>
             <div class="info-row"><div class="info-label">Type</div><div class="info-value" id="i-type">—</div></div>
@@ -591,47 +641,53 @@
               <div class="info-label">Label / Nom de code</div>
               <input class="info-input" id="i-label" type="text" placeholder="ex : Projet Alpes" onchange="sauver('label', this.value)" />
             </div>
+            <!-- Centres du réseau -->
+            <div id="centres-section" class="hidden" style="margin-top:14px;">
+              <div class="info-label" style="margin-bottom:6px;">Centres du réseau</div>
+              <div id="centres-list"></div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Col centre : équipements + alertes + KPIs -->
-      <div style="display:flex;flex-direction:column;gap:16px;">
+      <!-- Col 2 : Notes & actions -->
+      <div class="fiche-col-notes">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Notes & actions</div>
+            <button class="btn-add-action" onclick="ouvrirPopup()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Ajouter
+            </button>
+          </div>
+          <div class="card-body notes-body" id="actions-list">
+            <div class="empty-actions">Aucune action enregistrée.</div>
+          </div>
+        </div>
+      </div>
 
-        <!-- Ligne 1 : Équipements (moitié) + Alertes (moitié) -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <!-- Équipements -->
-          <div class="card">
-            <div class="card-header"><div class="card-title">Équipements</div></div>
-            <div class="card-body">
-              <div class="machines">
-                <div class="machine-box">
-                  <div class="machine-val" id="k-gamma">—</div>
+      <!-- Col 3 : Équipement + KPIs -->
+      <div class="fiche-col-kpi">
+
+        <!-- Équipement -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Équipement</div></div>
+          <div class="card-body">
+            <div class="machines">
+              <div class="machine-box">
+                <div class="machine-val" id="k-gamma">—</div>
+                <div style="display:flex;flex-direction:column;">
                   <div class="machine-label">Gamma Caméras</div>
                 </div>
-                <div class="machine-box">
-                  <div class="machine-val" id="k-pet">—</div>
+              </div>
+              <div class="machine-box">
+                <div class="machine-val" id="k-pet">—</div>
+                <div style="display:flex;flex-direction:column;">
                   <div class="machine-label">PET Scan</div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <!-- Alertes & rappels (Pack 7) -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Alertes &amp; rappels</div>
-              <span id="alertes-counter" style="font-size:11px;color:var(--text-soft);"></span>
-            </div>
-            <div class="card-body">
-              <button class="btn-add-action" onclick="ouvrirPopupAlerte()" style="width:100%;justify-content:center;border-color:#DC2626;color:#DC2626;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                </svg>
-                Nouvelle alerte
-              </button>
-              <div id="alertes-preview" style="margin-top:10px;display:flex;flex-direction:column;gap:6px;"></div>
             </div>
           </div>
         </div>
@@ -643,9 +699,7 @@
             <span class="save-ind" id="kpi-saved" style="font-size:10px;"></span>
           </div>
           <div class="card-body">
-            <!-- Sélecteur années -->
             <div class="kpi-controls" id="annees-bar"></div>
-            <!-- Tableau -->
             <div class="kpi-table-wrap">
               <table class="kpi-table">
                 <thead id="kpi-thead"></thead>
@@ -660,35 +714,27 @@
         </div>
 
       </div>
-
-      <!-- Col droite : Centres du réseau uniquement -->
-      <div id="col-droite" style="display:none;flex-direction:column;gap:16px;">
-        <div class="card" id="card-centres">
-          <div class="card-header"><div class="card-title">Centres du réseau</div></div>
-          <div class="card-body" id="centres-list"></div>
-        </div>
-      </div>
-
     </div>
 
-    <!-- Section actions (full width) -->
-    <div class="actions-section actions-full">
+    <!-- ══ Alertes (pleine largeur) ══ -->
+    <div class="fiche-full-row">
       <div class="card">
         <div class="card-header">
-          <div class="card-title">Historique des actions</div>
-          <button class="btn-add-action" onclick="ouvrirPopup()">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          <div class="card-title">Alertes &amp; rappels</div>
+          <span id="alertes-counter" style="font-size:11px;color:var(--text-soft);"></span>
+          <button class="btn-add-action" onclick="ouvrirPopupAlerte()" style="border-color:#DC2626;color:#DC2626;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
             </svg>
-            Ajouter
+            Nouvelle alerte
           </button>
         </div>
-        <div class="card-body" id="actions-list">
-          <div class="empty-actions">Aucune action enregistrée.</div>
+        <div class="card-body">
+          <div id="alertes-preview" style="display:flex;flex-direction:column;gap:6px;"></div>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -855,13 +901,9 @@ function chargerFiche() {
 
     // Centres du réseau
     if (currentGroupe.estReseau && currentGroupe.centres && currentGroupe.centres.length > 1) {
-      var cardCentres = document.getElementById('card-centres');
+      var centresSection = document.getElementById('centres-section');
       var listCentres = document.getElementById('centres-list');
-      var colDroite = document.getElementById('col-droite');
-      var ficheGrid = document.querySelector('.fiche-grid');
-      if (colDroite) colDroite.style.display = 'flex';
-      if (ficheGrid) ficheGrid.classList.add('has-centres');
-      cardCentres.style.display = 'block';
+      if (centresSection) centresSection.classList.remove('hidden');
       listCentres.innerHTML = currentGroupe.centres.map(function(c, idx) {
         return '<div class="centre-row-clickable" data-centre-idx="' + idx + '" title="Double-cliquez pour voir/modifier les détails">'
           + '<div class="info-label">' + esc(c.nom) + '</div>'
@@ -1469,7 +1511,7 @@ function appliquerModeLecture() {
   document.getElementById('btn-modifier').classList.remove('hidden');
   document.getElementById('btn-enregistrer').classList.add('hidden');
   document.getElementById('btn-annuler').classList.add('hidden');
-  document.getElementById('edit-hint').textContent = 'Mode lecture — cliquez sur Modifier pour éditer la fiche';
+  // edit-hint removed
 }
 
 function passerEnEdition() {
@@ -1488,7 +1530,7 @@ function passerEnEdition() {
   document.getElementById('btn-modifier').classList.add('hidden');
   document.getElementById('btn-enregistrer').classList.remove('hidden');
   document.getElementById('btn-annuler').classList.remove('hidden');
-  document.getElementById('edit-hint').textContent = 'Mode édition — vos changements seront sauvegardés en cliquant sur Enregistrer';
+  // edit-hint removed
 }
 
 function enregistrerModifs() {
