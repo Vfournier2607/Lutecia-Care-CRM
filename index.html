@@ -15,22 +15,22 @@
       --navy-mid:  #181C37;
       --blue:      #1B2F6E;
       --bordeaux:  #622346;
-      --grey:      #EBECF0;
-      --grey-lt:   #F7F7F7;
-      --white:     #FEFEFE;
+      --grey:      #D8DBE3;
+      --grey-lt:   #F4F5F7;
+      --white:     #FFFFFF;
       --text:      #0B1E46;
       --text-mid:  #2C2C4A;
-      --text-soft: #4A4A6A;
+      --text-soft: #6B7280;
 
       --s-contact:    #6B5B9E;
       --s-discussion: #4A6FA5;
       --s-advanced:   #1B2F6E;
       --s-loi:        #622346;
 
-      --sidebar: 220px;
-      --topbar:  60px;
-      --r:       6px;
-      --shadow:  0 2px 12px rgba(10,14,42,0.08);
+      --sidebar: 200px;
+      --topbar:  44px;
+      --r:       3px;
+      --shadow:  0 1px 4px rgba(10,14,42,0.06);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,11 +38,15 @@
     html, body {
       height: 100%;
       font-family: 'Jost', sans-serif;
-      font-size: 14px;
+      font-size: 12px;
       background: var(--grey-lt);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
     }
+
+    /* Fade-in global */
+    @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+    .main { animation: fadeIn .25s ease; }
 
     /* ══════════════════════════════════════
        LAYOUT
@@ -66,11 +70,11 @@
     }
 
     .sidebar-logo {
-      height: 90px;
+      height: 72px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 12px 16px;
+      padding: 8px 12px;
       border-bottom: 1px solid rgba(255,255,255,0.07);
     }
 
@@ -100,10 +104,10 @@
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 9px;
-      padding: 9px 20px;
+      gap: 8px;
+      padding: 7px 16px;
       color: rgba(255,255,255,0.5);
-      font-size: 12px;
+      font-size: 11px;
       cursor: pointer;
       transition: all 0.15s;
       border-left: 2px solid transparent;
@@ -114,11 +118,11 @@
     .nav-item.active { color: var(--white); background: rgba(255,255,255,0.07); border-left-color: var(--bordeaux); font-weight: 500; }
 
     .sidebar-user {
-      padding: 14px 20px;
+      padding: 10px 14px;
       border-top: 1px solid rgba(255,255,255,0.07);
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
     }
 
     .user-avatar {
@@ -144,15 +148,15 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 28px;
+      padding: 0 20px;
       border-bottom: 1px solid var(--grey);
-      box-shadow: var(--shadow);
+      box-shadow: none;
       z-index: 10;
     }
 
     .topbar-title {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 19px; font-weight: 600;
+      font-size: 16px; font-weight: 600;
       color: var(--navy);
     }
 
@@ -162,7 +166,7 @@
        CONTENU
     ══════════════════════════════════════ */
     .main {
-      padding: 24px 28px;
+      padding: 12px 16px;
       overflow-y: auto;
     }
 
@@ -172,31 +176,32 @@
     .stats {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin-bottom: 20px;
+      gap: 8px;
+      margin-bottom: 10px;
     }
 
     .stat {
       background: var(--white);
       border-radius: var(--r);
-      padding: 18px 20px;
+      padding: 10px 14px;
       border: 1px solid var(--grey);
-      box-shadow: var(--shadow);
+      transition: box-shadow .15s;
     }
+    .stat:hover { box-shadow: 0 2px 8px rgba(10,14,42,0.08); }
 
     .stat-label {
-      font-size: 9px; font-weight: 600;
+      font-size: 8px; font-weight: 600;
       letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--text-soft); margin-bottom: 6px;
+      color: var(--text-soft); margin-bottom: 4px;
     }
 
     .stat-value {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 30px; font-weight: 600;
+      font-size: 24px; font-weight: 600;
       color: var(--navy); line-height: 1;
     }
 
-    .stat-sub { font-size: 10px; color: var(--text-soft); margin-top: 3px; }
+    .stat-sub { font-size: 9px; color: var(--text-soft); margin-top: 2px; }
     .stat.alert .stat-value { color: var(--bordeaux); }
 
     /* ══════════════════════════════════════
@@ -206,13 +211,12 @@
       background: var(--white);
       border: 1px solid var(--grey);
       border-radius: var(--r);
-      padding: 14px 18px;
-      margin-bottom: 18px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 12px;
       flex-wrap: wrap;
-      box-shadow: var(--shadow);
     }
 
     .search {
@@ -280,7 +284,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 18px;
+      padding: 8px 12px;
       border-bottom: 1px solid var(--grey);
     }
 
@@ -296,10 +300,10 @@
     table { width: 100%; border-collapse: collapse; }
 
     thead th {
-      font-size: 9px; font-weight: 600;
+      font-size: 8px; font-weight: 700;
       letter-spacing: 0.10em; text-transform: uppercase;
       color: var(--text-soft);
-      padding: 9px 14px; text-align: left;
+      padding: 6px 10px; text-align: left;
       border-bottom: 1px solid var(--grey);
       background: var(--grey-lt);
       white-space: nowrap;
@@ -311,14 +315,20 @@
     tbody tr {
       border-bottom: 1px solid var(--grey);
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.12s;
     }
     tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: rgba(27,47,110,0.03); }
+    tbody tr { animation: fadeIn .2s ease both; }
+    tbody tr:nth-child(1)  { animation-delay: .02s; }
+    tbody tr:nth-child(2)  { animation-delay: .04s; }
+    tbody tr:nth-child(3)  { animation-delay: .06s; }
+    tbody tr:nth-child(4)  { animation-delay: .08s; }
+    tbody tr:nth-child(5)  { animation-delay: .10s; }
+    tbody tr:hover { background: rgba(27,47,110,0.04); }
 
     tbody td {
-      padding: 11px 14px;
-      font-size: 12px;
+      padding: 7px 10px;
+      font-size: 11px;
       color: var(--text);
       vertical-align: middle;
     }
