@@ -1803,27 +1803,6 @@ document.getElementById('popup-alerte').addEventListener('click', function(e) {
   });
 })();
 
-
-// ══════════════════════════════════════
-// RESIZE DES COLONNES (drag horizontal)
-// ══════════════════════════════════════
-(function() {
-  var STORAGE_KEY_COLS = 'lutecia_col_widths';
-
-  function saveCols(w1, w3) {
-    try { localStorage.setItem(STORAGE_KEY_COLS, JSON.stringify({w1:w1,w3:w3})); } catch(_) {}
-  }
-  function loadCols() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY_COLS) || 'null'); } catch(_) { return null; }
-  }
-
-  function applyColWidths(grid, w1, w3) {
-    grid.style.gridTemplateColumns = w1+'px 6px 1fr 6px '+w3+'px';
-  }
-
-  function initColResizers() {
-  })();
-
 </script>
 </body>
 </html>
