@@ -1170,29 +1170,41 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Authentification MSAL — identité tirée du compte Microsoft, pas d'une saisie manuelle
-  graphConnect().then(function(ok) {
+  // Mode local (127.0.0.1 / localhost) : bypass auth, données de test
+  var isLocal = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
+  if (isLocal) {
     var overlay = document.getElementById('loading-overlay');
     if (overlay) overlay.style.display = 'none';
-    if (!ok) {
-      if (overlay) {
-        overlay.style.display = 'flex';
-        overlay.querySelector('div > div:last-child').textContent = 'Connexion impossible. Rechargez la page.';
-      }
-      return;
-    }
-    currentUser = graphGetUserName();
+    currentUser = 'Démo Local';
     majSidebar(currentUser);
-    graphLoadEtat().then(function(etat) {
-      var local = loadOutput();
-      Object.keys(etat).forEach(function(id) {
-        if (!local[id]) local[id] = {};
-        Object.assign(local[id], etat[id]);
-      });
-      saveOutput(local);
-      renderTable();
-      renderStats();
-    }).catch(function(e) { /* état non disponible, on continue */ });
-  });
+    GRAPH_READY = false;
+    renderTable();
+    renderStats();
+  } else {
+    graphConnect().then(function(ok) {
+      var overlay = document.getElementById('loading-overlay');
+      if (overlay) overlay.style.display = 'none';
+      if (!ok) {
+        if (overlay) {
+          overlay.style.display = 'flex';
+          overlay.querySelector('div > div:last-child').textContent = 'Connexion impossible. Rechargez la page.';
+        }
+        return;
+      }
+      currentUser = graphGetUserName();
+      majSidebar(currentUser);
+      graphLoadEtat().then(function(etat) {
+        var local = loadOutput();
+        Object.keys(etat).forEach(function(id) {
+          if (!local[id]) local[id] = {};
+          Object.assign(local[id], etat[id]);
+        });
+        saveOutput(local);
+        renderTable();
+        renderStats();
+      }).catch(function(e) { /* état non disponible, on continue */ });
+    });
+  }
 });
 </script>
 <!-- Popup Alertes (Pack 7) -->

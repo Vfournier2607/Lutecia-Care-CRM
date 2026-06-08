@@ -1591,6 +1591,16 @@ document.addEventListener('DOMContentLoaded', function() {
   chargerFiche();
   setTimeout(appliquerModeLecture, 50);
 
+  // Mode local : bypass auth
+  var isLocal = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
+  if (isLocal) {
+    currentUser = 'Démo Local';
+    document.getElementById('sidebar-avatar').textContent = 'D';
+    document.getElementById('sidebar-name').textContent   = 'Démo Local';
+    GRAPH_READY = false;
+    return;
+  }
+
   // Authentification MSAL — identité tirée du compte Microsoft
   graphConnect().then(function(ok) {
     if (!ok) { window.location.href = 'index.html'; return; }
