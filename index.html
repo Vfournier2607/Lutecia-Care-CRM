@@ -607,6 +607,10 @@
       <div class="topbar-title">Deal Flow Europe</div>
       <div class="topbar-date" id="topbar-date"></div>
     </div>
+    <button onclick="exporterExcel()" style="font-family:'Jost',sans-serif;font-size:11px;font-weight:500;padding:5px 12px;border-radius:var(--r);border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;cursor:pointer;display:flex;align-items:center;gap:6px;" title="Exporter toutes les données en Excel">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Exporter Excel
+    </button>
   </header>
 
   <!-- Contenu -->
@@ -1651,6 +1655,103 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+// ══════════════════════════════════════════
+// EXPORT EXCEL
+// ══════════════════════════════════════════
+function exporterExcel() {
+  var imports  = loadImports();
+  var output   = loadOutput();
+  var journal  = JSON.parse(localStorage.getItem('lutecia_journal') || '[]');
+  var kpis     = JSON.parse(localStorage.getItem('lutecia_kpi')     || '{}');
+  var actions  = JSON.parse(localStorage.getItem('lutecia_actions') || '{}');
+
+  if (!imports.length) { alert('Aucune donnée importée. Importez d\'abord un fichier Excel.'); return; }
+
+  var wb = XLSX.utils.book_new();
+
+  // Colonnes de base (depuis Excel source)
+  var colsBase = ['Nom du centre','Type','Réseau','Nom réseau','TEP','Gamma cam.','Nb TEP','Nb Gamma','Adresse','CP','Région','Ville','Mapping','Lien','Notes'];
+  // Colonnes CRM ajoutées
+  var colsCRM  = ['Statut deal','Label','Responsable M&A','Contact clé','Source','Note CRM'];
+
+  var allRows = [];
+
+  // Une feuille par pays
+  imports.forEach(function(imp) {
+    var rows = [colsBase.concat(colsCRM)]; // header
+    imp.data.forEach(function(c) {
+      var id  = (c.reseau === 'Oui' && c.nom_reseau)
+        ? 'reseau_' + c.nom_reseau.toLowerCase().replace(/[^a-z0-9]/g, '_')
+        : 'centre_' + c.nom.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      var rec = output[id] || {};
+      var row = [
+        c.nom,
+        rec.type          || c.type          || '',
+        c.reseau          || '',
+        c.nom_reseau      || '',
+        rec.tep           || c.tep           || '',
+        rec.gamma_cam     || c.gamma_cam     || '',
+        rec.nb_tep        !== undefined ? rec.nb_tep        : (c.nb_tep   || 0),
+        rec.nb_gamma      !== undefined ? rec.nb_gamma      : (c.nb_gamma || 0),
+        rec.adresse       || c.adresse       || '',
+        c.cp              || '',
+        rec.region        || c.region        || '',
+        rec.ville         || c.ville         || '',
+        rec.mapping       || c.mapping       || '',
+        rec.contact       || c.contact       || '',
+        rec.notes_db      || c.notes         || '',
+        // CRM
+        rec.statut        || '',
+        rec.label         || '',
+        rec.responsable   || '',
+        rec.contact_cle   || '',
+        rec.source        || '',
+        rec.note          || ''
+      ];
+      rows.push(row);
+      allRows.push(row);
+    });
+    var ws = XLSX.utils.aoa_to_sheet(rows);
+    styleSheetHeader(ws, colsBase.length + colsCRM.length);
+    XLSX.utils.book_append_sheet(wb, ws, 'DB_' + imp.pays.substring(0, 28));
+  });
+
+  // Feuille Agrégat
+  if (allRows.length) {
+    var wsAgg = XLSX.utils.aoa_to_sheet([colsBase.concat(colsCRM)].concat(allRows));
+    styleSheetHeader(wsAgg, colsBase.length + colsCRM.length);
+    XLSX.utils.book_append_sheet(wb, wsAgg, 'Agrégat');
+  }
+
+  // Feuille Journal
+  var journalHeader = ['Date','Auteur','Structure','Champ modifié','Ancienne valeur','Nouvelle valeur','Pays'];
+  var journalRows = journal.map(function(j) {
+    return [
+      new Date(j.timestamp).toLocaleString('fr-FR'),
+      j.auteur || '',
+      j.nom_entite || j.id_entite || '',
+      j.champ_modifie || '',
+      j.ancienne_valeur || '',
+      j.nouvelle_valeur || '',
+      j.pays || ''
+    ];
+  });
+  var wsJournal = XLSX.utils.aoa_to_sheet([journalHeader].concat(journalRows));
+  styleSheetHeader(wsJournal, journalHeader.length);
+  XLSX.utils.book_append_sheet(wb, wsJournal, 'Journal');
+
+  // Téléchargement
+  var date = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, 'LuteciaCare_Export_' + date + '.xlsx');
+}
+
+function styleSheetHeader(ws, nbCols) {
+  // Largeurs de colonnes
+  ws['!cols'] = Array.from({length: nbCols}, function(_, i) {
+    return { wch: i === 0 ? 35 : i < 8 ? 12 : 22 };
+  });
+}
 </script>
 <!-- Popup Alertes (Pack 7) -->
 <div id="popup-alertes-list" class="popup-overlay hidden" style="position:fixed;inset:0;background:rgba(10,14,42,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;">
