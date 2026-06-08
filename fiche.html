@@ -657,9 +657,14 @@
             <div class="info-row"><div class="info-label">Type</div><div class="info-value" id="i-type">—</div></div>
             <div class="info-row"><div class="info-label">Réseau</div><div class="info-value" id="i-reseau">—</div></div>
             <div class="info-row"><div class="info-label">Nb centres</div><div class="info-value" id="i-nb">—</div></div>
+            <div class="info-row"><div class="info-label">Région</div><div class="info-value" id="i-region">—</div></div>
+            <div class="info-row"><div class="info-label">Ville</div><div class="info-value" id="i-ville">—</div></div>
+            <div class="info-row"><div class="info-label">Adresse</div><div class="info-value" id="i-adresse" style="word-break:break-word;">—</div></div>
             <div class="info-row"><div class="info-label">TEP</div><div class="info-value" id="i-tep">—</div></div>
             <div class="info-row"><div class="info-label">Gamma cam.</div><div class="info-value" id="i-gamma">—</div></div>
             <div class="info-row"><div class="info-label">Radiothérap.</div><div class="info-value" id="i-radio">—</div></div>
+            <div class="info-row"><div class="info-label">Lien</div><div class="info-value" id="i-lien">—</div></div>
+            <div class="info-row"><div class="info-label">Notes DB</div><div class="info-value" id="i-notes-db" style="word-break:break-word;color:var(--text-mid);">—</div></div>
             <div class="info-row">
               <div class="info-label">Label</div>
               <input class="info-input" id="i-label" type="text" placeholder="Nom de code…" onchange="sauver('label', this.value)" />
@@ -915,8 +920,21 @@ function chargerFiche() {
     document.getElementById('i-tep').textContent    = currentGroupe.tep    || '—';
     document.getElementById('i-gamma').textContent  = currentGroupe.gamma_cam || '—';
     document.getElementById('i-radio').textContent  = currentGroupe.radiotherapie || '—';
-    document.getElementById('k-gamma').textContent  = currentGroupe.nb_gamma !== undefined ? currentGroupe.nb_gamma : '—';
-    document.getElementById('k-pet').textContent    = currentGroupe.nb_tep   !== undefined ? currentGroupe.nb_tep   : '—';
+    document.getElementById('k-gamma').textContent  = currentGroupe.nb_gamma || '—';
+    document.getElementById('k-pet').textContent    = currentGroupe.nb_tep   || '—';
+
+    // Champs de la matrice Excel (premier centre si indépendant)
+    var c0 = currentGroupe.centres && currentGroupe.centres[0];
+    var setEl = function(id, val) { var el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+    setEl('i-region',   c0 && c0.region);
+    setEl('i-ville',    c0 && c0.ville);
+    setEl('i-adresse',  c0 && c0.adresse);
+    setEl('i-notes-db', c0 && c0.notes);
+    var lienEl = document.getElementById('i-lien');
+    if (lienEl) {
+      var url = c0 && c0.contact;
+      lienEl.innerHTML = url ? '<a href="' + esc(url) + '" target="_blank" style="color:var(--blue);text-decoration:none;">' + esc(url.replace(/^https?:\/\//, '').substring(0, 40)) + (url.length > 40 ? '…' : '') + '</a>' : '—';
+    }
 
     // Centres du réseau
     if (currentGroupe.estReseau && currentGroupe.centres && currentGroupe.centres.length > 1) {

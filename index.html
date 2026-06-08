@@ -957,10 +957,13 @@ function reloadData() {
         id: key, nom: c.reseau === 'Oui' && c.nom_reseau ? c.nom_reseau : c.nom,
         mapping: c.mapping, pays: c.pays, nb_centres: 0,
         tep: 'N/D', gamma_cam: 'N/D', radiotherapie: 'N/D',
+        nb_tep: 0, nb_gamma: 0,
         estReseau: c.reseau === 'Oui' && !!c.nom_reseau, centres: []
       };
     }
     map[key].nb_centres++;
+    map[key].nb_tep   += (c.nb_tep   || 0);
+    map[key].nb_gamma += (c.nb_gamma || 0);
     map[key].centres.push(c);
     ['tep', 'gamma_cam', 'radiotherapie'].forEach(function(champ) {
       if (c[champ] === 'Oui') map[key][champ] = 'Oui';
