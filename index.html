@@ -715,7 +715,7 @@
 
     <!-- Panneau Import -->
     <div class="filter-overlay" id="import-overlay" onclick="closeImportPanel()"></div>
-    <div class="filter-panel" id="import-panel" style="width:360px;right:-380px;">
+    <div class="filter-panel" id="import-panel" style="width:360px;">
       <div class="filter-panel-head">
         <span class="filter-panel-title">Importer des données</span>
         <button class="filter-panel-close" onclick="closeImportPanel()">✕</button>
@@ -1006,13 +1006,17 @@ function updateImportBadge() {
 }
 
 function openImportPanel() {
-  document.getElementById('import-panel').classList.add('open');
+  var panel = document.getElementById('import-panel');
+  panel.classList.add('open');
+  panel.style.right = '0';
   document.getElementById('import-overlay').classList.add('open');
   renderImportList();
 }
 
 function closeImportPanel() {
-  document.getElementById('import-panel').classList.remove('open');
+  var panel = document.getElementById('import-panel');
+  panel.classList.remove('open');
+  panel.style.right = '-380px';
   document.getElementById('import-overlay').classList.remove('open');
 }
 
@@ -1225,12 +1229,15 @@ function toggleFilterPanel() {
   var btn = document.getElementById('btn-filters-toggle');
   var isOpen = panel.classList.contains('open');
   panel.classList.toggle('open', !isOpen);
+  panel.style.right = isOpen ? '-320px' : '0';
   overlay.classList.toggle('open', !isOpen);
   btn.classList.toggle('active', !isOpen);
 }
 
 function closeFilterPanel() {
-  document.getElementById('filter-panel').classList.remove('open');
+  var panel = document.getElementById('filter-panel');
+  panel.classList.remove('open');
+  panel.style.right = '-320px';
   document.getElementById('filter-overlay').classList.remove('open');
   document.getElementById('btn-filters-toggle').classList.remove('active');
 }
