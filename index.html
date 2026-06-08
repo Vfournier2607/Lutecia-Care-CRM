@@ -332,6 +332,19 @@
     }
     .filter-overlay.open { display: block; }
 
+    /* Fichier importé card */
+    .import-file-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: var(--r);
+      border: 1px solid var(--grey); background: var(--grey-lt);
+    }
+    .import-file-flag { font-size: 18px; flex-shrink: 0; }
+    .import-file-info { flex: 1; min-width: 0; }
+    .import-file-name { font-size: 11px; font-weight: 600; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .import-file-meta { font-size: 10px; color: var(--text-soft); margin-top: 1px; }
+    .import-file-del { background: none; border: none; cursor: pointer; color: var(--text-soft); font-size: 14px; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; }
+    .import-file-del:hover { color: var(--bordeaux); background: rgba(98,35,52,.08); }
+
     /* ── Pastille modifié ── */
     .dot-modifie {
       display: inline-block;
@@ -575,6 +588,12 @@
         </svg>
         Deal Flow
       </a>
+      <a class="nav-item" onclick="openImportPanel()" style="cursor:pointer;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Importer <span id="import-badge" style="display:none;background:var(--bordeaux);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px;"></span>
+      </a>
     </nav>
     <div class="sidebar-user">
       <div class="user-avatar" id="sidebar-avatar">?</div>
@@ -694,6 +713,37 @@
       </div>
     </div>
 
+    <!-- Panneau Import -->
+    <div class="filter-overlay" id="import-overlay" onclick="closeImportPanel()"></div>
+    <div class="filter-panel" id="import-panel" style="width:360px;right:-380px;">
+      <div class="filter-panel-head">
+        <span class="filter-panel-title">Importer des données</span>
+        <button class="filter-panel-close" onclick="closeImportPanel()">✕</button>
+      </div>
+      <div class="filter-panel-body" style="gap:16px;">
+
+        <!-- Zone de dépôt -->
+        <div id="import-drop-zone" style="border:2px dashed var(--grey);border-radius:var(--r);padding:24px 16px;text-align:center;cursor:pointer;transition:border-color .15s;" onclick="document.getElementById('import-file-input').click()" ondragover="event.preventDefault();this.style.borderColor='var(--blue)'" ondragleave="this.style.borderColor='var(--grey)'" ondrop="handleImportDrop(event)">
+          <div style="font-size:22px;margin-bottom:8px;">📂</div>
+          <div style="font-size:12px;font-weight:600;color:var(--navy);">Cliquer ou déposer un fichier Excel</div>
+          <div style="font-size:10px;color:var(--text-soft);margin-top:4px;">.xlsx — feuille DB requise</div>
+          <input type="file" id="import-file-input" accept=".xlsx" style="display:none" onchange="handleImportFile(this.files[0])">
+        </div>
+
+        <!-- Fichiers importés -->
+        <div>
+          <span class="sf-label">Fichiers importés</span>
+          <div id="import-list" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;"></div>
+          <div id="import-empty" style="font-size:11px;color:var(--text-soft);padding:10px 0;">Aucun fichier importé.</div>
+        </div>
+
+      </div>
+      <div class="filter-panel-footer">
+        <button class="btn-reset-filter" onclick="clearAllImports()" style="color:var(--bordeaux);border-color:var(--bordeaux)">Tout effacer</button>
+        <button class="btn-apply-filter" onclick="closeImportPanel()">Fermer</button>
+      </div>
+    </div>
+
     <!-- Tableau -->
     <div class="table-wrap">
       <div class="table-head-bar">
@@ -731,67 +781,243 @@
   </main>
 </div>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="msal.min.js"></script>
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/graph.js"></script>
 <script>
 // ══════════════════════════════════════════
-// DONNÉES — Excel Screening Master intégré
-// 6 lignes de test (toutes issues du vrai fichier)
+// IMPORT EXCEL
 // ══════════════════════════════════════════
-const SCREENING_DATA = [
-  {
-    nom: "ABC - Nuremberg", mapping: "Clinics groups",
-    adresse: "Prof.-Ernst-Nathan-Str. 1 90419 Nürnberg",
-    pays: "Allemagne", nb_centres: 1,
-    reseau: "Oui", nom_reseau: "ABC (Ambulantes Behandlungscentrum)",
-    tep: "N/D", gamma_cam: "N/D", nb_tep: 0, nb_gamma: 0,
-    radiotherapie: "N/D",
-    contact: "https://www.abc-klinikum.de/behandlungen/diagnose-krebs/nuklearmedizin"
-  },
-  {
-    nom: "AGAPLESION KLINIKUM HAGEN", mapping: "Clinics groups",
-    adresse: "Grünstraße 35, 58095 Hagen",
-    pays: "Allemagne", nb_centres: 2,
-    reseau: "Oui", nom_reseau: "Agaplesion",
-    tep: "N/D", gamma_cam: "N/D", nb_tep: 0, nb_gamma: 0,
-    radiotherapie: "N/D", contact: ""
-  },
-  {
-    nom: "AGAPLESION MARKUS KRANKENHAUS", mapping: "Clinics groups",
-    adresse: "Wilhelm-Epstein-Straße 4, 60431 Frankfurt am Main",
-    pays: "Allemagne", nb_centres: 2,
-    reseau: "Oui", nom_reseau: "Agaplesion",
-    tep: "N/D", gamma_cam: "N/D", nb_tep: 0, nb_gamma: 0,
-    radiotherapie: "N/D", contact: ""
-  },
-  {
-    nom: "AGAPLESION Medical Care Center", mapping: "Independent clinic",
-    adresse: "Paul-Zipp-Str. 171-173 35398 Gießen",
-    pays: "Allemagne", nb_centres: 1,
-    reseau: "Non", nom_reseau: "",
-    tep: "Non", gamma_cam: "Oui", nb_tep: 0, nb_gamma: 0,
-    radiotherapie: "N/D",
-    contact: "https://www.mvz-gi.de/leistungsspektrum/fachabteilung/nuklearmedizin"
-  },
-  {
-    nom: "ambulanzzentrum-schweinfurt", mapping: "Independent clinic",
-    adresse: "8 Gustav-Adolf-Straße 97422 Schweinfurt",
-    pays: "Allemagne", nb_centres: 1,
-    reseau: "Non", nom_reseau: "",
-    tep: "N/D", gamma_cam: "N/D", nb_tep: 0, nb_gamma: 0,
-    radiotherapie: "N/D", contact: "https://www.ambulanzzentrum-schweinfurt.de"
-  },
-  {
-    nom: "Ammerland-Klinik MVZ GmbH", mapping: "Independent clinic",
-    adresse: "Lange Straße 38, 26655 Westerstede",
-    pays: "Allemagne", nb_centres: 1,
-    reseau: "N/D", nom_reseau: "",
-    tep: "N/D", gamma_cam: "N/D", nb_tep: 0, nb_gamma: 0,
-    radiotherapie: "N/D", contact: ""
+var IMPORTS_KEY = 'lutecia_imports';
+
+function loadImports() {
+  try { return JSON.parse(localStorage.getItem(IMPORTS_KEY) || '[]'); } catch { return []; }
+}
+
+function saveImports(arr) {
+  try { localStorage.setItem(IMPORTS_KEY, JSON.stringify(arr)); } catch(e) { alert('Stockage plein : ' + e.message); }
+}
+
+function getScreeningData() {
+  var imports = loadImports();
+  var all = [];
+  imports.forEach(function(imp) { all = all.concat(imp.data); });
+  return all;
+}
+
+function paysToFlag(pays) {
+  var flags = {
+    'italie': '🇮🇹', 'italy': '🇮🇹', 'france': '🇫🇷', 'allemagne': '🇩🇪', 'germany': '🇩🇪',
+    'espagne': '🇪🇸', 'spain': '🇪🇸', 'portugal': '🇵🇹', 'belgique': '🇧🇪', 'belgium': '🇧🇪',
+    'suisse': '🇨🇭', 'switzerland': '🇨🇭', 'uk': '🇬🇧', 'angleterre': '🇬🇧', 'pays-bas': '🇳🇱',
+    'netherlands': '🇳🇱', 'autriche': '🇦🇹', 'austria': '🇦🇹', 'pologne': '🇵🇱', 'poland': '🇵🇱'
+  };
+  return flags[pays.toLowerCase()] || '🏳️';
+}
+
+function paysFromFilename(name) {
+  var mapping = {
+    'italy': 'Italie', 'italie': 'Italie', 'ita': 'Italie',
+    'france': 'France', 'fra': 'France',
+    'germany': 'Allemagne', 'allemagne': 'Allemagne', 'ger': 'Allemagne',
+    'spain': 'Espagne', 'espagne': 'Espagne', 'esp': 'Espagne',
+    'portugal': 'Portugal', 'por': 'Portugal',
+    'belgium': 'Belgique', 'belgique': 'Belgique', 'bel': 'Belgique',
+    'switzerland': 'Suisse', 'suisse': 'Suisse', 'che': 'Suisse',
+    'uk': 'Royaume-Uni', 'england': 'Royaume-Uni',
+    'netherlands': 'Pays-Bas', 'pays-bas': 'Pays-Bas',
+    'austria': 'Autriche', 'autriche': 'Autriche',
+    'poland': 'Pologne', 'pologne': 'Pologne'
+  };
+  var lower = name.toLowerCase();
+  for (var k in mapping) {
+    if (lower.includes(k)) return mapping[k];
   }
-];
+  return null;
+}
+
+function parseDbSheet(ws, pays) {
+  var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
+  if (!rows.length) return [];
+  var header = rows[0];
+  var centres = [];
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i];
+    if (!r[0] || String(r[0]).startsWith('=')) continue;
+    var nom = String(r[0] || '').trim();
+    if (!nom) continue;
+    var nbTep   = parseFloat(r[8]) || 0;
+    var nbGamma = parseFloat(r[9]) || 0;
+    var estReseau = r[3] === 1 || r[3] === '1' || r[3] === true;
+    centres.push({
+      nom:           nom,
+      pays:          pays,
+      type:          String(r[2] || '').trim(),
+      reseau:        estReseau ? 'Oui' : 'Non',
+      nom_reseau:    String(r[4] || '').trim(),
+      tep:           nbTep > 0 ? 'Oui' : (nbTep === 0 && r[6] !== null ? 'Non' : 'N/D'),
+      gamma_cam:     nbGamma > 0 ? 'Oui' : (nbGamma === 0 && r[7] !== null ? 'Non' : 'N/D'),
+      nb_tep:        nbTep,
+      nb_gamma:      nbGamma,
+      adresse:       String(r[10] || '').trim(),
+      cp:            String(r[11] || '').trim(),
+      region:        String(r[12] || '').trim(),
+      ville:         String(r[13] || '').trim(),
+      mapping:       String(r[14] || '').trim() || 'Autre',
+      contact:       String(r[15] || '').trim(),
+      notes:         String(r[16] || '').trim(),
+      radiotherapie: 'N/D',
+      nb_centres:    1
+    });
+  }
+  return centres;
+}
+
+function handleImportFile(file) {
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var wb = XLSX.read(e.target.result, { type: 'array' });
+      var wsName = wb.SheetNames.find(function(n) { return n.trim().toUpperCase() === 'DB'; });
+      if (!wsName) { alert('Feuille "DB" introuvable dans ce fichier.'); return; }
+
+      var pays = paysFromFilename(file.name);
+      if (!pays) {
+        pays = prompt('Pays non détecté dans le nom du fichier.\nEntrez le pays :');
+        if (!pays || !pays.trim()) return;
+        pays = pays.trim();
+      }
+
+      var centres = parseDbSheet(wb.Sheets[wsName], pays);
+      if (!centres.length) { alert('Aucun centre trouvé dans la feuille DB.'); return; }
+
+      var imports = loadImports();
+      var idx = imports.findIndex(function(imp) { return imp.pays === pays; });
+      var entry = {
+        pays:       pays,
+        filename:   file.name,
+        nb:         centres.length,
+        importedAt: new Date().toISOString(),
+        data:       centres
+      };
+      if (idx >= 0) imports[idx] = entry; else imports.push(entry);
+      saveImports(imports);
+
+      reloadData();
+      renderImportList();
+      updateImportBadge();
+      document.getElementById('import-drop-zone').style.borderColor = 'var(--grey)';
+    } catch(err) {
+      alert('Erreur lors de la lecture : ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  document.getElementById('import-file-input').value = '';
+}
+
+function handleImportDrop(e) {
+  e.preventDefault();
+  document.getElementById('import-drop-zone').style.borderColor = 'var(--grey)';
+  var file = e.dataTransfer.files[0];
+  if (file) handleImportFile(file);
+}
+
+function deleteImport(pays) {
+  var imports = loadImports().filter(function(imp) { return imp.pays !== pays; });
+  saveImports(imports);
+  reloadData();
+  renderImportList();
+  updateImportBadge();
+}
+
+function clearAllImports() {
+  if (!confirm('Supprimer tous les fichiers importés ?')) return;
+  saveImports([]);
+  reloadData();
+  renderImportList();
+  updateImportBadge();
+}
+
+function reloadData() {
+  var SCREENING_DATA = getScreeningData();
+  // rebuild GROUPES
+  var map = {};
+  SCREENING_DATA.forEach(function(c) {
+    var key;
+    if (c.reseau === 'Oui' && c.nom_reseau) {
+      key = 'reseau_' + c.nom_reseau.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    } else {
+      key = 'centre_' + c.nom.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    }
+    if (!map[key]) {
+      map[key] = {
+        id: key, nom: c.reseau === 'Oui' && c.nom_reseau ? c.nom_reseau : c.nom,
+        mapping: c.mapping, pays: c.pays, nb_centres: 0,
+        tep: 'N/D', gamma_cam: 'N/D', radiotherapie: 'N/D',
+        estReseau: c.reseau === 'Oui' && !!c.nom_reseau, centres: []
+      };
+    }
+    map[key].nb_centres++;
+    map[key].centres.push(c);
+    ['tep', 'gamma_cam', 'radiotherapie'].forEach(function(champ) {
+      if (c[champ] === 'Oui') map[key][champ] = 'Oui';
+      else if (c[champ] === 'Non' && map[key][champ] === 'N/D') map[key][champ] = 'Non';
+    });
+  });
+  GROUPES = Object.values(map);
+  populateFiltres();
+  renderTable();
+  renderStats();
+}
+
+function renderImportList() {
+  var list  = document.getElementById('import-list');
+  var empty = document.getElementById('import-empty');
+  if (!list) return;
+  var imports = loadImports();
+  if (!imports.length) {
+    list.innerHTML = '';
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  list.innerHTML = imports.map(function(imp) {
+    var date = new Date(imp.importedAt).toLocaleDateString('fr-FR');
+    return '<div class="import-file-card">'
+      + '<span class="import-file-flag">' + paysToFlag(imp.pays) + '</span>'
+      + '<div class="import-file-info">'
+      + '<div class="import-file-name">' + esc(imp.pays) + '</div>'
+      + '<div class="import-file-meta">' + esc(imp.filename) + ' · ' + imp.nb + ' centres · ' + date + '</div>'
+      + '</div>'
+      + '<button class="import-file-del" onclick="deleteImport(\'' + esc(imp.pays) + '\')" title="Supprimer">✕</button>'
+      + '</div>';
+  }).join('');
+}
+
+function updateImportBadge() {
+  var badge = document.getElementById('import-badge');
+  var n = loadImports().length;
+  if (!badge) return;
+  badge.textContent = n;
+  badge.style.display = n > 0 ? '' : 'none';
+}
+
+function openImportPanel() {
+  document.getElementById('import-panel').classList.add('open');
+  document.getElementById('import-overlay').classList.add('open');
+  renderImportList();
+}
+
+function closeImportPanel() {
+  document.getElementById('import-panel').classList.remove('open');
+  document.getElementById('import-overlay').classList.remove('open');
+}
+
+// SCREENING_DATA désormais dynamique (chargé depuis localStorage)
+var SCREENING_DATA = getScreeningData();
 
 const STATUT_LABELS = {
   contact: 'Prise de contact', discussion: 'Discussion',
@@ -1347,16 +1573,10 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('topbar-date').textContent =
     new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
-  // Groupement
-  GROUPES = grouperCentres();
-
-  // Filtres
-  populateFiltres();
+  // Chargement des données importées + rendu
+  reloadData();
   renderSavedFilters();
-
-  // Rendu initial
-  renderStats();
-  renderTable();
+  updateImportBadge();
 
   // Délégation de clic sur le tableau (remplace onclick inline sur <tr>)
   document.getElementById('tbody').addEventListener('click', function(e) {
