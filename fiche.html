@@ -880,9 +880,40 @@ function chargerFiche() {
   if (!currentId) { document.getElementById('topbar-nom').textContent = 'Structure introuvable'; return; }
 
   try {
-    var raw = localStorage.getItem('lutecia_groupes') || '[]';
-    var groupes = JSON.parse(raw);
-    currentGroupe = groupes.find(function(g) { return g.id === currentId; });
+    // Reconstruit les groupes depuis lutecia_imports (source de vérité)
+    var imports = JSON.parse(localStorage.getItem('lutecia_imports') || '[]');
+    var all = [];
+    imports.forEach(function(imp) { all = all.concat(imp.data || []); });
+    var map = {};
+    all.forEach(function(c) {
+      var key = c.reseau === 'Oui' && c.nom_reseau
+        ? 'reseau_' + c.nom_reseau.toLowerCase().replace(/[^a-z0-9]/g, '_')
+        : 'centre_' + c.nom.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      if (!map[key]) {
+        map[key] = {
+          id: key, nom: c.reseau === 'Oui' && c.nom_reseau ? c.nom_reseau : c.nom,
+          mapping: c.mapping, pays: c.pays, nb_centres: 0,
+          tep: 'N/D', gamma_cam: 'N/D', radiotherapie: 'N/D',
+          nb_tep: 0, nb_gamma: 0,
+          estReseau: c.reseau === 'Oui' && !!c.nom_reseau, centres: []
+        };
+      }
+      map[key].nb_centres++;
+      map[key].nb_tep   += (c.nb_tep   || 0);
+      map[key].nb_gamma += (c.nb_gamma || 0);
+      map[key].centres.push(c);
+      ['tep', 'gamma_cam', 'radiotherapie'].forEach(function(f) {
+        if (c[f] === 'Oui') map[key][f] = 'Oui';
+        else if (c[f] === 'Non' && map[key][f] === 'N/D') map[key][f] = 'Non';
+      });
+    });
+    currentGroupe = map[currentId] || null;
+    // Fallback sur lutecia_groupes si import vide
+    if (!currentGroupe) {
+      var raw = localStorage.getItem('lutecia_groupes') || '[]';
+      var groupes = JSON.parse(raw);
+      currentGroupe = groupes.find(function(g) { return g.id === currentId; }) || null;
+    }
   } catch(e) { currentGroupe = null; }
 
   var rec = getRecord(currentId);
