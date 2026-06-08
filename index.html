@@ -205,88 +205,132 @@
     .stat.alert .stat-value { color: var(--bordeaux); }
 
     /* ══════════════════════════════════════
-       FILTRES
+       FILTRES (panneau latéral)
     ══════════════════════════════════════ */
-    .filters {
-      background: var(--white);
-      border: 1px solid var(--grey);
-      border-radius: var(--r);
-      padding: 8px 12px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
     .search {
-      font-family: 'Jost', sans-serif;
-      font-size: 12px;
-      padding: 6px 11px;
-      border: 1px solid var(--grey);
-      border-radius: var(--r);
-      background: var(--grey-lt);
-      color: var(--text);
-      outline: none;
-      width: 200px;
+      font-family: 'Jost', sans-serif; font-size: 12px;
+      padding: 6px 11px; border: 1px solid var(--grey);
+      border-radius: var(--r); background: var(--grey-lt);
+      color: var(--text); outline: none; width: 100%;
     }
     .search:focus { border-color: var(--blue); background: var(--white); }
 
-    .filter-group { display: flex; align-items: center; gap: 6px; }
+    .filter-group { display: flex; flex-direction: column; gap: 4px; }
 
     .filter-label {
       font-size: 10px; font-weight: 600;
       color: var(--text-soft);
       letter-spacing: 0.06em; text-transform: uppercase;
-      white-space: nowrap;
     }
 
     .filter-select {
       font-family: 'Jost', sans-serif; font-size: 11px;
-      padding: 5px 8px;
-      border: 1px solid var(--grey);
-      border-radius: var(--r);
-      background: var(--grey-lt);
-      color: var(--text);
-      cursor: pointer; outline: none;
+      padding: 5px 8px; border: 1px solid var(--grey);
+      border-radius: var(--r); background: var(--grey-lt);
+      color: var(--text); cursor: pointer; outline: none; width: 100%;
     }
     .filter-select:focus { border-color: var(--blue); }
 
-    .divider { width: 1px; height: 20px; background: var(--grey); }
-    .ml-auto { margin-left: auto; }
+    /* Bouton d'ouverture du panneau */
+    .btn-filters-toggle {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 500;
+      padding: 5px 11px; border-radius: var(--r);
+      border: 1px solid var(--grey); background: var(--white);
+      color: var(--text-mid); cursor: pointer;
+      transition: border-color .15s, color .15s;
+      position: relative;
+    }
+    .btn-filters-toggle:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-filters-toggle.active { border-color: var(--navy); background: var(--navy); color: #fff; }
+    .filter-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 16px; height: 16px; border-radius: 8px;
+      background: var(--bordeaux); color: #fff;
+      font-size: 9px; font-weight: 700; padding: 0 3px;
+    }
+    .btn-filters-toggle.active .filter-badge { background: rgba(255,255,255,.3); }
 
-    /* Filtres sauvegardés */
-    .saved-filters-bar {
-      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-      padding: 6px 12px; background: var(--white);
-      border: 1px solid var(--grey); border-radius: var(--r);
-      margin-bottom: 6px; min-height: 34px;
+    /* Panneau latéral */
+    .filter-panel {
+      position: fixed; top: 0; right: -320px; bottom: 0;
+      width: 300px; background: var(--white);
+      border-left: 1px solid var(--grey);
+      box-shadow: -4px 0 20px rgba(10,14,42,.1);
+      z-index: 500; transition: right .25s ease;
+      display: flex; flex-direction: column;
+      overflow: hidden;
     }
-    .saved-filters-bar:empty { display: none; }
-    .sf-label { font-size: 10px; font-weight: 600; color: var(--text-soft); white-space: nowrap; }
+    .filter-panel.open { right: 0; }
+    .filter-panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-bottom: 1px solid var(--grey);
+      flex-shrink: 0;
+    }
+    .filter-panel-title {
+      font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600;
+      color: var(--navy);
+    }
+    .filter-panel-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-soft); font-size: 18px; padding: 2px 6px;
+      border-radius: var(--r); transition: background .15s;
+    }
+    .filter-panel-close:hover { background: var(--grey-lt); }
+    .filter-panel-body {
+      flex: 1; overflow-y: auto; padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .filter-panel-footer {
+      padding: 10px 16px; border-top: 1px solid var(--grey);
+      display: flex; gap: 8px; flex-shrink: 0;
+    }
+    .filter-sep { height: 1px; background: var(--grey); margin: 4px 0; }
+
+    /* Filtres sauvegardés (dans le panneau) */
+    .sf-label { font-size: 10px; font-weight: 600; color: var(--text-soft); white-space: nowrap; letter-spacing:.06em; text-transform:uppercase; }
+    .sf-chips { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; }
     .sf-chip {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 3px 8px; border-radius: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 5px 10px; border-radius: var(--r);
       background: var(--navy); color: #fff;
-      font-family: 'Jost', sans-serif; font-size: 10px; font-weight: 500;
-      cursor: pointer; border: none; transition: opacity .15s;
+      font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 500;
+      cursor: pointer; border: none; transition: opacity .15s; width: 100%;
     }
-    .sf-chip:hover { opacity: .8; }
+    .sf-chip:hover { opacity: .85; }
     .sf-chip-del {
       display: inline-flex; align-items: center; justify-content: center;
-      width: 12px; height: 12px; border-radius: 50%;
-      background: rgba(255,255,255,.25); font-size: 9px; line-height: 1;
-      cursor: pointer; margin-left: 2px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: rgba(255,255,255,.2); font-size: 10px;
+      cursor: pointer; flex-shrink: 0;
     }
-    .sf-chip-del:hover { background: rgba(255,255,255,.5); }
+    .sf-chip-del:hover { background: rgba(255,255,255,.45); }
     .btn-save-filter {
-      font-family: 'Jost', sans-serif; font-size: 10px; font-weight: 500;
-      padding: 4px 10px; border-radius: var(--r);
+      font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 500;
+      padding: 6px 12px; border-radius: var(--r);
       border: 1px dashed var(--grey); background: transparent;
-      color: var(--text-mid); cursor: pointer; white-space: nowrap;
+      color: var(--text-mid); cursor: pointer; width: 100%; margin-top: 6px;
       transition: border-color .15s, color .15s;
     }
     .btn-save-filter:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-reset-filter {
+      font-family: 'Jost', sans-serif; font-size: 11px;
+      padding: 6px 12px; border-radius: var(--r);
+      border: 1px solid var(--grey); background: transparent;
+      color: var(--text-mid); cursor: pointer; flex: 1;
+    }
+    .btn-reset-filter:hover { border-color: var(--bordeaux); color: var(--bordeaux); }
+    .btn-apply-filter {
+      font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 600;
+      padding: 6px 12px; border-radius: var(--r);
+      border: none; background: var(--navy); color: #fff;
+      cursor: pointer; flex: 2;
+    }
+    .filter-overlay {
+      position: fixed; inset: 0; z-index: 499;
+      background: rgba(10,14,42,.25); display: none;
+    }
+    .filter-overlay.open { display: block; }
 
     /* ── Pastille modifié ── */
     .dot-modifie {
@@ -544,11 +588,6 @@
       <div class="topbar-title">Deal Flow Europe</div>
       <div class="topbar-date" id="topbar-date"></div>
     </div>
-    <div style="display:flex;gap:10px;align-items:center;">
-      <button onclick="resetFiltres()" style="font-family:'Jost',sans-serif;font-size:11px;padding:6px 12px;border:1px solid var(--grey);border-radius:var(--r);background:transparent;color:var(--text-mid);cursor:pointer;">
-        Réinitialiser
-      </button>
-    </div>
   </header>
 
   <!-- Contenu -->
@@ -557,70 +596,102 @@
     <!-- Stats -->
     <div class="stats" id="stats"></div>
 
-    <!-- Filtres sauvegardés -->
-    <div class="saved-filters-bar" id="saved-filters-bar"></div>
+    <!-- Overlay et panneau latéral de filtres -->
+    <div class="filter-overlay" id="filter-overlay" onclick="closeFilterPanel()"></div>
+    <div class="filter-panel" id="filter-panel">
+      <div class="filter-panel-head">
+        <span class="filter-panel-title">Filtres</span>
+        <button class="filter-panel-close" onclick="closeFilterPanel()">✕</button>
+      </div>
+      <div class="filter-panel-body">
 
-    <!-- Filtres -->
-    <div class="filters">
-      <input class="search" id="f-search" placeholder="🔍  Rechercher..." oninput="renderTable()" />
-      <div class="divider"></div>
-      <div class="filter-group">
-        <span class="filter-label">Pays</span>
-        <select class="filter-select" id="f-pays" onchange="renderTable()">
-          <option value="">Tous</option>
-        </select>
+        <!-- Recherche -->
+        <div class="filter-group">
+          <span class="filter-label">Recherche</span>
+          <input class="search" id="f-search" placeholder="Nom du centre…" oninput="renderTable();updateFilterBadge()" />
+        </div>
+
+        <!-- Pays -->
+        <div class="filter-group">
+          <span class="filter-label">Pays</span>
+          <select class="filter-select" id="f-pays" onchange="renderTable();updateFilterBadge()">
+            <option value="">Tous</option>
+          </select>
+        </div>
+
+        <!-- Type -->
+        <div class="filter-group">
+          <span class="filter-label">Type</span>
+          <select class="filter-select" id="f-type" onchange="renderTable();updateFilterBadge()">
+            <option value="">Tous</option>
+          </select>
+        </div>
+
+        <!-- TEP -->
+        <div class="filter-group">
+          <span class="filter-label">TEP</span>
+          <select class="filter-select" id="f-tep" onchange="renderTable();updateFilterBadge()">
+            <option value="">Tous</option>
+            <option value="Oui">Oui</option>
+            <option value="Non">Non</option>
+            <option value="N/D">N/D</option>
+          </select>
+        </div>
+
+        <!-- Gamma -->
+        <div class="filter-group">
+          <span class="filter-label">Gamma cam</span>
+          <select class="filter-select" id="f-gamma" onchange="renderTable();updateFilterBadge()">
+            <option value="">Tous</option>
+            <option value="Oui">Oui</option>
+            <option value="Non">Non</option>
+            <option value="N/D">N/D</option>
+          </select>
+        </div>
+
+        <!-- Radio -->
+        <div class="filter-group">
+          <span class="filter-label">Radiothérapie</span>
+          <select class="filter-select" id="f-radio" onchange="renderTable();updateFilterBadge()">
+            <option value="">Tous</option>
+            <option value="Oui">Oui</option>
+            <option value="Non">Non</option>
+            <option value="N/D">N/D</option>
+          </select>
+        </div>
+
+        <!-- Statut deal -->
+        <div class="filter-group">
+          <span class="filter-label">Statut du deal</span>
+          <select class="filter-select" id="f-statut" onchange="renderTable();updateFilterBadge()">
+            <option value="">Tous</option>
+            <option value="contact">Prise de contact</option>
+            <option value="discussion">Discussion</option>
+            <option value="advanced">Discussion avancée</option>
+            <option value="loi">LOI signée</option>
+          </select>
+        </div>
+
+        <!-- Sur la planche -->
+        <div class="filter-group" style="flex-direction:row;align-items:center;gap:8px;">
+          <input type="checkbox" id="f-modifies" onchange="renderTable();updateFilterBadge()" />
+          <label for="f-modifies" style="font-size:11px;color:var(--text-mid);cursor:pointer;">Sur la planche uniquement</label>
+        </div>
+
+        <div class="filter-sep"></div>
+
+        <!-- Filtres sauvegardés -->
+        <div>
+          <span class="sf-label">Filtres sauvegardés</span>
+          <div class="sf-chips" id="saved-filters-bar"></div>
+          <button class="btn-save-filter" onclick="promptSaveFilter()">＋ Sauvegarder ce filtre</button>
+        </div>
+
       </div>
-      <div class="filter-group">
-        <span class="filter-label">Type</span>
-        <select class="filter-select" id="f-type" onchange="renderTable()">
-          <option value="">Tous</option>
-        </select>
+      <div class="filter-panel-footer">
+        <button class="btn-reset-filter" onclick="resetFiltres()">Réinitialiser</button>
+        <button class="btn-apply-filter" onclick="closeFilterPanel()">Appliquer</button>
       </div>
-      <div class="filter-group">
-        <span class="filter-label">TEP</span>
-        <select class="filter-select" id="f-tep" onchange="renderTable()">
-          <option value="">Tous</option>
-          <option value="Oui">Oui</option>
-          <option value="Non">Non</option>
-          <option value="N/D">N/D</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <span class="filter-label">Gamma cam</span>
-        <select class="filter-select" id="f-gamma" onchange="renderTable()">
-          <option value="">Tous</option>
-          <option value="Oui">Oui</option>
-          <option value="Non">Non</option>
-          <option value="N/D">N/D</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <span class="filter-label">Radiothérapie</span>
-        <select class="filter-select" id="f-radio" onchange="renderTable()">
-          <option value="">Tous</option>
-          <option value="Oui">Oui</option>
-          <option value="Non">Non</option>
-          <option value="N/D">N/D</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <span class="check-modifie">
-          <input type="checkbox" id="f-modifies" onchange="renderTable()" />
-          <label for="f-modifies">Sur la planche</label>
-        </span>
-      </div>
-      <div class="filter-group ml-auto">
-        <span class="filter-label">Statut du deal</span>
-        <select class="filter-select" id="f-statut" onchange="renderTable()">
-          <option value="">Tous</option>
-          <option value="contact">Prise de contact</option>
-          <option value="discussion">Discussion</option>
-          <option value="advanced">Discussion avancée</option>
-          <option value="loi">LOI signée</option>
-        </select>
-      </div>
-      <div class="divider"></div>
-      <button class="btn-save-filter" onclick="promptSaveFilter()">＋ Sauvegarder</button>
     </div>
 
     <!-- Tableau -->
@@ -630,7 +701,12 @@
           <span class="table-title">Centres en suivi actif</span>
           <span class="table-count" id="table-count"></span>
         </div>
-        <span class="source-label">Base : Excel Screening Master v2</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="source-label">Base : Excel Screening Master v2</span>
+          <button class="btn-filters-toggle" id="btn-filters-toggle" onclick="toggleFilterPanel()">
+            ⚙ Filtres <span class="filter-badge" id="filter-badge" style="display:none">0</span>
+          </button>
+        </div>
       </div>
       <table>
         <thead>
@@ -914,6 +990,39 @@ function resetFiltres() {
   var mc = document.getElementById('f-modifies');
   if (mc) mc.checked = false;
   renderTable();
+  updateFilterBadge();
+}
+
+function toggleFilterPanel() {
+  var panel = document.getElementById('filter-panel');
+  var overlay = document.getElementById('filter-overlay');
+  var btn = document.getElementById('btn-filters-toggle');
+  var isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  overlay.classList.toggle('open', !isOpen);
+  btn.classList.toggle('active', !isOpen);
+}
+
+function closeFilterPanel() {
+  document.getElementById('filter-panel').classList.remove('open');
+  document.getElementById('filter-overlay').classList.remove('open');
+  document.getElementById('btn-filters-toggle').classList.remove('active');
+}
+
+function updateFilterBadge() {
+  var count = 0;
+  ['f-pays','f-type','f-tep','f-gamma','f-radio','f-statut'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && el.value) count++;
+  });
+  var s = document.getElementById('f-search');
+  if (s && s.value.trim()) count++;
+  var m = document.getElementById('f-modifies');
+  if (m && m.checked) count++;
+  var badge = document.getElementById('filter-badge');
+  if (!badge) return;
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'inline-flex' : 'none';
 }
 
 // ══════════════════════════════════════════

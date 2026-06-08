@@ -394,13 +394,11 @@
     #centres-list { max-height: 200px; overflow-y: auto; }
 
   
-    /* ══ Cartes déplaçables / redimensionnables ══ */
+    /* ══ Cartes ══ */
     .card-draggable {
       cursor: default;
       user-select: none;
       position: relative;
-      resize: both;
-      overflow: auto;
       min-height: 80px;
     }
     .drag-handle {
@@ -1772,54 +1770,7 @@ document.getElementById('popup-alerte').addEventListener('click', function(e) {
   }
 
   function initColResizers() {
-    var grid = document.getElementById('fiche-grid');
-    if (!grid) return;
-
-    // Restore saved widths
-    var saved = loadCols();
-    if (saved) applyColWidths(grid, saved.w1, saved.w3);
-
-    grid.querySelectorAll('.col-resizer').forEach(function(handle) {
-      var colIdx = parseInt(handle.dataset.col); // 1 = between col1&col2, 2 = between col2&col3
-
-      handle.addEventListener('mousedown', function(e) {
-        e.preventDefault();
-        handle.classList.add('active');
-
-        var startX = e.clientX;
-        var gridRect = grid.getBoundingClientRect();
-        var cols = grid.style.gridTemplateColumns || '220px 6px 1fr 6px 240px';
-        var parts = cols.split(' ');
-        var w1 = parseInt(parts[0]) || 220;
-        var w3 = parseInt(parts[4]) || 240;
-
-        function onMove(ev) {
-          var dx = ev.clientX - startX;
-          if (colIdx === 1) {
-            w1 = Math.max(140, Math.min(400, w1 + dx));
-          } else {
-            w3 = Math.max(140, Math.min(400, w3 - dx));
-          }
-          applyColWidths(grid, w1, w3);
-          startX = ev.clientX;
-        }
-        function onUp() {
-          handle.classList.remove('active');
-          document.removeEventListener('mousemove', onMove);
-          document.removeEventListener('mouseup', onUp);
-          var cols2 = grid.style.gridTemplateColumns.split(' ');
-          saveCols(parseInt(cols2[0])||w1, parseInt(cols2[4])||w3);
-        }
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup', onUp);
-      });
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(initColResizers, 600);
-  });
-})();
+  })();
 
 </script>
 </body>
