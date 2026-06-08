@@ -255,6 +255,39 @@
     .divider { width: 1px; height: 20px; background: var(--grey); }
     .ml-auto { margin-left: auto; }
 
+    /* Filtres sauvegardés */
+    .saved-filters-bar {
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+      padding: 6px 12px; background: var(--white);
+      border: 1px solid var(--grey); border-radius: var(--r);
+      margin-bottom: 6px; min-height: 34px;
+    }
+    .saved-filters-bar:empty { display: none; }
+    .sf-label { font-size: 10px; font-weight: 600; color: var(--text-soft); white-space: nowrap; }
+    .sf-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 20px;
+      background: var(--navy); color: #fff;
+      font-family: 'Jost', sans-serif; font-size: 10px; font-weight: 500;
+      cursor: pointer; border: none; transition: opacity .15s;
+    }
+    .sf-chip:hover { opacity: .8; }
+    .sf-chip-del {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: rgba(255,255,255,.25); font-size: 9px; line-height: 1;
+      cursor: pointer; margin-left: 2px;
+    }
+    .sf-chip-del:hover { background: rgba(255,255,255,.5); }
+    .btn-save-filter {
+      font-family: 'Jost', sans-serif; font-size: 10px; font-weight: 500;
+      padding: 4px 10px; border-radius: var(--r);
+      border: 1px dashed var(--grey); background: transparent;
+      color: var(--text-mid); cursor: pointer; white-space: nowrap;
+      transition: border-color .15s, color .15s;
+    }
+    .btn-save-filter:hover { border-color: var(--blue); color: var(--blue); }
+
     /* ── Pastille modifié ── */
     .dot-modifie {
       display: inline-block;
@@ -524,6 +557,9 @@
     <!-- Stats -->
     <div class="stats" id="stats"></div>
 
+    <!-- Filtres sauvegardés -->
+    <div class="saved-filters-bar" id="saved-filters-bar"></div>
+
     <!-- Filtres -->
     <div class="filters">
       <input class="search" id="f-search" placeholder="🔍  Rechercher..." oninput="renderTable()" />
@@ -583,6 +619,8 @@
           <option value="loi">LOI signée</option>
         </select>
       </div>
+      <div class="divider"></div>
+      <button class="btn-save-filter" onclick="promptSaveFilter()">＋ Sauvegarder</button>
     </div>
 
     <!-- Tableau -->
@@ -879,6 +917,71 @@ function resetFiltres() {
 }
 
 // ══════════════════════════════════════════
+// FILTRES SAUVEGARDÉS
+// ══════════════════════════════════════════
+var SAVED_FILTERS_KEY = 'lutecia_saved_filters';
+
+function getSavedFilters() {
+  try { return JSON.parse(localStorage.getItem(SAVED_FILTERS_KEY) || '[]'); } catch(e) { return []; }
+}
+
+function getCurrentFilterState() {
+  return {
+    search:   document.getElementById('f-search').value || '',
+    pays:     document.getElementById('f-pays').value || '',
+    type:     document.getElementById('f-type').value || '',
+    tep:      document.getElementById('f-tep').value || '',
+    gamma:    document.getElementById('f-gamma').value || '',
+    radio:    document.getElementById('f-radio').value || '',
+    statut:   document.getElementById('f-statut').value || '',
+    modifies: document.getElementById('f-modifies').checked || false
+  };
+}
+
+function applyFilterState(state) {
+  document.getElementById('f-search').value  = state.search  || '';
+  document.getElementById('f-pays').value    = state.pays    || '';
+  document.getElementById('f-type').value    = state.type    || '';
+  document.getElementById('f-tep').value     = state.tep     || '';
+  document.getElementById('f-gamma').value   = state.gamma   || '';
+  document.getElementById('f-radio').value   = state.radio   || '';
+  document.getElementById('f-statut').value  = state.statut  || '';
+  document.getElementById('f-modifies').checked = state.modifies || false;
+  renderTable();
+}
+
+function promptSaveFilter() {
+  var name = prompt('Nom du filtre :');
+  if (!name || !name.trim()) return;
+  var filters = getSavedFilters();
+  filters.push({ name: name.trim(), state: getCurrentFilterState() });
+  localStorage.setItem(SAVED_FILTERS_KEY, JSON.stringify(filters));
+  renderSavedFilters();
+}
+
+function deleteSavedFilter(idx) {
+  var filters = getSavedFilters();
+  filters.splice(idx, 1);
+  localStorage.setItem(SAVED_FILTERS_KEY, JSON.stringify(filters));
+  renderSavedFilters();
+}
+
+function renderSavedFilters() {
+  var bar = document.getElementById('saved-filters-bar');
+  if (!bar) return;
+  var filters = getSavedFilters();
+  if (!filters.length) { bar.innerHTML = ''; return; }
+  var html = '<span class="sf-label">Filtres :</span>';
+  filters.forEach(function(f, i) {
+    html += '<button class="sf-chip" onclick="applyFilterState(' + JSON.stringify(f.state).replace(/"/g,'&quot;') + ')">'
+          + esc(f.name)
+          + '<span class="sf-chip-del" onclick="event.stopPropagation();deleteSavedFilter(' + i + ')">✕</span>'
+          + '</button>';
+  });
+  bar.innerHTML = html;
+}
+
+// ══════════════════════════════════════════
 // TRI
 // ══════════════════════════════════════════
 function sortBy(key) {
@@ -1140,6 +1243,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Filtres
   populateFiltres();
+  renderSavedFilters();
 
   // Rendu initial
   renderStats();
