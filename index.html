@@ -892,6 +892,7 @@ function handleImportFile(file) {
       }
 
       var centres = parseDbSheet(wb.Sheets[wsName], pays);
+      console.log('[IMPORT] centres parsés:', centres.length, '| pays:', pays);
       if (!centres.length) { alert('Aucun centre trouvé dans la feuille DB.'); return; }
 
       var imports = loadImports();
@@ -905,6 +906,7 @@ function handleImportFile(file) {
       };
       if (idx >= 0) imports[idx] = entry; else imports.push(entry);
       saveImports(imports);
+      console.log('[IMPORT] sauvegardé. lutecia_imports size:', (localStorage.getItem('lutecia_imports')||'').length, 'bytes');
 
       reloadData();
       renderImportList();

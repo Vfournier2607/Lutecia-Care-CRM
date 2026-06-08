@@ -881,7 +881,9 @@ function chargerFiche() {
 
   try {
     // Reconstruit les groupes depuis lutecia_imports (source de vérité)
-    var imports = JSON.parse(localStorage.getItem('lutecia_imports') || '[]');
+    var rawImports = localStorage.getItem('lutecia_imports') || '[]';
+    console.log('[FICHE] lutecia_imports size:', rawImports.length, 'bytes | currentId:', currentId);
+    var imports = JSON.parse(rawImports);
     var all = [];
     imports.forEach(function(imp) { all = all.concat(imp.data || []); });
     var map = {};
@@ -907,6 +909,7 @@ function chargerFiche() {
         else if (c[f] === 'Non' && map[key][f] === 'N/D') map[key][f] = 'Non';
       });
     });
+    console.log('[FICHE] groupes reconstruits:', Object.keys(map).length, '| currentId:', currentId, '| trouvé:', !!map[currentId]);
     currentGroupe = map[currentId] || null;
     // Fallback sur lutecia_groupes si import vide
     if (!currentGroupe) {
