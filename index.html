@@ -5,41 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deal Flow — Lutecia Care</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* ══════════════════════════════════════
        VARIABLES & RESET
     ══════════════════════════════════════ */
     :root {
-      --navy:      #0A0E2A;
-      --navy-mid:  #181C37;
-      --blue:      #1B2F6E;
-      --bordeaux:  #622346;
-      --grey:      #D8DBE3;
-      --grey-lt:   #F4F5F7;
-      --white:     #FFFFFF;
-      --text:      #0B1E46;
-      --text-mid:  #2C2C4A;
-      --text-soft: #6B7280;
+      --navy:        #1a2340;
+      --navy-dark:   #111827;
+      --navy-mid:    #253058;
+      --navy-light:  #3d4f7c;
+      --mauve:       #7a3555;
+      --mauve-light: #a05070;
+      --steel:       #8a9bb5;
+      --steel-light: #c5cfe0;
+      --off-white:   #f5f3f0;
+      --white:       #ffffff;
+      --text:        #1a2340;
+      --text-body:   #3d4f6a;
+      --text-muted:  #6b7a94;
+
+      /* legacy aliases kept for any JS that might reference them */
+      --grey:      var(--steel-light);
+      --grey-lt:   var(--off-white);
+      --text-mid:  var(--text-body);
+      --text-soft: var(--text-muted);
+      --blue:      var(--navy-light);
+      --bordeaux:  var(--mauve);
 
       --s-contact:    #6B5B9E;
       --s-discussion: #4A6FA5;
-      --s-advanced:   #1B2F6E;
-      --s-loi:        #622346;
+      --s-advanced:   var(--navy-light);
+      --s-loi:        var(--mauve);
 
       --sidebar: 200px;
       --topbar:  44px;
-      --r:       3px;
-      --shadow:  0 1px 4px rgba(10,14,42,0.06);
+      --r:       4px;
+      --r-lg:    8px;
+      --shadow:  0 2px 8px rgba(26,35,64,0.08);
+      --shadow-sm: 0 2px 8px rgba(26,35,64,0.08);
+      --shadow-md: 0 8px 32px rgba(26,35,64,0.14);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
       height: 100%;
-      font-family: 'Jost', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 12px;
-      background: var(--grey-lt);
+      background: var(--off-white);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
     }
@@ -115,7 +129,7 @@
     }
 
     .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.05); }
-    .nav-item.active { color: var(--white); background: rgba(255,255,255,0.07); border-left-color: var(--bordeaux); font-weight: 500; }
+    .nav-item.active { color: var(--white); background: rgba(255,255,255,0.07); border-left-color: var(--mauve); font-weight: 500; }
 
     .sidebar-user {
       padding: 10px 14px;
@@ -128,7 +142,7 @@
     .user-avatar {
       width: 28px; height: 28px;
       border-radius: 50%;
-      background: var(--bordeaux);
+      background: var(--mauve);
       display: flex; align-items: center; justify-content: center;
       font-size: 10px; font-weight: 600; color: var(--white);
       flex-shrink: 0;
@@ -149,7 +163,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
-      border-bottom: 1px solid var(--grey);
+      border-bottom: 1px solid var(--steel-light);
       box-shadow: none;
       z-index: 10;
     }
@@ -160,7 +174,7 @@
       color: var(--navy);
     }
 
-    .topbar-date { font-size: 11px; color: var(--text-soft); }
+    .topbar-date { font-size: 11px; color: var(--text-muted); }
 
     /* ══════════════════════════════════════
        CONTENU
@@ -184,15 +198,15 @@
       background: var(--white);
       border-radius: var(--r);
       padding: 10px 14px;
-      border: 1px solid var(--grey);
+      border: 1px solid var(--steel-light);
       transition: box-shadow .15s;
     }
-    .stat:hover { box-shadow: 0 2px 8px rgba(10,14,42,0.08); }
+    .stat:hover { box-shadow: 0 2px 8px rgba(26,35,64,0.08); }
 
     .stat-label {
       font-size: 8px; font-weight: 600;
       letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--text-soft); margin-bottom: 4px;
+      color: var(--text-muted); margin-bottom: 4px;
     }
 
     .stat-value {
@@ -201,52 +215,52 @@
       color: var(--navy); line-height: 1;
     }
 
-    .stat-sub { font-size: 9px; color: var(--text-soft); margin-top: 2px; }
-    .stat.alert .stat-value { color: var(--bordeaux); }
+    .stat-sub { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+    .stat.alert .stat-value { color: var(--mauve); }
 
     /* ══════════════════════════════════════
        FILTRES (panneau latéral)
     ══════════════════════════════════════ */
     .search {
-      font-family: 'Jost', sans-serif; font-size: 12px;
-      padding: 6px 11px; border: 1px solid var(--grey);
-      border-radius: var(--r); background: var(--grey-lt);
+      font-family: 'Inter', sans-serif; font-size: 12px;
+      padding: 6px 11px; border: 1px solid var(--steel-light);
+      border-radius: var(--r); background: var(--off-white);
       color: var(--text); outline: none; width: 100%;
     }
-    .search:focus { border-color: var(--blue); background: var(--white); }
+    .search:focus { border-color: var(--navy-light); background: var(--white); }
 
     .filter-group { display: flex; flex-direction: column; gap: 4px; }
 
     .filter-label {
       font-size: 10px; font-weight: 600;
-      color: var(--text-soft);
+      color: var(--text-muted);
       letter-spacing: 0.06em; text-transform: uppercase;
     }
 
     .filter-select {
-      font-family: 'Jost', sans-serif; font-size: 11px;
-      padding: 5px 8px; border: 1px solid var(--grey);
-      border-radius: var(--r); background: var(--grey-lt);
+      font-family: 'Inter', sans-serif; font-size: 11px;
+      padding: 5px 8px; border: 1px solid var(--steel-light);
+      border-radius: var(--r); background: var(--off-white);
       color: var(--text); cursor: pointer; outline: none; width: 100%;
     }
-    .filter-select:focus { border-color: var(--blue); }
+    .filter-select:focus { border-color: var(--navy-light); }
 
     /* Bouton d'ouverture du panneau */
     .btn-filters-toggle {
       display: inline-flex; align-items: center; gap: 5px;
-      font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 500;
+      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
       padding: 5px 11px; border-radius: var(--r);
-      border: 1px solid var(--grey); background: var(--white);
-      color: var(--text-mid); cursor: pointer;
+      border: 1px solid var(--steel-light); background: var(--white);
+      color: var(--text-body); cursor: pointer;
       transition: border-color .15s, color .15s;
       position: relative;
     }
-    .btn-filters-toggle:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-filters-toggle:hover { border-color: var(--navy-light); color: var(--navy-light); }
     .btn-filters-toggle.active { border-color: var(--navy); background: var(--navy); color: #fff; }
     .filter-badge {
       display: inline-flex; align-items: center; justify-content: center;
       min-width: 16px; height: 16px; border-radius: 8px;
-      background: var(--bordeaux); color: #fff;
+      background: var(--mauve); color: #fff;
       font-size: 9px; font-weight: 700; padding: 0 3px;
     }
     .btn-filters-toggle.active .filter-badge { background: rgba(255,255,255,.3); }
@@ -255,8 +269,8 @@
     .filter-panel {
       position: fixed; top: 0; right: -320px; bottom: 0;
       width: 300px; background: var(--white);
-      border-left: 1px solid var(--grey);
-      box-shadow: -4px 0 20px rgba(10,14,42,.1);
+      border-left: 1px solid var(--steel-light);
+      box-shadow: -4px 0 20px rgba(26,35,64,0.10);
       z-index: 500; transition: right .25s ease;
       display: flex; flex-direction: column;
       overflow: hidden;
@@ -264,7 +278,7 @@
     .filter-panel.open { right: 0; }
     .filter-panel-head {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 16px; border-bottom: 1px solid var(--grey);
+      padding: 14px 16px; border-bottom: 1px solid var(--steel-light);
       flex-shrink: 0;
     }
     .filter-panel-title {
@@ -273,28 +287,28 @@
     }
     .filter-panel-close {
       background: none; border: none; cursor: pointer;
-      color: var(--text-soft); font-size: 18px; padding: 2px 6px;
+      color: var(--text-muted); font-size: 18px; padding: 2px 6px;
       border-radius: var(--r); transition: background .15s;
     }
-    .filter-panel-close:hover { background: var(--grey-lt); }
+    .filter-panel-close:hover { background: var(--off-white); }
     .filter-panel-body {
       flex: 1; overflow-y: auto; padding: 14px 16px;
       display: flex; flex-direction: column; gap: 14px;
     }
     .filter-panel-footer {
-      padding: 10px 16px; border-top: 1px solid var(--grey);
+      padding: 10px 16px; border-top: 1px solid var(--steel-light);
       display: flex; gap: 8px; flex-shrink: 0;
     }
-    .filter-sep { height: 1px; background: var(--grey); margin: 4px 0; }
+    .filter-sep { height: 1px; background: var(--steel-light); margin: 4px 0; }
 
     /* Filtres sauvegardés (dans le panneau) */
-    .sf-label { font-size: 10px; font-weight: 600; color: var(--text-soft); white-space: nowrap; letter-spacing:.06em; text-transform:uppercase; }
+    .sf-label { font-size: 10px; font-weight: 600; color: var(--text-muted); white-space: nowrap; letter-spacing:.06em; text-transform:uppercase; }
     .sf-chips { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; }
     .sf-chip {
       display: flex; align-items: center; justify-content: space-between;
       padding: 5px 10px; border-radius: var(--r);
       background: var(--navy); color: #fff;
-      font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 500;
+      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
       cursor: pointer; border: none; transition: opacity .15s; width: 100%;
     }
     .sf-chip:hover { opacity: .85; }
@@ -306,29 +320,29 @@
     }
     .sf-chip-del:hover { background: rgba(255,255,255,.45); }
     .btn-save-filter {
-      font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 500;
+      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
       padding: 6px 12px; border-radius: var(--r);
-      border: 1px dashed var(--grey); background: transparent;
-      color: var(--text-mid); cursor: pointer; width: 100%; margin-top: 6px;
+      border: 1px dashed var(--steel-light); background: transparent;
+      color: var(--text-body); cursor: pointer; width: 100%; margin-top: 6px;
       transition: border-color .15s, color .15s;
     }
-    .btn-save-filter:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-save-filter:hover { border-color: var(--navy-light); color: var(--navy-light); }
     .btn-reset-filter {
-      font-family: 'Jost', sans-serif; font-size: 11px;
+      font-family: 'Inter', sans-serif; font-size: 11px;
       padding: 6px 12px; border-radius: var(--r);
-      border: 1px solid var(--grey); background: transparent;
-      color: var(--text-mid); cursor: pointer; flex: 1;
+      border: 1px solid var(--steel-light); background: transparent;
+      color: var(--text-body); cursor: pointer; flex: 1;
     }
-    .btn-reset-filter:hover { border-color: var(--bordeaux); color: var(--bordeaux); }
+    .btn-reset-filter:hover { border-color: var(--mauve); color: var(--mauve); }
     .btn-apply-filter {
-      font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 600;
+      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
       padding: 6px 12px; border-radius: var(--r);
       border: none; background: var(--navy); color: #fff;
       cursor: pointer; flex: 2;
     }
     .filter-overlay {
       position: fixed; inset: 0; z-index: 499;
-      background: rgba(10,14,42,.25); display: none;
+      background: rgba(26,35,64,0.25); display: none;
     }
     .filter-overlay.open { display: block; }
 
@@ -336,28 +350,28 @@
     .import-file-card {
       display: flex; align-items: center; gap: 10px;
       padding: 8px 10px; border-radius: var(--r);
-      border: 1px solid var(--grey); background: var(--grey-lt);
+      border: 1px solid var(--steel-light); background: var(--off-white);
     }
     .import-file-flag { font-size: 18px; flex-shrink: 0; }
     .import-file-info { flex: 1; min-width: 0; }
     .import-file-name { font-size: 11px; font-weight: 600; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .import-file-meta { font-size: 10px; color: var(--text-soft); margin-top: 1px; }
-    .import-file-del { background: none; border: none; cursor: pointer; color: var(--text-soft); font-size: 14px; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; }
-    .import-file-del:hover { color: var(--bordeaux); background: rgba(98,35,52,.08); }
+    .import-file-meta { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+    .import-file-del { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; }
+    .import-file-del:hover { color: var(--mauve); background: rgba(122,53,85,0.08); }
 
     /* ── Pastille modifié ── */
     .dot-modifie {
       display: inline-block;
       width: 7px; height: 7px;
       border-radius: 50%;
-      background: var(--bordeaux);
+      background: var(--mauve);
       margin-right: 6px;
       vertical-align: middle;
       flex-shrink: 0;
     }
     .check-modifie { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
     .check-modifie input { cursor: pointer; }
-    .check-modifie label { font-size: 11px; color: var(--text-mid); cursor: pointer; white-space: nowrap; }
+    .check-modifie label { font-size: 11px; color: var(--text-body); cursor: pointer; white-space: nowrap; }
 
     /* ══════════════════════════════════════
        TABLEAU
@@ -365,7 +379,7 @@
     .table-wrap {
       background: var(--white);
       border-radius: var(--r);
-      border: 1px solid var(--grey);
+      border: 1px solid var(--steel-light);
       box-shadow: var(--shadow);
       overflow: hidden;
     }
@@ -375,7 +389,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 8px 12px;
-      border-bottom: 1px solid var(--grey);
+      border-bottom: 1px solid var(--steel-light);
     }
 
     .table-title {
@@ -384,26 +398,26 @@
       color: var(--navy);
     }
 
-    .table-count { font-size: 11px; color: var(--text-soft); }
-    .source-label { font-size: 10px; color: var(--text-soft); font-style: italic; }
+    .table-count { font-size: 11px; color: var(--text-muted); }
+    .source-label { font-size: 10px; color: var(--text-muted); font-style: italic; }
 
     table { width: 100%; border-collapse: collapse; }
 
     thead th {
       font-size: 8px; font-weight: 700;
       letter-spacing: 0.10em; text-transform: uppercase;
-      color: var(--text-soft);
+      color: var(--text-muted);
       padding: 6px 10px; text-align: left;
-      border-bottom: 1px solid var(--grey);
-      background: var(--grey-lt);
+      border-bottom: 1px solid var(--steel-light);
+      background: var(--off-white);
       white-space: nowrap;
       cursor: pointer; user-select: none;
     }
-    thead th:hover { color: var(--blue); }
-    thead th.sorted { color: var(--blue); }
+    thead th:hover { color: var(--navy-light); }
+    thead th.sorted { color: var(--navy-light); }
 
     tbody tr {
-      border-bottom: 1px solid var(--grey);
+      border-bottom: 1px solid var(--steel-light);
       cursor: pointer;
       transition: background 0.12s;
     }
@@ -414,7 +428,7 @@
     tbody tr:nth-child(3)  { animation-delay: .06s; }
     tbody tr:nth-child(4)  { animation-delay: .08s; }
     tbody tr:nth-child(5)  { animation-delay: .10s; }
-    tbody tr:hover { background: rgba(27,47,110,0.04); }
+    tbody tr:hover { background: rgba(61,79,124,0.04); }
 
     tbody td {
       padding: 7px 10px;
@@ -424,14 +438,14 @@
     }
 
     .cell-nom { font-weight: 500; color: var(--navy); }
-    .cell-nd  { color: var(--text-soft); font-style: italic; }
+    .cell-nd  { color: var(--text-muted); font-style: italic; }
 
     /* ══════════════════════════════════════
        BADGES
     ══════════════════════════════════════ */
-    .badge-oui  { color: var(--text); background: var(--grey-lt); border: 1px solid var(--grey); padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; }
-    .badge-non  { color: var(--text-soft); background: var(--grey-lt); border: 1px solid var(--grey); padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; }
-    .badge-nd   { color: var(--text-soft); background: var(--grey); padding: 2px 8px; border-radius: 20px; font-size: 10px; }
+    .badge-oui  { color: var(--text); background: var(--off-white); border: 1px solid var(--steel-light); padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+    .badge-non  { color: var(--text-muted); background: var(--off-white); border: 1px solid var(--steel-light); padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; }
+    .badge-nd   { color: var(--text-muted); background: var(--steel-light); padding: 2px 8px; border-radius: 20px; font-size: 10px; }
 
     .status-badge {
       display: inline-flex; align-items: center; gap: 5px;
@@ -444,30 +458,30 @@
     }
     .s-contact    { color: var(--s-contact);    background: rgba(107,91,158,0.12); }
     .s-discussion { color: var(--s-discussion); background: rgba(74,111,165,0.12); }
-    .s-advanced   { color: var(--s-advanced);   background: rgba(27,47,110,0.12); }
-    .s-loi        { color: var(--s-loi);         background: rgba(98,35,70,0.12); }
+    .s-advanced   { color: var(--s-advanced);   background: rgba(61,79,124,0.12); }
+    .s-loi        { color: var(--s-loi);         background: rgba(122,53,85,0.12); }
 
     /* ══════════════════════════════════════
        INPUTS INLINE
     ══════════════════════════════════════ */
     .inline-input {
-      font-family: 'Jost', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 11px;
       padding: 3px 7px;
-      border: 1px solid var(--grey);
+      border: 1px solid var(--steel-light);
       border-radius: 4px;
       background: transparent;
       color: var(--text);
       outline: none;
       width: 120px;
     }
-    .inline-input:focus { border-color: var(--blue); background: var(--white); }
+    .inline-input:focus { border-color: var(--navy-light); background: var(--white); }
 
     .inline-select {
-      font-family: 'Jost', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 10px;
       padding: 3px 7px;
-      border: 1px solid var(--grey);
+      border: 1px solid var(--steel-light);
       border-radius: 20px;
       background: transparent;
       color: var(--text);
@@ -481,7 +495,7 @@
     .empty {
       padding: 50px;
       text-align: center;
-      color: var(--text-soft);
+      color: var(--text-muted);
       font-size: 12px;
     }
 
@@ -490,7 +504,7 @@
     ══════════════════════════════════════ */
     .modal-overlay {
       position: fixed; inset: 0;
-      background: rgba(10,14,42,0.80);
+      background: rgba(26,35,64,0.80);
       backdrop-filter: blur(6px);
       display: flex; align-items: center; justify-content: center;
       z-index: 1000;
@@ -502,7 +516,7 @@
       padding: 40px 44px;
       width: 380px;
       text-align: center;
-      box-shadow: 0 24px 64px rgba(10,14,42,0.25);
+      box-shadow: 0 24px 64px rgba(26,35,64,0.25);
       animation: fadeUp 0.2s ease;
     }
 
@@ -518,7 +532,7 @@
     }
 
     .modal-sub {
-      font-size: 10px; color: var(--text-soft);
+      font-size: 10px; color: var(--text-muted);
       letter-spacing: 0.10em; text-transform: uppercase;
       margin-bottom: 28px;
     }
@@ -526,45 +540,45 @@
     .modal-label {
       font-size: 10px; font-weight: 600;
       letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--text-soft);
+      color: var(--text-muted);
       display: block; text-align: left; margin-bottom: 5px;
     }
 
     .modal-input {
       width: 100%;
-      font-family: 'Jost', sans-serif; font-size: 13px;
+      font-family: 'Inter', sans-serif; font-size: 13px;
       padding: 10px 13px;
-      border: 1px solid var(--grey);
+      border: 1px solid var(--steel-light);
       border-radius: var(--r);
       color: var(--text); outline: none;
       margin-bottom: 14px;
     }
-    .modal-input:focus { border-color: var(--blue); }
+    .modal-input:focus { border-color: var(--navy-light); }
 
     .modal-btn {
       width: 100%; padding: 11px;
       background: var(--navy); color: var(--white);
       border: none; border-radius: var(--r);
-      font-family: 'Jost', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 12px; font-weight: 500;
       cursor: pointer; letter-spacing: 0.04em;
       transition: background 0.15s;
     }
-    .modal-btn:hover { background: var(--blue); }
-    .modal-error { font-size: 11px; color: var(--bordeaux); margin-top: 6px; min-height: 14px; }
+    .modal-btn:hover { background: var(--navy-light); }
+    .modal-error { font-size: 11px; color: var(--mauve); margin-top: 6px; min-height: 14px; }
 
     /* ══════════════════════════════════════
        UTILS
     ══════════════════════════════════════ */
     .hidden { display: none !important; }
     ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: var(--grey); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: var(--steel-light); border-radius: 10px; }
   </style>
 </head>
 <body>
 
 <!-- ══ CHARGEMENT ══ -->
-<div id="loading-overlay" style="position:fixed;inset:0;background:#0A0E2A;display:flex;align-items:center;justify-content:center;z-index:1000;">
+<div id="loading-overlay" style="position:fixed;inset:0;background:#1a2340;display:flex;align-items:center;justify-content:center;z-index:1000;">
   <div style="text-align:center;">
     <img id="loading-logo" style="height:120px;width:auto;display:block;margin:0 auto 20px;" />
     <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Connexion en cours…</div>
@@ -592,7 +606,7 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
-        Importer <span id="import-badge" style="display:none;background:var(--bordeaux);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px;"></span>
+        Importer <span id="import-badge" style="display:none;background:var(--mauve);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px;"></span>
       </a>
     </nav>
     <div class="sidebar-user">
@@ -607,7 +621,7 @@
       <div class="topbar-title">Deal Flow Europe</div>
       <div class="topbar-date" id="topbar-date"></div>
     </div>
-    <button onclick="exporterExcel()" style="font-family:'Jost',sans-serif;font-size:12px;font-weight:600;padding:7px 16px;border-radius:var(--r);border:none;background:#fff;color:var(--navy);cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 2px 8px rgba(0,0,0,0.15);" title="Exporter toutes les données en Excel">
+    <button onclick="exporterExcel()" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;padding:7px 16px;border-radius:var(--r);border:none;background:#fff;color:var(--navy);cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 2px 8px rgba(0,0,0,0.15);" title="Exporter toutes les données en Excel">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Exporter Excel
     </button>
@@ -698,7 +712,7 @@
         <!-- Sur la planche -->
         <div class="filter-group" style="flex-direction:row;align-items:center;gap:8px;">
           <input type="checkbox" id="f-modifies" onchange="renderTable();updateFilterBadge()" />
-          <label for="f-modifies" style="font-size:11px;color:var(--text-mid);cursor:pointer;">Sur la planche uniquement</label>
+          <label for="f-modifies" style="font-size:11px;color:var(--text-body);cursor:pointer;">Sur la planche uniquement</label>
         </div>
 
         <div class="filter-sep"></div>
@@ -727,10 +741,10 @@
       <div class="filter-panel-body" style="gap:16px;">
 
         <!-- Zone de dépôt -->
-        <div id="import-drop-zone" style="border:2px dashed var(--grey);border-radius:var(--r);padding:24px 16px;text-align:center;cursor:pointer;transition:border-color .15s;" onclick="document.getElementById('import-file-input').click()" ondragover="event.preventDefault();this.style.borderColor='var(--blue)'" ondragleave="this.style.borderColor='var(--grey)'" ondrop="handleImportDrop(event)">
+        <div id="import-drop-zone" style="border:2px dashed var(--steel-light);border-radius:var(--r);padding:24px 16px;text-align:center;cursor:pointer;transition:border-color .15s;" onclick="document.getElementById('import-file-input').click()" ondragover="event.preventDefault();this.style.borderColor='var(--navy-light)'" ondragleave="this.style.borderColor='var(--steel-light)'" ondrop="handleImportDrop(event)">
           <div style="font-size:22px;margin-bottom:8px;">📂</div>
           <div style="font-size:12px;font-weight:600;color:var(--navy);">Cliquer ou déposer un fichier Excel</div>
-          <div style="font-size:10px;color:var(--text-soft);margin-top:4px;">.xlsx — feuille DB requise</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">.xlsx — feuille DB requise</div>
           <input type="file" id="import-file-input" accept=".xlsx" style="display:none" onchange="handleImportFile(this.files[0])">
         </div>
 
@@ -738,12 +752,12 @@
         <div>
           <span class="sf-label">Fichiers importés</span>
           <div id="import-list" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;"></div>
-          <div id="import-empty" style="font-size:11px;color:var(--text-soft);padding:10px 0;">Aucun fichier importé.</div>
+          <div id="import-empty" style="font-size:11px;color:var(--text-muted);padding:10px 0;">Aucun fichier importé.</div>
         </div>
 
       </div>
       <div class="filter-panel-footer">
-        <button class="btn-reset-filter" onclick="clearAllImports()" style="color:var(--bordeaux);border-color:var(--bordeaux)">Tout effacer</button>
+        <button class="btn-reset-filter" onclick="clearAllImports()" style="color:var(--mauve);border-color:var(--mauve)">Tout effacer</button>
         <button class="btn-apply-filter" onclick="closeImportPanel()">Fermer</button>
       </div>
     </div>
@@ -915,7 +929,7 @@ function handleImportFile(file) {
       reloadData();
       renderImportList();
       updateImportBadge();
-      document.getElementById('import-drop-zone').style.borderColor = 'var(--grey)';
+      document.getElementById('import-drop-zone').style.borderColor = 'var(--steel-light)';
     } catch(err) {
       alert('Erreur lors de la lecture : ' + err.message);
     }
@@ -926,7 +940,7 @@ function handleImportFile(file) {
 
 function handleImportDrop(e) {
   e.preventDefault();
-  document.getElementById('import-drop-zone').style.borderColor = 'var(--grey)';
+  document.getElementById('import-drop-zone').style.borderColor = 'var(--steel-light)';
   var file = e.dataTransfer.files[0];
   if (file) handleImportFile(file);
 }
@@ -1477,9 +1491,9 @@ function renderTable() {
 
     return '<tr data-id="' + esc(g.id) + '">'
       + '<td class="cell-nom">' + (isModifie(g, output) ? '<span class="dot-modifie" title="Structure modifiée"></span>' : '') + esc(g.nom)
-        + (g.estReseau ? '' : '<br><span style="font-size:10px;color:var(--text-soft);font-style:italic">Indépendant</span>')
+        + (g.estReseau ? '' : '<br><span style="font-size:10px;color:var(--text-muted);font-style:italic">Indépendant</span>')
         + '</td>'
-      + '<td style="font-size:11px;color:var(--text-soft)">' + esc(g.mapping) + '</td>'
+      + '<td style="font-size:11px;color:var(--text-muted)">' + esc(g.mapping) + '</td>'
       + '<td style="font-size:11px">' + esc(g.pays) + '</td>'
       + '<td style="text-align:center;font-weight:500">' + g.nb_centres + '</td>'
       + '<td style="text-align:center">' + badgeVal(g.tep) + '</td>'
@@ -1529,18 +1543,18 @@ function ouvrirPopupAlertes(id) {
     var enRetard = d.getTime() < today.getTime();
     var color = enRetard ? '#0a0a0a' : '#DC2626';
     var libelle = enRetard ? 'En retard' : 'À venir';
-    return '<div style="padding:12px 14px;border:1px solid var(--grey);border-radius:6px;margin-bottom:8px;background:var(--grey-lt);">'
+    return '<div style="padding:12px 14px;border:1px solid var(--steel-light);border-radius:6px;margin-bottom:8px;background:var(--off-white);">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
       + '<div style="display:flex;align-items:center;gap:8px;">'
       + '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + color + ';"></span>'
       + '<span style="font-size:13px;font-weight:600;color:' + color + ';">' + new Date(a.echeance).toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}) + '</span>'
       + '<span style="font-size:10px;color:' + color + ';font-weight:600;text-transform:uppercase;letter-spacing:.05em;">' + libelle + '</span>'
       + '</div>'
-      + '<span style="font-size:10px;color:var(--text-soft);">par ' + esc(a.auteur || '—') + '</span>'
+      + '<span style="font-size:10px;color:var(--text-muted);">par ' + esc(a.auteur || '—') + '</span>'
       + '</div>'
       + '<div style="font-size:12px;color:var(--text);line-height:1.4;">' + esc(a.note || '') + '</div>'
       + '</div>';
-  }).join('') || '<div style="text-align:center;color:var(--text-soft);padding:20px;font-size:12px;">Aucune alerte active.</div>';
+  }).join('') || '<div style="text-align:center;color:var(--text-muted);padding:20px;font-size:12px;">Aucune alerte active.</div>';
 
   document.getElementById('popup-alertes-list').classList.remove('hidden');
 }
@@ -1754,14 +1768,14 @@ function styleSheetHeader(ws, nbCols) {
 }
 </script>
 <!-- Popup Alertes (Pack 7) -->
-<div id="popup-alertes-list" class="popup-overlay hidden" style="position:fixed;inset:0;background:rgba(10,14,42,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;">
-  <div style="background:var(--white);border-radius:10px;padding:24px 28px;width:520px;max-width:92vw;max-height:80vh;overflow-y:auto;box-shadow:0 24px 64px rgba(10,14,42,0.2);">
+<div id="popup-alertes-list" class="popup-overlay hidden" style="position:fixed;inset:0;background:rgba(26,35,64,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;">
+  <div style="background:var(--white);border-radius:10px;padding:24px 28px;width:520px;max-width:92vw;max-height:80vh;overflow-y:auto;box-shadow:0 24px 64px rgba(26,35,64,0.2);">
     <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--navy);margin-bottom:6px;" id="pal-titre">Alertes</div>
-    <div style="font-size:11px;color:var(--text-soft);margin-bottom:18px;" id="pal-soustitre"></div>
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:18px;" id="pal-soustitre"></div>
     <div id="pal-liste"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;">
-      <button onclick="fermerPopupAlertes()" style="font-family:Jost,sans-serif;font-size:11px;padding:7px 14px;border:1px solid var(--grey);border-radius:6px;background:transparent;color:var(--text-soft);cursor:pointer;">Fermer</button>
-      <button onclick="ouvrirFicheDepuisPopup()" style="font-family:Jost,sans-serif;font-size:11px;padding:7px 14px;border:none;border-radius:6px;background:var(--navy);color:var(--white);cursor:pointer;">Ouvrir la fiche</button>
+      <button onclick="fermerPopupAlertes()" style="font-family:Inter,sans-serif;font-size:11px;padding:7px 14px;border:1px solid var(--steel-light);border-radius:6px;background:transparent;color:var(--text-muted);cursor:pointer;">Fermer</button>
+      <button onclick="ouvrirFicheDepuisPopup()" style="font-family:Inter,sans-serif;font-size:11px;padding:7px 14px;border:none;border-radius:6px;background:var(--navy);color:var(--white);cursor:pointer;">Ouvrir la fiche</button>
     </div>
   </div>
 </div>
