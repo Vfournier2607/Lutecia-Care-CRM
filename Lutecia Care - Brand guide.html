@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lutecia Care — Brand Identity &amp; Design System</title>
+<meta name="description" content="The complete brand identity and design system for Lutecia Care: logo, colour, typography, components, data display, motion, voice and copy-paste assets." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   LUTECIA CARE — BRAND IDENTITY & DESIGN SYSTEM
+   Canonical reference. Every token, component and rule below is
+   lifted from / consistent with the production website.
+   Brand: deep navy #1a2340 · mauve accent #7a3555
+   Type:  Cormorant Garamond (serif) · Inter (sans)
+═══════════════════════════════════════════════════════════════ */
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+:root{
+  /* ── Navy family ── */
+  --navy:#1a2340; --navy-dark:#111827; --navy-mid:#253058; --navy-light:#3d4f7c;
+  /* ── Accent ── */
+  --mauve:#7a3555; --mauve-light:#a05070;
+  /* ── Steel / structure ── */
+  --steel:#8a9bb5; --steel-light:#c5cfe0;
+  /* ── Surfaces ── */
+  --off-white:#f5f3f0; --white:#ffffff;
+  /* ── Text ── */
+  --text-dark:#1a2340; --text-body:#3d4f6a; --text-muted:#6b7a94;
+  /* ── Functional (semantic) ── */
+  --success:#2e7d5b; --success-bg:rgba(46,125,91,0.10);
+  --warning:#b5852f; --warning-bg:rgba(181,133,47,0.12);
+  --danger:#b3402f;  --danger-bg:rgba(179,64,47,0.10);
+  --info:var(--navy-light); --info-bg:rgba(61,79,124,0.10);
+  /* ── Type ── */
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'SFMono-Regular',ui-monospace,Menlo,Consolas,monospace;
+  /* ── Shape ── */
+  --radius:4px; --radius-lg:8px; --radius-full:9999px;
+  --transition:0.35s cubic-bezier(0.4,0,0.2,1);
+  /* ── Elevation ── */
+  --shadow-sm:0 2px 8px rgba(26,35,64,0.08);
+  --shadow-md:0 8px 32px rgba(26,35,64,0.14);
+  --shadow-lg:0 20px 60px rgba(26,35,64,0.18);
+  /* ── Spacing scale (rem rhythm) ── */
+  --s1:.5rem; --s2:.75rem; --s3:1rem; --s4:1.5rem; --s5:2rem; --s6:3rem; --s7:4rem; --s8:7rem;
+}
+
+html{ scroll-behavior:smooth; font-size:16px; }
+body{ font-family:var(--sans); color:var(--text-dark); background:var(--off-white); -webkit-font-smoothing:antialiased; overflow-x:hidden; line-height:1.6; }
+img,svg{ display:block; max-width:100%; }
+a{ color:var(--mauve); text-decoration:none; }
+ul,ol{ list-style:none; }
+code,.mono{ font-family:var(--mono); font-size:0.85em; }
+
+h1,h2,h3,h4{ font-family:var(--serif); font-weight:400; line-height:1.15; letter-spacing:-0.01em; color:var(--navy); }
+h1{ font-size:clamp(2.6rem,5.5vw,4.4rem); font-weight:300; }
+h1 em,h2 em,h3 em{ font-style:italic; color:var(--mauve); }
+p{ color:var(--text-body); }
+
+/* ── Doc shell ── */
+.wrap{ max-width:1120px; margin:0 auto; padding:0 2.5rem; }
+.section{ padding:5.5rem 0; border-bottom:1px solid var(--steel-light); scroll-margin-top:64px; }
+.kicker{ font-family:var(--sans); font-size:0.72rem; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; color:var(--mauve); display:block; margin-bottom:0.6rem; }
+.section-title{ font-size:clamp(1.9rem,3.4vw,2.9rem); margin-bottom:0.9rem; }
+.section-desc{ font-size:1.08rem; line-height:1.7; color:var(--text-body); max-width:64ch; margin-bottom:3rem; }
+.subsection{ margin-bottom:3.5rem; }
+.subsection-title{ font-size:1.45rem; margin-bottom:0.4rem; }
+.subsection-desc{ font-size:0.95rem; color:var(--text-muted); max-width:64ch; margin-bottom:1.5rem; line-height:1.7; }
+.sub-label{ font-family:var(--sans); font-size:0.68rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); display:block; margin-bottom:0.9rem; }
+
+.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+.grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
+.grid-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
+.grid-auto{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:1rem; }
+@media(max-width:860px){ .grid-3,.grid-4{ grid-template-columns:1fr 1fr; } }
+@media(max-width:560px){ .grid-2,.grid-3,.grid-4{ grid-template-columns:1fr; } }
+
+.panel{ background:var(--white); border:1px solid var(--steel-light); border-radius:var(--radius-lg); padding:2rem; }
+.demo-row{ display:flex; gap:1rem; align-items:center; flex-wrap:wrap; }
+.demo-stage{ background:var(--white); border:1px solid var(--steel-light); border-radius:var(--radius-lg); padding:2rem; margin-bottom:1rem; }
+.demo-stage--navy{ background:var(--navy); border-color:var(--navy); }
+.demo-stage--light{ background:var(--off-white); }
+.stage-caption{ font-size:0.78rem; color:var(--text-muted); }
+
+.note{ background:rgba(122,53,85,0.06); border-left:3px solid var(--mauve); padding:1rem 1.25rem; border-radius:0 var(--radius) var(--radius) 0; font-size:0.9rem; color:var(--text-body); margin-top:1.5rem; line-height:1.7; }
+.note strong{ color:var(--navy); }
+
+/* ════════ COVER / HERO ════════ */
+.cover{ background:
+  radial-gradient(ellipse 80% 60% at 70% 40%, #253058 0%, transparent 60%),
+  radial-gradient(ellipse 60% 80% at 20% 70%, #0d1526 0%, transparent 55%),
+  linear-gradient(135deg,#111827 0%,#1a2340 50%,#0d1526 100%);
+  color:var(--white); padding:6rem 0 5rem; position:relative; overflow:hidden; }
+.cover::after{ content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:radial-gradient(circle,rgba(138,155,181,0.12) 1px,transparent 1px),radial-gradient(circle,rgba(122,53,85,0.10) 1px,transparent 1px);
+  background-size:60px 60px,100px 100px; background-position:0 0,30px 30px; animation:drift 20s linear infinite; }
+@keyframes drift{ from{transform:translate(0,0);} to{transform:translate(60px,60px);} }
+.cover .wrap{ position:relative; z-index:1; }
+.cover-logo{ margin-bottom:3.5rem; }
+.cover-logo svg{ height:60px; color:var(--white); }
+.cover h1{ color:var(--white); margin-bottom:1.25rem; }
+.cover h1 em{ color:var(--steel-light); }
+.cover-sub{ color:rgba(255,255,255,0.62); font-size:1.15rem; max-width:56ch; line-height:1.7; }
+.cover-meta{ margin-top:3rem; display:flex; gap:2.5rem; flex-wrap:wrap; }
+.cover-meta .cm-label{ color:var(--steel); text-transform:uppercase; letter-spacing:0.1em; font-weight:600; font-size:0.68rem; margin-bottom:0.3rem; }
+.cover-meta .cm-val{ color:rgba(255,255,255,0.85); font-size:0.85rem; }
+
+/* ════════ STICKY TOC ════════ */
+.toc{ position:sticky; top:0; z-index:100; background:rgba(245,243,240,0.88); backdrop-filter:blur(16px); border-bottom:1px solid var(--steel-light); }
+.toc-inner{ display:flex; gap:1.6rem; overflow-x:auto; padding:0.9rem 2.5rem; max-width:1120px; margin:0 auto; scrollbar-width:none; }
+.toc-inner::-webkit-scrollbar{ display:none; }
+.toc a{ font-size:0.72rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); white-space:nowrap; transition:color var(--transition); padding:2px 0; display:flex; gap:0.4rem; }
+.toc a:hover{ color:var(--mauve); }
+.toc a .n{ color:var(--steel); }
+
+/* ════════ SWATCHES ════════ */
+.swatch{ border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--steel-light); background:var(--white); transition:transform var(--transition); }
+.swatch:hover{ transform:translateY(-3px); box-shadow:var(--shadow-md); }
+.swatch-chip{ height:96px; display:flex; align-items:flex-end; padding:0.6rem; }
+.swatch-chip .var{ font-size:0.66rem; color:rgba(255,255,255,0.72); letter-spacing:0.03em; }
+.swatch-chip.is-light .var{ color:var(--text-muted); }
+.swatch-body{ padding:0.7rem 0.85rem 0.95rem; }
+.swatch-name{ font-weight:600; font-size:0.86rem; color:var(--navy); }
+.swatch-hex{ font-family:var(--mono); font-size:0.72rem; color:var(--mauve); margin-top:0.25rem; }
+.swatch-usage{ font-size:0.74rem; color:var(--text-muted); margin-top:0.35rem; line-height:1.5; }
+.usage-bar{ display:flex; height:52px; border-radius:var(--radius); overflow:hidden; border:1px solid var(--steel-light); margin-top:1rem; }
+.usage-bar span{ display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:600; letter-spacing:0.04em; }
+
+/* ════════ TYPE SPECIMENS ════════ */
+.type-row{ display:grid; grid-template-columns:140px 1fr; gap:2rem; padding:1.4rem 0; border-top:1px solid var(--steel-light); align-items:baseline; }
+.type-row:first-of-type{ border-top:none; }
+.type-spec{ font-size:0.73rem; color:var(--text-muted); line-height:1.6; }
+.type-spec strong{ display:block; color:var(--navy); font-family:var(--sans); font-size:0.78rem; }
+.weights{ display:flex; flex-wrap:wrap; gap:1.5rem; margin-top:1rem; }
+.weights .w-sample{ font-size:2.2rem; color:var(--navy); }
+.weights .w-name{ font-size:0.7rem; color:var(--text-muted); margin-top:0.3rem; text-align:center; }
+
+/* ════════ LOGO LAB ════════ */
+.logo-stage{ border-radius:var(--radius-lg); padding:2.5rem; display:flex; align-items:center; justify-content:center; min-height:150px; }
+.logo-stage svg{ height:52px; }
+.st-navy{ background:var(--navy); } .st-navy svg{ color:var(--white); }
+.st-light{ background:var(--off-white); border:1px solid var(--steel-light); } .st-light svg{ color:var(--navy); }
+.st-mauve{ background:var(--mauve); } .st-mauve svg{ color:var(--white); }
+.st-grad{ background:linear-gradient(135deg,#111827,#253058); } .st-grad svg{ color:var(--white); }
+.clearspace{ background:var(--off-white); border:1px solid var(--steel-light); border-radius:var(--radius-lg); padding:2.5rem; display:flex; justify-content:center; }
+.clearspace-inner{ position:relative; padding:42px; }
+.clearspace-inner::before{ content:''; position:absolute; inset:0; border:1px dashed var(--mauve); border-radius:4px; }
+.clearspace-inner svg{ height:50px; color:var(--navy); position:relative; }
+
+/* ════════ DO / DON'T ════════ */
+.rules-grid{ display:grid; grid-template-columns:1fr 1fr; gap:2rem; }
+@media(max-width:760px){ .rules-grid{ grid-template-columns:1fr; } }
+.rules-col h3{ display:flex; align-items:center; gap:0.6rem; font-size:1.3rem; margin-bottom:1.2rem; }
+.rules-col .mark{ width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:700; color:var(--white); font-family:var(--sans); }
+.do .mark{ background:var(--success); } .dont .mark{ background:var(--mauve); }
+.rule{ background:var(--white); border:1px solid var(--steel-light); border-radius:var(--radius-lg); padding:1.3rem 1.4rem; margin-bottom:1rem; }
+.do .rule{ border-left:3px solid var(--success); } .dont .rule{ border-left:3px solid var(--mauve); }
+.rule h4{ font-family:var(--sans); font-size:0.95rem; font-weight:600; color:var(--navy); margin-bottom:0.3rem; }
+.rule p{ font-size:0.85rem; line-height:1.6; }
+.rule-demo{ margin-top:0.9rem; border-radius:var(--radius); padding:1rem; display:flex; align-items:center; justify-content:center; min-height:64px; }
+
+/* ════════ COMPONENT LIBRARY ════════ */
+.showcase-title{ font-family:var(--sans); font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--mauve); font-weight:600; margin-bottom:1.2rem; padding-bottom:0.7rem; border-bottom:1px solid var(--steel-light); }
+
+/* buttons */
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.85rem 2rem; font-family:var(--sans); font-size:0.875rem; font-weight:500; letter-spacing:0.04em; border-radius:var(--radius); transition:var(--transition); white-space:nowrap; cursor:pointer; border:1px solid transparent; }
+.btn-sm{ padding:0.55rem 1.2rem; font-size:0.8rem; } .btn-lg{ padding:1rem 2.5rem; font-size:0.95rem; }
+.btn--dark{ background:var(--navy); color:var(--white); }
+.btn--dark:hover{ background:var(--navy-mid); transform:translateY(-1px); box-shadow:var(--shadow-md); }
+.btn--mauve{ background:var(--mauve); color:var(--white); }
+.btn--mauve:hover{ background:var(--mauve-light); transform:translateY(-1px); box-shadow:var(--shadow-md); }
+.btn--light{ background:var(--white); color:var(--navy); border-color:var(--steel-light); }
+.btn--light:hover{ background:var(--off-white); transform:translateY(-1px); box-shadow:var(--shadow-md); }
+.btn--outline{ background:transparent; color:var(--navy); border-color:var(--steel); }
+.btn--outline:hover{ border-color:var(--navy); }
+.btn--outline-light{ background:transparent; color:var(--white); border-color:rgba(255,255,255,0.45); }
+.btn--outline-light:hover{ background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.7); }
+.btn--ghost{ background:transparent; color:var(--text-body); }
+.btn--ghost:hover{ color:var(--mauve); }
+.btn:disabled,.btn.is-disabled{ opacity:0.45; cursor:not-allowed; transform:none; box-shadow:none; }
+.btn:active{ transform:scale(0.98); }
+
+/* forms */
+.field{ margin-bottom:1.1rem; }
+.field label{ display:block; font-size:0.72rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.45rem; }
+.input{ width:100%; padding:0.7rem 0.9rem; background:var(--white); border:1px solid var(--steel-light); border-radius:var(--radius); color:var(--navy); font-family:var(--sans); font-size:0.9rem; transition:border-color var(--transition),box-shadow var(--transition); outline:none; }
+.input::placeholder{ color:var(--text-muted); }
+.input:focus{ border-color:var(--mauve); box-shadow:0 0 0 3px rgba(122,53,85,0.12); }
+.input--error{ border-color:var(--danger); }
+.input--error:focus{ box-shadow:0 0 0 3px rgba(179,64,47,0.14); }
+select.input{ appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7a94' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:34px; }
+textarea.input{ min-height:96px; resize:vertical; line-height:1.6; }
+.field-help{ font-size:0.76rem; color:var(--text-muted); margin-top:0.35rem; }
+.field-err{ font-size:0.76rem; color:var(--danger); margin-top:0.35rem; }
+/* navy form (matches site contact) */
+.on-navy .field label{ color:var(--steel); }
+.on-navy .input{ background:rgba(255,255,255,0.07); border-color:rgba(255,255,255,0.15); color:var(--white); }
+.on-navy .input::placeholder{ color:rgba(255,255,255,0.3); }
+.on-navy .input:focus{ border-color:rgba(255,255,255,0.45); box-shadow:none; background:rgba(255,255,255,0.1); }
+
+/* tags / badges / status */
+.tag{ display:inline-flex; align-items:center; gap:0.4rem; font-size:0.68rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; padding:0.25rem 0.65rem; border-radius:2px; }
+.tag--mauve{ background:var(--mauve); color:var(--white); }
+.tag--navy{ background:var(--navy); color:var(--white); }
+.tag--soft{ background:var(--off-white); color:var(--text-body); border:1px solid var(--steel-light); }
+.status{ display:inline-flex; align-items:center; gap:0.45rem; font-size:0.72rem; font-weight:600; padding:0.25rem 0.7rem; border-radius:var(--radius-full); }
+.status .dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.status--ok{ background:var(--success-bg); color:var(--success); } .status--ok .dot{ background:var(--success); }
+.status--warn{ background:var(--warning-bg); color:var(--warning); } .status--warn .dot{ background:var(--warning); }
+.status--danger{ background:var(--danger-bg); color:var(--danger); } .status--danger .dot{ background:var(--danger); }
+.status--info{ background:var(--info-bg); color:var(--info); } .status--info .dot{ background:var(--info); animation:pulse 1.6s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+/* generic card */
+.uicard{ background:var(--white); border:1px solid var(--steel-light); border-radius:var(--radius-lg); padding:1.5rem; transition:var(--transition); }
+.uicard:hover{ border-color:var(--steel); box-shadow:var(--shadow-md); }
+.uicard-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.8rem; }
+.uicard h4{ font-size:1.15rem; }
+.uicard .sub{ font-size:0.82rem; color:var(--text-muted); margin-top:0.2rem; }
+.uicard .body{ font-size:0.88rem; color:var(--text-body); line-height:1.65; }
+.uicard .foot{ display:flex; justify-content:space-between; align-items:center; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--steel-light); font-size:0.8rem; color:var(--text-muted); }
+.uicard--accent{ border-top:2px solid var(--mauve); }
+
+/* table */
+.tbl-wrap{ overflow-x:auto; border:1px solid var(--steel-light); border-radius:var(--radius-lg); }
+table.tbl{ width:100%; border-collapse:collapse; font-size:0.88rem; background:var(--white); }
+table.tbl th{ text-align:left; padding:0.8rem 1rem; background:var(--off-white); font-family:var(--sans); font-size:0.68rem; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted); font-weight:600; border-bottom:1px solid var(--steel-light); white-space:nowrap; }
+table.tbl td{ padding:0.8rem 1rem; border-bottom:1px solid var(--steel-light); color:var(--text-body); }
+table.tbl tbody tr:last-child td{ border-bottom:none; }
+table.tbl tbody tr{ transition:background var(--transition); }
+table.tbl tbody tr:hover{ background:var(--off-white); }
+table.tbl .cell-strong{ color:var(--navy); font-weight:600; }
+table.tbl .cell-mono{ font-family:var(--mono); font-size:0.82rem; }
+
+/* tabs */
+.tabs{ display:flex; gap:0.25rem; border-bottom:1px solid var(--steel-light); margin-bottom:1.5rem; }
+.tab{ padding:0.7rem 1.2rem; font-size:0.875rem; font-weight:500; color:var(--text-muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:var(--transition); }
+.tab:hover{ color:var(--navy); }
+.tab.is-active{ color:var(--mauve); border-bottom-color:var(--mauve); }
+.tab-panel{ display:none; font-size:0.9rem; color:var(--text-body); }
+.tab-panel.is-active{ display:block; }
+
+/* progress (saturation) */
+.bar-track{ width:100%; height:8px; background:var(--off-white); border:1px solid var(--steel-light); border-radius:var(--radius-full); overflow:hidden; }
+.bar-fill{ height:100%; border-radius:var(--radius-full); }
+.bar-fill--navy{ background:var(--navy); } .bar-fill--mauve{ background:var(--mauve); }
+.bar-fill--ok{ background:var(--success); } .bar-fill--warn{ background:var(--warning); } .bar-fill--danger{ background:var(--danger); }
+.bar-row{ display:flex; justify-content:space-between; font-size:0.78rem; margin-bottom:0.4rem; }
+.bar-row .l{ color:var(--navy); font-weight:500; } .bar-row .v{ color:var(--text-muted); font-family:var(--mono); }
+
+/* modal */
+.modal-backdrop{ background:rgba(26,35,64,0.45); border-radius:var(--radius-lg); padding:2.5rem; display:flex; align-items:center; justify-content:center; min-height:300px; backdrop-filter:blur(3px); }
+.modal{ background:var(--white); border:1px solid var(--steel-light); border-radius:var(--radius-lg); width:100%; max-width:440px; box-shadow:var(--shadow-lg); overflow:hidden; }
+.modal-head{ display:flex; justify-content:space-between; align-items:center; padding:1.3rem 1.5rem; border-bottom:1px solid var(--steel-light); }
+.modal-head h4{ font-size:1.3rem; }
+.modal-x{ width:30px; height:30px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); border-radius:var(--radius); cursor:pointer; font-size:1.1rem; }
+.modal-x:hover{ background:var(--off-white); color:var(--navy); }
+.modal-body{ padding:1.5rem; font-size:0.9rem; color:var(--text-body); line-height:1.7; }
+.modal-foot{ display:flex; justify-content:flex-end; gap:0.75rem; padding:1rem 1.5rem; border-top:1px solid var(--steel-light); }
+
+/* toast */
+.toast-stack{ display:flex; flex-direction:column; gap:0.7rem; max-width:380px; }
+.toast{ display:flex; gap:0.8rem; padding:0.9rem 1rem; background:var(--white); border:1px solid var(--steel-light); border-radius:var(--radius); box-shadow:var(--shadow-md); align-items:flex-start; }
+.toast--ok{ border-left:3px solid var(--success); } .toast--warn{ border-left:3px solid var(--warning); } .toast--danger{ border-left:3px solid var(--danger); } .toast--info{ border-left:3px solid var(--navy-light); }
+.toast .ti{ width:18px; height:18px; flex-shrink:0; }
+.toast .tt{ font-size:0.85rem; font-weight:600; color:var(--navy); margin-bottom:0.1rem; }
+.toast .tm{ font-size:0.8rem; color:var(--text-muted); line-height:1.5; }
+
+/* tooltip */
+.tip{ position:relative; display:inline-flex; }
+.tip .tip-box{ position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); background:var(--navy); color:var(--white); font-size:0.76rem; padding:0.45rem 0.7rem; border-radius:var(--radius); white-space:nowrap; opacity:0; pointer-events:none; transition:opacity var(--transition); box-shadow:var(--shadow-md); }
+.tip .tip-box::after{ content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:var(--navy); }
+.tip:hover .tip-box{ opacity:1; }
+
+/* code block */
+.code{ background:var(--navy-dark); border-radius:var(--radius-lg); overflow:hidden; }
+.code-head{ padding:0.6rem 1rem; background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); font-size:0.72rem; color:var(--steel); font-family:var(--mono); display:flex; justify-content:space-between; align-items:center; }
+.code-copy{ font-size:0.7rem; color:var(--steel-light); cursor:pointer; background:none; border:1px solid rgba(255,255,255,0.18); padding:0.2rem 0.6rem; border-radius:3px; transition:var(--transition); }
+.code-copy:hover{ color:var(--white); border-color:rgba(255,255,255,0.4); }
+.code pre{ margin:0; padding:1.1rem 1.2rem; overflow-x:auto; }
+.code code{ font-family:var(--mono); font-size:0.78rem; line-height:1.75; color:rgba(255,255,255,0.82); white-space:pre; }
+
+/* empty / loading */
+.empty{ text-align:center; padding:2.5rem; border:1px dashed var(--steel-light); border-radius:var(--radius-lg); background:var(--white); }
+.empty svg{ width:40px; height:40px; color:var(--steel); margin:0 auto 0.9rem; }
+.empty h4{ font-size:1.1rem; margin-bottom:0.3rem; }
+.empty p{ font-size:0.85rem; color:var(--text-muted); }
+.skeleton{ background:linear-gradient(90deg,var(--off-white) 25%,#ecebe7 50%,var(--off-white) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:var(--radius); }
+@keyframes shimmer{ from{background-position:200% 0;} to{background-position:-200% 0;} }
+
+/* ════════ SITE COMPONENT REPLICAS ════════ */
+.repl-nav{ background:var(--navy); border-radius:var(--radius-lg); padding:0 1.5rem; height:64px; display:flex; align-items:center; gap:1.5rem; }
+.repl-nav .logo svg{ height:34px; color:var(--white); }
+.repl-nav ul{ display:flex; gap:0.3rem; margin-left:auto; }
+.repl-nav ul a{ font-size:0.8rem; font-weight:500; color:rgba(255,255,255,0.9); padding:0.4rem 0.7rem; border-radius:var(--radius); }
+.repl-nav ul a:hover{ background:rgba(255,255,255,0.1); color:#fff; }
+.repl-nav .lang{ font-size:0.7rem; font-weight:600; color:rgba(255,255,255,0.55); letter-spacing:0.08em; }
+.repl-nav .lang .on{ color:#fff; }
+
+.kpi{ background:var(--white); border:1px solid var(--steel-light); border-top:2px solid var(--navy); padding:2rem 1.5rem; border-radius:var(--radius); text-align:center; transition:var(--transition); }
+.kpi:hover{ border-top-color:var(--mauve); box-shadow:var(--shadow-md); transform:translateY(-2px); }
+.kpi .v{ font-family:var(--serif); font-size:2.6rem; font-weight:600; color:var(--navy); line-height:1; margin-bottom:0.4rem; }
+.kpi .l{ font-size:0.72rem; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); }
+
+.pillar{ display:flex; gap:1.1rem; padding:1.3rem; border-left:2px solid var(--steel-light); background:var(--white); border-radius:0 var(--radius) var(--radius) 0; transition:border-color var(--transition); }
+.pillar:hover{ border-left-color:var(--mauve); } .pillar:hover .pi{ color:var(--mauve); }
+.pillar .pi{ width:34px; height:34px; color:var(--navy-light); flex-shrink:0; transition:color var(--transition); }
+.pillar h4{ font-size:1.1rem; margin-bottom:0.25rem; }
+.pillar p{ font-size:0.85rem; }
+
+.glass-wrap{ background:var(--navy); border-radius:var(--radius-lg); padding:2rem; }
+.glass{ background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(8px); border-radius:var(--radius-lg); padding:1.8rem; transition:var(--transition); }
+.glass:hover{ background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.22); transform:translateY(-2px); }
+.glass h4{ color:var(--white); font-size:1.3rem; margin-bottom:0.5rem; }
+.glass p{ color:rgba(255,255,255,0.65); font-size:0.85rem; }
+
+.feature{ padding:1.5rem 0; border-top:1px solid var(--steel-light); }
+.feature .num{ font-family:var(--serif); font-size:2.4rem; font-weight:300; color:var(--steel-light); line-height:1; margin-bottom:0.5rem; }
+.feature h4{ font-size:1.15rem; margin-bottom:0.3rem; }
+.feature p{ font-size:0.85rem; }
+
+.france-map{ width:100%; max-width:300px; margin:0 auto; }
+.map-label{ font-family:var(--sans); font-size:9px; fill:var(--text-body); }
+.map-label--accent{ fill:var(--mauve); }
+.centre-item{ display:flex; gap:0.9rem; padding:0.95rem 0; border-bottom:1px solid var(--steel-light); }
+.centre-item:first-child{ border-top:1px solid var(--steel-light); }
+.centre-dot{ width:8px; height:8px; border-radius:50%; background:var(--navy); margin-top:5px; flex-shrink:0; }
+.centre-dot--accent{ background:var(--mauve); }
+.centre-item strong{ display:block; font-size:0.85rem; color:var(--navy); margin-bottom:0.15rem; }
+.centre-item span{ font-size:0.78rem; color:var(--text-muted); }
+.centre-item--accent strong{ color:var(--mauve); }
+
+.research{ padding:2rem; border:1px solid var(--steel-light); border-radius:var(--radius-lg); transition:var(--transition); }
+.research:hover{ box-shadow:var(--shadow-md); transform:translateY(-2px); }
+.research--feat{ background:var(--navy); border-color:var(--navy); color:var(--white); }
+.research--feat h4{ color:var(--white); } .research--feat p{ color:rgba(255,255,255,0.7); }
+.research .rtag{ font-size:0.68rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--mauve-light); margin-bottom:0.6rem; }
+.research h4{ font-size:1.3rem; margin-bottom:0.5rem; } .research p{ font-size:0.85rem; }
+
+.news{ padding:1.6rem; border-radius:var(--radius-lg); background:var(--white); border:1px solid var(--steel-light); transition:var(--transition); }
+.news:hover{ box-shadow:var(--shadow-md); transform:translateY(-2px); }
+.news--feat{ background:var(--navy); border-color:var(--navy); color:var(--white); }
+.news--feat h4{ color:var(--white); } .news--feat .nlink{ color:rgba(255,255,255,0.6); }
+.news-meta{ display:flex; gap:0.7rem; align-items:center; margin-bottom:0.7rem; }
+.news time{ font-size:0.76rem; color:var(--text-muted); } .news--feat time{ color:rgba(255,255,255,0.4); }
+.news h4{ font-size:1.1rem; line-height:1.3; margin-bottom:0.5rem; }
+.nlink{ font-size:0.78rem; font-weight:600; color:var(--mauve); display:inline-block; margin-top:0.6rem; }
+
+.doc-footer{ background:var(--navy-dark); color:rgba(255,255,255,0.4); padding:3rem 0; font-size:0.82rem; }
+.doc-footer .wrap{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem; align-items:center; }
+.doc-footer svg{ height:32px; color:rgba(255,255,255,0.7); }
+
+@media(max-width:640px){
+  .wrap{ padding:0 1.5rem; } .section{ padding:3.5rem 0; }
+  .type-row{ grid-template-columns:1fr; gap:0.7rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════ COVER ════════════════════ -->
+<header class="cover">
+  <div class="wrap">
+    <div class="cover-logo">
+      <svg viewBox="0 0 160 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Lutecia Care">
+        <line x1="2" y1="2" x2="2" y2="70" stroke="currentColor" stroke-width="1.4"/><line x1="2" y1="2" x2="38" y2="2" stroke="currentColor" stroke-width="1.4"/><line x1="2" y1="70" x2="58" y2="70" stroke="currentColor" stroke-width="1.4"/><line x1="58" y1="14" x2="155" y2="14" stroke="currentColor" stroke-width="1.4"/><line x1="155" y1="14" x2="155" y2="58" stroke="currentColor" stroke-width="1.4"/><text x="14" y="41" style="font-family:var(--serif);font-size:22px;fill:currentColor">Lutecia</text><text x="14" y="64" style="font-family:var(--serif);font-size:22px;fill:currentColor">Care</text>
+      </svg>
+    </div>
+    <span class="kicker" style="color:var(--steel)">Brand Identity &amp; Design System</span>
+    <h1>A precise, premium system for<br><em>nuclear medicine</em></h1>
+    <p class="cover-sub">The single source of truth for how Lutecia Care looks, sounds and behaves — across web, presentations, print and clinical communications. Every token, component and rule here is canonical. Build on it; don't reinvent.</p>
+    <div class="cover-meta">
+      <div><div class="cm-label">Version</div><div class="cm-val">2.0 — Full system</div></div>
+      <div><div class="cm-label">Sector</div><div class="cm-val">Independent nuclear medicine · France</div></div>
+      <div><div class="cm-label">Languages</div><div class="cm-val">English · Français</div></div>
+      <div><div class="cm-label">Sections</div><div class="cm-val">15</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════════════ STICKY TOC ════════════════════ -->
+<nav class="toc">
+  <div class="toc-inner">
+    <a href="#foundation"><span class="n">01</span> Foundation</a>
+    <a href="#personality"><span class="n">02</span> Personality</a>
+    <a href="#logo"><span class="n">03</span> Logo</a>
+    <a href="#colour"><span class="n">04</span> Colour</a>
+    <a href="#type"><span class="n">05</span> Type</a>
+    <a href="#icons"><span class="n">06</span> Icons</a>
+    <a href="#components"><span class="n">07</span> Components</a>
+    <a href="#data"><span class="n">08</span> Data &amp; Network</a>
+    <a href="#spacing"><span class="n">09</span> Spacing</a>
+    <a href="#elevation"><span class="n">10</span> Elevation</a>
+    <a href="#motion"><span class="n">11</span> Motion</a>
+    <a href="#imagery"><span class="n">12</span> Imagery</a>
+    <a href="#voice"><span class="n">13</span> Voice</a>
+    <a href="#rules"><span class="n">14</span> Do's &amp; Don'ts</a>
+    <a href="#tokens"><span class="n">15</span> Tokens</a>
+  </div>
+</nav>
+
+<!-- ════════ 01 · FOUNDATION ════════ -->
+<section class="section" id="foundation">
+  <div class="wrap">
+    <span class="kicker">Section 01</span>
+    <h2 class="section-title">Brand Foundation</h2>
+    <p class="section-desc">Lutecia Care is a leading independent nuclear-medicine platform in France — founded in 2024, majority-owned by its founders and physicians, dedicated to excellence in PET-CT and scintigraphy. The brand holds two ideas in tension and balance: <em>clinical authority</em> and <em>human care</em>.</p>
+
+    <div class="grid-2" style="gap:2rem;">
+      <div class="panel">
+        <span class="sub-label">Mission</span>
+        <h3 style="margin-bottom:0.7rem;">A model built around physicians and patients</h3>
+        <p>A specialised platform that structures, coordinates and develops a network of nuclear-medicine centres — on strong medical expertise and a strategic partnership with independent physicians.</p>
+      </div>
+      <div class="panel">
+        <span class="sub-label">Positioning</span>
+        <h3 style="margin-bottom:0.7rem;">The national leader, dedicated to one thing</h3>
+        <p>A pure-play in nuclear medicine — not a generalist imaging group. Depth over breadth: best-in-class infrastructure, rapid adoption of innovation including theranostics, a national footprint.</p>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:1.5rem;">
+      <div class="panel" style="text-align:center;"><div class="kpi" style="border:none;padding:0.5rem 0;"><div class="v">7</div><div class="l">Centres in France</div></div></div>
+      <div class="panel" style="text-align:center;"><div class="kpi" style="border:none;padding:0.5rem 0;"><div class="v">€c.40m</div><div class="l">Revenue</div></div></div>
+      <div class="panel" style="text-align:center;"><div class="kpi" style="border:none;padding:0.5rem 0;"><div class="v">&gt;60k</div><div class="l">Exams / year</div></div></div>
+    </div>
+
+    <div class="note"><strong>Naming.</strong> The brand is spelled <span class="mono">Lutecia Care</span> — confirmed. Use this spelling on every surface (wordmark, logo <span class="mono">&lt;text&gt;</span> nodes, body copy, email domain <span class="mono">@luteciacare.fr</span>). It is <em>not</em> "Lutetia" (the Roman name for Paris) — a common autocorrect; guard against it in copy review.</div>
+  </div>
+</section>
+
+<!-- ════════ 02 · PERSONALITY ════════ -->
+<section class="section" id="personality">
+  <div class="wrap">
+    <span class="kicker">Section 02</span>
+    <h2 class="section-title">Personality &amp; Values</h2>
+    <p class="section-desc">Three words anchor every decision — <strong>Excellence, precision, access</strong>. They appear verbatim in the hero and should guide tone, layout, imagery and product.</p>
+
+    <div class="grid-3" style="margin-bottom:2.5rem;">
+      <div class="panel"><div class="feature num" style="margin-bottom:0.4rem;">01</div><h4 style="margin-bottom:0.3rem;">Authoritative, not cold</h4><p style="font-size:0.9rem;">Serif headlines and deep navy convey institutional gravity; generous whitespace and warm off-white keep it humane.</p></div>
+      <div class="panel"><div class="feature num" style="margin-bottom:0.4rem;">02</div><h4 style="margin-bottom:0.3rem;">Precise, never busy</h4><p style="font-size:0.9rem;">Thin 1.4–1.5px linework, restrained accents, one idea per block — design that mirrors diagnostic precision.</p></div>
+      <div class="panel"><div class="feature num" style="margin-bottom:0.4rem;">03</div><h4 style="margin-bottom:0.3rem;">Premium, but accessible</h4><p style="font-size:0.9rem;">Editorial typography signals quality; plain bilingual language and clear journeys keep it open to all.</p></div>
+    </div>
+
+    <div class="rules-grid">
+      <div class="rules-col do">
+        <h3><span class="mark">✓</span> We are</h3>
+        <div class="rule"><h4>Independent &amp; physician-led</h4><p>Majority-owned by founders and physicians; a partner, not an employer.</p></div>
+        <div class="rule"><h4>Specialist — pure-play nuclear medicine</h4><p>One discipline, done to the highest standard.</p></div>
+        <div class="rule"><h4>Scientific &amp; innovation-forward</h4><p>Theranostics, a scientific committee, a continuous innovation roadmap.</p></div>
+        <div class="rule"><h4>Calm, considered, editorial</h4><p>Quiet confidence over noise; whitespace over density.</p></div>
+        <div class="rule"><h4>Bilingual by default</h4><p>English and French treated as equals, everywhere.</p></div>
+      </div>
+      <div class="rules-col dont">
+        <h3><span class="mark">✗</span> We are not</h3>
+        <div class="rule"><h4>A generic hospital or radiology chain</h4><p>We don't look or speak like a commodity imaging provider.</p></div>
+        <div class="rule"><h4>Loud, salesy or jargon-heavy to patients</h4><p>No superlatives, no intimidating clinical language up front.</p></div>
+        <div class="rule"><h4>Cluttered or trend-chasing</h4><p>No gradient-soup, no decorative noise, no fashion for its own sake.</p></div>
+        <div class="rule"><h4>Cold to the point of intimidating</h4><p>Authority never tips into clinical austerity.</p></div>
+        <div class="rule"><h4>English-first</h4><p>French is never an afterthought bolted on at the end.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 03 · LOGO ════════ -->
+<section class="section" id="logo">
+  <div class="wrap">
+    <span class="kicker">Section 03</span>
+    <h2 class="section-title">Logo &amp; Wordmark</h2>
+    <p class="section-desc">The logo is an SVG wordmark — <strong>"Lutecia / Care"</strong> set in Cormorant Garamond on two lines, framed by an open, asymmetric bracket of 1.4px strokes. The bracket is unclosed by design: it reads as a frame, a viewport, an aperture — never a box. It scales cleanly and inherits its colour from <span class="mono">currentColor</span>.</p>
+
+    <div class="subsection">
+      <span class="sub-label">3.1 · Colour variants</span>
+      <div class="grid-2">
+        <div><div class="logo-stage st-navy" id="logoNavy"></div><p class="stage-caption">Primary — white on navy (default)</p></div>
+        <div><div class="logo-stage st-light" id="logoLight"></div><p class="stage-caption">Navy on light / off-white</p></div>
+        <div><div class="logo-stage st-grad" id="logoGrad"></div><p class="stage-caption">White on brand gradient (hero)</p></div>
+        <div><div class="logo-stage st-mauve" id="logoMauve"></div><p class="stage-caption">Reversed on mauve — special use only</p></div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <span class="sub-label">3.2 · Clear space &amp; minimum size</span>
+      <div class="grid-2" style="align-items:start;">
+        <div>
+          <div class="clearspace"><div class="clearspace-inner" id="logoClear"></div></div>
+          <p class="stage-caption" style="margin-top:0.6rem;">Keep clear space ≥ the cap-height of "Care" on all four sides (dashed).</p>
+        </div>
+        <div class="panel">
+          <table class="tbl"><tbody>
+            <tr><td>Nav (default)</td><td class="cell-mono">height: 44px</td></tr>
+            <tr><td>Nav / footer (small)</td><td class="cell-mono">height: 36px</td></tr>
+            <tr><td>Minimum digital</td><td class="cell-mono">height: 28px</td></tr>
+            <tr><td>Minimum print</td><td class="cell-mono">~14mm wide</td></tr>
+            <tr><td>Stroke weight</td><td class="cell-mono">1.4px @ native</td></tr>
+            <tr><td>viewBox</td><td class="cell-mono">0 0 160 72</td></tr>
+          </tbody></table>
+          <p style="font-size:0.85rem;margin-top:1rem;color:var(--text-body);">Always ship as inline SVG so it stays crisp and recolours via <span class="mono">currentColor</span>. The wordmark depends on Cormorant Garamond — embed or outline the text for print/PDF.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 04 · COLOUR ════════ -->
+<section class="section" id="colour">
+  <div class="wrap">
+    <span class="kicker">Section 04</span>
+    <h2 class="section-title">Colour Palette</h2>
+    <p class="section-desc">A deliberately narrow system: a family of deep navies for authority, one warm mauve as the only accent, cool steels for structure, a warm off-white that softens the whole. <strong>Mauve is precious</strong> — emphasis, tags, hovers and active states only.</p>
+
+    <div class="subsection">
+      <span class="sub-label">4.1 · Primary</span>
+      <div class="grid-4">
+        <div class="swatch"><div class="swatch-chip" style="background:#1a2340"><span class="var">--navy</span></div><div class="swatch-body"><div class="swatch-name">Navy</div><div class="swatch-hex">#1a2340</div><div class="swatch-usage">Primary brand · text · surfaces</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#7a3555"><span class="var">--mauve</span></div><div class="swatch-body"><div class="swatch-name">Mauve</div><div class="swatch-hex">#7a3555</div><div class="swatch-usage">The accent — use sparingly</div></div></div>
+        <div class="swatch"><div class="swatch-chip is-light" style="background:#f5f3f0"><span class="var">--off-white</span></div><div class="swatch-body"><div class="swatch-name">Off-white</div><div class="swatch-hex">#f5f3f0</div><div class="swatch-usage">Warm background base</div></div></div>
+        <div class="swatch"><div class="swatch-chip is-light" style="background:#fff;border-bottom:1px solid var(--steel-light)"><span class="var">--white</span></div><div class="swatch-body"><div class="swatch-name">White</div><div class="swatch-hex">#ffffff</div><div class="swatch-usage">Cards · clean surfaces</div></div></div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <span class="sub-label">4.2 · Navy family &amp; accent tint</span>
+      <div class="grid-4">
+        <div class="swatch"><div class="swatch-chip" style="background:#111827"><span class="var">--navy-dark</span></div><div class="swatch-body"><div class="swatch-name">Navy Dark</div><div class="swatch-hex">#111827</div><div class="swatch-usage">Footer · gradient floor</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#253058"><span class="var">--navy-mid</span></div><div class="swatch-body"><div class="swatch-name">Navy Mid</div><div class="swatch-hex">#253058</div><div class="swatch-usage">Hover · gradient glow</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#3d4f7c"><span class="var">--navy-light</span></div><div class="swatch-body"><div class="swatch-name">Navy Light</div><div class="swatch-hex">#3d4f7c</div><div class="swatch-usage">Icons · tertiary</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#a05070"><span class="var">--mauve-light</span></div><div class="swatch-body"><div class="swatch-name">Mauve Light</div><div class="swatch-hex">#a05070</div><div class="swatch-usage">Accent hover · tags</div></div></div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <span class="sub-label">4.3 · Steel &amp; text greys</span>
+      <div class="grid-4">
+        <div class="swatch"><div class="swatch-chip" style="background:#8a9bb5"><span class="var">--steel</span></div><div class="swatch-body"><div class="swatch-name">Steel</div><div class="swatch-hex">#8a9bb5</div><div class="swatch-usage">Muted accents on navy</div></div></div>
+        <div class="swatch"><div class="swatch-chip is-light" style="background:#c5cfe0"><span class="var">--steel-light</span></div><div class="swatch-body"><div class="swatch-name">Steel Light</div><div class="swatch-hex">#c5cfe0</div><div class="swatch-usage">Borders · dividers · rules</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#3d4f6a"><span class="var">--text-body</span></div><div class="swatch-body"><div class="swatch-name">Text Body</div><div class="swatch-hex">#3d4f6a</div><div class="swatch-usage">Paragraph copy</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#6b7a94"><span class="var">--text-muted</span></div><div class="swatch-body"><div class="swatch-name">Text Muted</div><div class="swatch-hex">#6b7a94</div><div class="swatch-usage">Captions · meta · labels</div></div></div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <span class="sub-label">4.4 · Functional / semantic</span>
+      <p class="subsection-desc">Muted, desaturated tones tuned to sit beside the brand palette — for status, alerts and (in the Chalandise model) saturation/capacity signals. Never neon.</p>
+      <div class="grid-4">
+        <div class="swatch"><div class="swatch-chip" style="background:#2e7d5b"><span class="var">--success</span></div><div class="swatch-body"><div class="swatch-name">Success</div><div class="swatch-hex">#2e7d5b</div><div class="swatch-usage">Confirmed · healthy · open</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#b5852f"><span class="var">--warning</span></div><div class="swatch-body"><div class="swatch-name">Warning</div><div class="swatch-hex">#b5852f</div><div class="swatch-usage">Near-saturation · caution</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#b3402f"><span class="var">--danger</span></div><div class="swatch-body"><div class="swatch-name">Danger</div><div class="swatch-hex">#b3402f</div><div class="swatch-usage">Error · saturated · failed</div></div></div>
+        <div class="swatch"><div class="swatch-chip" style="background:#3d4f7c"><span class="var">--info</span></div><div class="swatch-body"><div class="swatch-name">Info</div><div class="swatch-hex">#3d4f7c</div><div class="swatch-usage">Running · neutral notice</div></div></div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <span class="sub-label">4.5 · Usage balance</span>
+      <p class="subsection-desc">Aim for roughly this distribution on any layout. Navy and neutrals carry the page; mauve is a seasoning, not a base.</p>
+      <div class="usage-bar">
+        <span style="background:#f5f3f0;color:#6b7a94;flex:55">Neutrals 55%</span>
+        <span style="background:#1a2340;color:#fff;flex:35">Navy family 35%</span>
+        <span style="background:#7a3555;color:#fff;flex:10">Mauve 10%</span>
+      </div>
+      <div class="note"><strong>Accessibility.</strong> Navy on white ≈ 13.6:1 and on off-white ≈ 12.6:1 (AAA). Mauve on white ≈ 6.9:1 — AA normal text, AAA large; good for links, tags, buttons. Avoid muted text below 14px on off-white. Never set mauve text on navy — use steel-light instead.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 05 · TYPOGRAPHY ════════ -->
+<section class="section" id="type">
+  <div class="wrap">
+    <span class="kicker">Section 05</span>
+    <h2 class="section-title">Typography</h2>
+    <p class="section-desc">Two typefaces, a clear division of labour. <strong>Cormorant Garamond</strong> — a high-contrast display serif — carries headings, KPI figures and quotes, almost always light/regular with italics for emphasis. <strong>Inter</strong> handles all body copy, UI, labels and navigation.</p>
+
+    <div class="grid-2" style="gap:2rem;margin-bottom:2.5rem;">
+      <div class="panel">
+        <span class="sub-label">Display / Headings</span>
+        <div style="font-family:var(--serif);font-size:3.2rem;font-weight:300;color:var(--navy);line-height:1;margin:0.4rem 0;">Cormorant<br>Garamond</div>
+        <p style="font-size:0.88rem;">Weights 300–600 + italics. Headings in 300–400, negative tracking (<span class="mono">-0.01em</span>), tight leading (<span class="mono">1.15</span>). Italic = emphasis and turns <em>mauve</em> in headings.</p>
+        <div class="weights">
+          <div><div class="w-sample" style="font-weight:300">Aa</div><div class="w-name">300</div></div>
+          <div><div class="w-sample" style="font-weight:400">Aa</div><div class="w-name">400</div></div>
+          <div><div class="w-sample" style="font-weight:500">Aa</div><div class="w-name">500</div></div>
+          <div><div class="w-sample" style="font-weight:600">Aa</div><div class="w-name">600</div></div>
+          <div><div class="w-sample" style="font-style:italic">Aa</div><div class="w-name">Italic</div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <span class="sub-label">Body / Interface</span>
+        <div style="font-family:var(--sans);font-size:2.8rem;font-weight:600;color:var(--navy);line-height:1;margin:0.4rem 0;">Inter</div>
+        <p style="font-size:0.88rem;">Weights 300–700. Body at <span class="mono">1rem / 1.75</span>. Labels &amp; eyebrows are uppercase, 600–700, wide tracking (<span class="mono">0.08–0.16em</span>).</p>
+        <div class="weights">
+          <div><div class="w-sample" style="font-family:var(--sans);font-weight:300">Aa</div><div class="w-name">300</div></div>
+          <div><div class="w-sample" style="font-family:var(--sans);font-weight:400">Aa</div><div class="w-name">400</div></div>
+          <div><div class="w-sample" style="font-family:var(--sans);font-weight:500">Aa</div><div class="w-name">500</div></div>
+          <div><div class="w-sample" style="font-family:var(--sans);font-weight:600">Aa</div><div class="w-name">600</div></div>
+          <div><div class="w-sample" style="font-family:var(--sans);font-weight:700">Aa</div><div class="w-name">700</div></div>
+        </div>
+      </div>
+    </div>
+
+    <span class="sub-label">5.1 · Type scale</span>
+    <div class="panel" style="padding:0.5rem 2rem;">
+      <div class="type-row"><div class="type-spec"><strong>H1 · Display</strong>clamp(2.6→5rem) · serif 300 · 1.15</div><div style="font-family:var(--serif);font-size:clamp(2.2rem,4vw,3.2rem);font-weight:300;color:var(--navy);">A leading independent player in <em style="color:var(--mauve);font-style:italic;">nuclear medicine</em></div></div>
+      <div class="type-row"><div class="type-spec"><strong>H2 · Section</strong>clamp(2→3.4rem) · serif 400</div><div style="font-family:var(--serif);font-size:clamp(1.6rem,3vw,2.3rem);color:var(--navy);">The national leader, dedicated to <em style="color:var(--mauve);font-style:italic;">nuclear medicine</em></div></div>
+      <div class="type-row"><div class="type-spec"><strong>H3 · Block</strong>clamp(1.4→2rem) · serif 400</div><div style="font-family:var(--serif);font-size:1.55rem;color:var(--navy);">Theranostics &amp; the scientific committee</div></div>
+      <div class="type-row"><div class="type-spec"><strong>H4 · Card</strong>1.2rem · serif 400</div><div style="font-family:var(--serif);font-size:1.2rem;color:var(--navy);">For Patients · For Physicians</div></div>
+      <div class="type-row"><div class="type-spec"><strong>Body</strong>1rem / 1.75 · sans 400</div><div style="font-family:var(--sans);font-size:1rem;color:var(--text-body);">From your first appointment to your results, our teams make the experience as clear and comfortable as possible.</div></div>
+      <div class="type-row"><div class="type-spec"><strong>Eyebrow / Label</strong>0.72rem · sans 600 · UPPER +0.14em</div><div><span class="kicker" style="margin:0;">Introducing Lutecia Care</span></div></div>
+      <div class="type-row"><div class="type-spec"><strong>KPI figure</strong>clamp(2.2→3.5rem) · serif 600</div><div style="font-family:var(--serif);font-size:2.8rem;font-weight:600;color:var(--navy);">&gt;33k <span style="font-size:0.95rem;color:var(--text-muted);font-family:var(--sans);">PET-CT exams</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 06 · ICONOGRAPHY ════════ -->
+<section class="section" id="icons">
+  <div class="wrap">
+    <span class="kicker">Section 06</span>
+    <h2 class="section-title">Iconography</h2>
+    <p class="section-desc">Icons are outline-only, drawn on a 40×40 viewBox with <strong>1.5px strokes</strong>, rounded caps and joins, no fills. They inherit <span class="mono">currentColor</span> — navy-light at rest, mauve on hover — living inside the colour system rather than fighting it.</p>
+
+    <div class="grid-auto">
+      <div class="panel" style="text-align:center;padding:2rem 1rem;"><svg viewBox="0 0 40 40" fill="none" style="width:46px;height:46px;color:var(--navy-light);margin:0 auto 0.8rem;"><circle cx="20" cy="14" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M6 36c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><div style="font-size:0.76rem;color:var(--text-muted);">Patients</div></div>
+      <div class="panel" style="text-align:center;padding:2rem 1rem;"><svg viewBox="0 0 40 40" fill="none" style="width:46px;height:46px;color:var(--navy-light);margin:0 auto 0.8rem;"><rect x="8" y="8" width="24" height="24" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M20 15v10M15 20h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><div style="font-size:0.76rem;color:var(--text-muted);">Physicians</div></div>
+      <div class="panel" style="text-align:center;padding:2rem 1rem;"><svg viewBox="0 0 40 40" fill="none" style="width:46px;height:46px;color:var(--navy-light);margin:0 auto 0.8rem;"><path d="M20 6l3.09 6.26L30 13.27l-5 4.87 1.18 6.88L20 22l-6.18 3.02L15 18.14l-5-4.87 6.91-1.01L20 6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><div style="font-size:0.76rem;color:var(--text-muted);">Innovation</div></div>
+      <div class="panel" style="text-align:center;padding:2rem 1rem;"><svg viewBox="0 0 40 40" fill="none" style="width:46px;height:46px;color:var(--navy-light);margin:0 auto 0.8rem;"><circle cx="20" cy="20" r="13" stroke="currentColor" stroke-width="1.5"/><path d="M20 12v8l5 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><div style="font-size:0.76rem;color:var(--text-muted);">Access</div></div>
+      <div class="panel" style="text-align:center;padding:2rem 1rem;color:var(--mauve);"><svg viewBox="0 0 40 40" fill="none" style="width:46px;height:46px;color:var(--mauve);margin:0 auto 0.8rem;"><path d="M20 6l3.09 6.26L30 13.27l-5 4.87 1.18 6.88L20 22l-6.18 3.02L15 18.14l-5-4.87 6.91-1.01L20 6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><div style="font-size:0.76rem;color:var(--mauve);">Hover (mauve)</div></div>
+    </div>
+    <div class="note"><strong>Rules.</strong> 40×40 grid · stroke 1.5px · round caps/joins · outline-only · single colour · 34–48px in UI · one icon per pillar/feature. Never fill, two-tone, mix weights, add shadows, or use emoji/skeuomorphic glyphs.</div>
+  </div>
+</section>
+
+<!-- ════════ 07 · COMPONENTS ════════ -->
+<section class="section" id="components">
+  <div class="wrap">
+    <span class="kicker">Section 07</span>
+    <h2 class="section-title">Web App Design System</h2>
+    <p class="section-desc">The interface layer. Every control shares the same DNA: 1px steel borders, a 2–3px accent edge (navy → mauve on hover/active), 4–8px radii, soft 1px lifts, the single 0.35s easing. All components below are live — interact with them.</p>
+
+    <!-- 7.1 buttons -->
+    <div class="subsection">
+      <h3 class="subsection-title">7.1 · Buttons</h3>
+      <p class="subsection-desc">Dark is the default primary; mauve is the accent CTA; light/outline for secondary; ghost for tertiary. On navy sections use light + outline-light.</p>
+      <div class="panel">
+        <div class="showcase-title">Variants</div>
+        <div class="demo-row" style="margin-bottom:1.5rem;"><a class="btn btn--dark">Primary</a><a class="btn btn--mauve">Accent</a><a class="btn btn--light">Light</a><a class="btn btn--outline">Outline</a><a class="btn btn--ghost">Ghost</a><a class="btn btn--dark is-disabled">Disabled</a></div>
+        <div class="showcase-title">Sizes</div>
+        <div class="demo-row" style="margin-bottom:1.5rem;"><a class="btn btn--dark btn-sm">Small</a><a class="btn btn--dark">Default</a><a class="btn btn--dark btn-lg">Large</a></div>
+        <div class="showcase-title">On navy</div>
+        <div class="demo-stage--navy" style="padding:1.5rem;border-radius:var(--radius-lg);"><div class="demo-row"><a class="btn btn--light">Discover Lutecia Care</a><a class="btn btn--outline-light">Contact Us</a></div></div>
+      </div>
+    </div>
+
+    <!-- 7.2 forms -->
+    <div class="subsection">
+      <h3 class="subsection-title">7.2 · Form inputs</h3>
+      <p class="subsection-desc">Two contexts: light (default) and navy (the site's contact form). Focus rings are mauve on light, white on navy.</p>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="showcase-title">Light context</div>
+          <div class="field"><label>Name</label><input class="input" placeholder="Dr. Marie Laurent" /></div>
+          <div class="field"><label>I am a…</label><select class="input"><option>Patient</option><option>Physician</option><option>Institutional partner</option></select></div>
+          <div class="field"><label>Email</label><input class="input input--error" value="marie@" /><div class="field-err">Enter a valid email address.</div></div>
+          <div class="field"><label>Message</label><textarea class="input" placeholder="How can we help?"></textarea><div class="field-help">We typically reply within two business days.</div></div>
+        </div>
+        <div class="panel on-navy demo-stage--navy" style="border:none;">
+          <div class="showcase-title" style="color:var(--steel);border-color:rgba(255,255,255,0.12);">Navy context (site contact form)</div>
+          <div class="field"><label>Name</label><input class="input" placeholder="Your name" /></div>
+          <div class="field"><label>Email</label><input class="input" placeholder="you@email.com" /></div>
+          <div class="field"><label>I am a…</label><select class="input"><option>Select…</option><option>Patient</option><option>Physician</option></select></div>
+          <div class="field" style="margin-bottom:1.3rem;"><label>Message</label><textarea class="input"></textarea></div>
+          <a class="btn btn--light">Send message</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7.3 tags/status -->
+    <div class="subsection">
+      <h3 class="subsection-title">7.3 · Tags, status &amp; badges</h3>
+      <div class="panel">
+        <div class="showcase-title">News / category tags</div>
+        <div class="demo-row" style="margin-bottom:1.5rem;"><span class="tag tag--mauve">Development</span><span class="tag tag--navy">Acquisition</span><span class="tag" style="background:var(--mauve-light);color:#fff;">Expansion</span><span class="tag tag--soft">Greenfield</span></div>
+        <div class="showcase-title">Status pills</div>
+        <div class="demo-row"><span class="status status--ok"><span class="dot"></span>Open</span><span class="status status--info"><span class="dot"></span>In build</span><span class="status status--warn"><span class="dot"></span>Near saturation</span><span class="status status--danger"><span class="dot"></span>Saturated</span></div>
+      </div>
+    </div>
+
+    <!-- 7.4 cards -->
+    <div class="subsection">
+      <h3 class="subsection-title">7.4 · Cards</h3>
+      <div class="grid-3">
+        <div class="uicard uicard--accent"><div class="uicard-head"><div><h4>Vannes — CMNM</h4><div class="sub">Morbihan · 56</div></div><span class="status status--ok"><span class="dot"></span>Open</span></div><div class="body">PET-CT &amp; scintigraphy · 2 PET-CT · 3 γ-cameras.</div><div class="foot"><span>6,715 TEP / yr</span><a class="nlink" style="margin:0;">Detail →</a></div></div>
+        <div class="uicard"><div class="uicard-head"><div><h4>Soissons</h4><div class="sub">Aisne · 02</div></div><span class="status status--warn"><span class="dot"></span>78%</span></div><div class="body">PET-CT &amp; scintigraphy · 1 PET-CT · 2 γ-cameras.</div><div class="foot"><span>5,526 TEP / yr</span><a class="nlink" style="margin:0;">Detail →</a></div></div>
+        <div class="uicard"><div class="uicard-head"><div><h4>Arcachon</h4><div class="sub">Gironde · 33</div></div><span class="status status--info"><span class="dot"></span>2027</span></div><div class="body">Greenfield project · authorisation granted Sep. 2025.</div><div class="foot"><span>Coming 2027</span><a class="nlink" style="margin:0;">Detail →</a></div></div>
+      </div>
+    </div>
+
+    <!-- 7.5 table -->
+    <div class="subsection">
+      <h3 class="subsection-title">7.5 · Tables</h3>
+      <p class="subsection-desc">Off-white uppercase headers, hairline row rules, hover-tint rows, mono for figures.</p>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>Centre</th><th>Dept</th><th>PET-CT</th><th>γ-cameras</th><th>TEP / yr</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="cell-strong">Lorient — CMNM</td><td>56</td><td class="cell-mono">1</td><td class="cell-mono">3</td><td class="cell-mono">7,325</td><td><span class="status status--ok"><span class="dot"></span>Open</span></td></tr>
+            <tr><td class="cell-strong">Vannes — CMNM</td><td>56</td><td class="cell-mono">2</td><td class="cell-mono">3</td><td class="cell-mono">6,715</td><td><span class="status status--ok"><span class="dot"></span>Open</span></td></tr>
+            <tr><td class="cell-strong">Amiens</td><td>80</td><td class="cell-mono">2</td><td class="cell-mono">2</td><td class="cell-mono">7,186</td><td><span class="status status--warn"><span class="dot"></span>82%</span></td></tr>
+            <tr><td class="cell-strong">Arcachon</td><td>33</td><td class="cell-mono">—</td><td class="cell-mono">—</td><td class="cell-mono">—</td><td><span class="status status--info"><span class="dot"></span>2027</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 7.6 tabs -->
+    <div class="subsection">
+      <h3 class="subsection-title">7.6 · Tabs</h3>
+      <div class="panel">
+        <div class="tabs" data-tabs>
+          <div class="tab is-active" data-tab="0">Patients</div>
+          <div class="tab" data-tab="1">Physicians</div>
+          <div class="tab" data-tab="2">Partners</div>
+        </div>
+        <div class="tab-panel is-active" data-panel="0">From first appointment to results — a clear, comfortable nuclear-medicine journey.</div>
+        <div class="tab-panel" data-panel="1">Professional independence, comprehensive support, and access to innovation.</div>
+        <div class="tab-panel" data-panel="2">A fast-growing platform shaping the future of nuclear medicine in France and Europe.</div>
+      </div>
+    </div>
+
+    <!-- 7.7 progress -->
+    <div class="subsection">
+      <h3 class="subsection-title">7.7 · Progress &amp; saturation bars</h3>
+      <p class="subsection-desc">The capacity/saturation signal central to the Chalandise model. Colour follows the semantic scale: navy/success → warning → danger as a centre approaches its scanner ceiling.</p>
+      <div class="panel">
+        <div style="margin-bottom:1.2rem;"><div class="bar-row"><span class="l">Lorient</span><span class="v">3,200 / 5,000</span></div><div class="bar-track"><div class="bar-fill bar-fill--ok" style="width:64%"></div></div></div>
+        <div style="margin-bottom:1.2rem;"><div class="bar-row"><span class="l">Amiens</span><span class="v">4,100 / 5,000</span></div><div class="bar-track"><div class="bar-fill bar-fill--warn" style="width:82%"></div></div></div>
+        <div><div class="bar-row"><span class="l">Soissons</span><span class="v">4,700 / 5,000</span></div><div class="bar-track"><div class="bar-fill bar-fill--danger" style="width:94%"></div></div></div>
+      </div>
+    </div>
+
+    <!-- 7.8 modal -->
+    <div class="subsection">
+      <h3 class="subsection-title">7.8 · Modal</h3>
+      <div class="modal-backdrop">
+        <div class="modal">
+          <div class="modal-head"><h4>Confirm centre detail</h4><div class="modal-x">✕</div></div>
+          <div class="modal-body">You're about to open the full market estimate for <strong>Soissons</strong>, including addressable demand, competition and the base → captable split.</div>
+          <div class="modal-foot"><a class="btn btn--outline btn-sm">Cancel</a><a class="btn btn--dark btn-sm">View estimate</a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7.9 toast -->
+    <div class="subsection">
+      <h3 class="subsection-title">7.9 · Toasts &amp; alerts</h3>
+      <div class="toast-stack">
+        <div class="toast toast--ok"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><div><div class="tt">Message sent</div><div class="tm">We'll reply within two business days.</div></div></div>
+        <div class="toast toast--warn"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><div><div class="tt">Centre near saturation</div><div class="tm">Amiens is at 82% of estimated scanner capacity.</div></div></div>
+        <div class="toast toast--info"><svg class="ti" viewBox="0 0 24 24" fill="none" stroke="var(--navy-light)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><div><div class="tt">Estimate updated</div><div class="tm">Recalculated against the latest SAE capacity data.</div></div></div>
+      </div>
+    </div>
+
+    <!-- 7.10 misc: tooltip / code / empty / loading -->
+    <div class="subsection">
+      <h3 class="subsection-title">7.10 · Tooltip · Code · Empty · Loading</h3>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="showcase-title">Tooltip</div>
+          <div class="demo-row" style="margin-bottom:2rem;"><span class="tip"><a class="btn btn--outline btn-sm">Hover me</a><span class="tip-box">Addressable demand, captive-excluded</span></span></div>
+          <div class="showcase-title">Empty state</div>
+          <div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><h4>No centres match</h4><p>Adjust the saturation or distance filters.</p></div>
+        </div>
+        <div class="panel">
+          <div class="showcase-title">Loading skeleton</div>
+          <div style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:2rem;"><div class="skeleton" style="height:14px;width:60%;"></div><div class="skeleton" style="height:14px;width:90%;"></div><div class="skeleton" style="height:14px;width:75%;"></div></div>
+          <div class="showcase-title">Inline code token</div>
+          <p style="font-size:0.88rem;">Set the accent with <span class="mono" style="background:var(--off-white);padding:2px 6px;border-radius:3px;border:1px solid var(--steel-light);">var(--mauve)</span> — never a hard-coded hex.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 08 · DATA & NETWORK ════════ -->
+<section class="section" id="data">
+  <div class="wrap">
+    <span class="kicker">Section 08</span>
+    <h2 class="section-title">Data Display &amp; Network</h2>
+    <p class="section-desc">The signature on-brand display patterns — drawn straight from the site. KPI grids, the France network map, the centre list, research blocks and news cards. These are the shapes that carry data in Lutecia communications.</p>
+
+    <div class="subsection">
+      <span class="sub-label">8.1 · Navigation bar (replica)</span>
+      <div class="repl-nav">
+        <span class="logo"><svg viewBox="0 0 160 72" fill="none"><line x1="2" y1="2" x2="2" y2="70" stroke="currentColor" stroke-width="1.4"/><line x1="2" y1="2" x2="38" y2="2" stroke="currentColor" stroke-width="1.4"/><line x1="2" y1="70" x2="58" y2="70" stroke="currentColor" stroke-width="1.4"/><line x1="58" y1="14" x2="155" y2="14" stroke="currentColor" stroke-width="1.4"/><line x1="155" y1="14" x2="155" y2="58" stroke="currentColor" stroke-width="1.4"/><text x="14" y="41" style="font-family:var(--serif);font-size:22px;fill:currentColor">Lutecia</text><text x="14" y="64" style="font-family:var(--serif);font-size:22px;fill:currentColor">Care</text></svg></span>
+        <ul><li><a>About</a></li><li><a>Patients</a></li><li><a>Physicians</a></li><li><a>Research</a></li><li><a>Contact</a></li></ul>
+        <span class="lang"><span>FR</span> | <span class="on">EN</span></span>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <span class="sub-label">8.2 · KPI grid</span>
+      <div class="grid-3">
+        <div class="kpi"><div class="v">7</div><div class="l">Centres across France</div></div>
+        <div class="kpi"><div class="v">15</div><div class="l">Physician shareholders</div></div>
+        <div class="kpi"><div class="v">~90</div><div class="l">Healthcare professionals</div></div>
+        <div class="kpi"><div class="v">€c.40m</div><div class="l">Revenue</div></div>
+        <div class="kpi"><div class="v">&gt;33k</div><div class="l">PET-CT exams</div></div>
+        <div class="kpi"><div class="v">&gt;27k</div><div class="l">Scintigraphy exams</div></div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <span class="sub-label">8.3 · Network map &amp; centre list</span>
+      <div class="grid-2" style="align-items:start;gap:3rem;">
+        <div>
+          <svg viewBox="0 0 340 380" fill="none" class="france-map">
+            <path d="M145 20 L180 18 L215 30 L240 50 L260 80 L270 110 L265 140 L260 165 L270 190 L265 220 L250 250 L230 275 L210 300 L195 330 L175 355 L155 365 L130 355 L110 335 L90 305 L75 275 L65 250 L55 220 L50 190 L60 160 L55 135 L60 105 L80 80 L100 58 L120 40 Z" fill="#e8edf5" stroke="#c5cfe0" stroke-width="1.5"/>
+            <circle cx="168" cy="78" r="5" fill="#1a2340"/><text x="178" y="82" class="map-label">Amiens</text>
+            <circle cx="155" cy="95" r="5" fill="#1a2340"/><text x="165" y="99" class="map-label">Beauvais</text>
+            <circle cx="182" cy="90" r="5" fill="#1a2340"/><text x="192" y="94" class="map-label">Soissons</text>
+            <circle cx="80" cy="170" r="5" fill="#1a2340"/><text x="90" y="174" class="map-label">Lorient</text>
+            <circle cx="92" cy="185" r="5" fill="#1a2340"/><text x="102" y="189" class="map-label">Vannes</text>
+            <circle cx="200" cy="290" r="5" fill="#1a2340"/><text x="210" y="294" class="map-label">Nîmes</text>
+            <circle cx="105" cy="265" r="5" fill="#7a3555"/><text x="115" y="269" class="map-label map-label--accent">Arcachon*</text>
+          </svg>
+          <p class="stage-caption" style="text-align:center;margin-top:0.6rem;">* Arcachon — opening autumn 2027</p>
+        </div>
+        <div>
+          <div class="centre-item"><div class="centre-dot"></div><div><strong>Amiens</strong><span>2 PET-CT · 2 γ-cameras</span></div></div>
+          <div class="centre-item"><div class="centre-dot"></div><div><strong>Beauvais</strong><span>1 PET-CT · 2 γ-cameras</span></div></div>
+          <div class="centre-item"><div class="centre-dot"></div><div><strong>Soissons</strong><span>1 PET-CT · 2 γ-cameras</span></div></div>
+          <div class="centre-item"><div class="centre-dot"></div><div><strong>Nîmes — Scintigard</strong><span>1 PET-CT · 2 γ-cameras</span></div></div>
+          <div class="centre-item"><div class="centre-dot"></div><div><strong>Lorient — CMNM</strong><span>1 PET-CT · 3 γ-cameras</span></div></div>
+          <div class="centre-item"><div class="centre-dot"></div><div><strong>Vannes — CMNM</strong><span>2 PET-CT · 3 γ-cameras</span></div></div>
+          <div class="centre-item centre-item--accent"><div class="centre-dot centre-dot--accent"></div><div><strong>Arcachon — Coming 2027</strong><span>Greenfield · authorisation Sep. 2025</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <span class="sub-label">8.4 · Research blocks &amp; news cards</span>
+      <div class="grid-3" style="margin-bottom:1.5rem;">
+        <div class="research research--feat"><div class="rtag">Focus</div><h4>Theranostics</h4><p>Combining diagnostics and targeted therapy — the cutting edge of nuclear medicine.</p></div>
+        <div class="research"><h4>Scientific Committee</h4><p>Sharing best medical practices across the network.</p></div>
+        <div class="research"><h4>Innovation Roadmap</h4><p>Continuous upgrade of technical platforms.</p></div>
+      </div>
+      <div class="grid-3">
+        <div class="news news--feat"><div class="news-meta"><span class="tag" style="background:rgba(255,255,255,0.15);color:#fff;">Development</span><time>2026</time></div><h4>Lutecia Care becomes the national leader in nuclear medicine</h4><a class="nlink">Read more →</a></div>
+        <div class="news"><div class="news-meta"><span class="tag tag--mauve">Expansion</span><time>Sep. 2025</time></div><h4>Arcachon: authorisation granted for a new centre</h4><a class="nlink">Read more →</a></div>
+        <div class="news"><div class="news-meta"><span class="tag tag--navy">Acquisition</span><time>May 2025</time></div><h4>Lutecia Care acquires CMNM (Lorient &amp; Vannes)</h4><a class="nlink">Read more →</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 09 · SPACING ════════ -->
+<section class="section" id="spacing">
+  <div class="wrap">
+    <span class="kicker">Section 09</span>
+    <h2 class="section-title">Spacing &amp; Grid</h2>
+    <p class="section-desc">Generous, rhythmic, centred. Content lives in a centred container with breathing room; sections alternate three backgrounds to create rhythm down a page.</p>
+
+    <div class="grid-2" style="gap:2rem;align-items:start;">
+      <div class="panel">
+        <div class="showcase-title">Containers &amp; grid</div>
+        <table class="tbl"><tbody>
+          <tr><td>Content max-width</td><td class="cell-mono">1200px</td></tr>
+          <tr><td>Nav max-width</td><td class="cell-mono">1300px</td></tr>
+          <tr><td>Gutter (desktop)</td><td class="cell-mono">2rem</td></tr>
+          <tr><td>Section padding</td><td class="cell-mono">7rem 0</td></tr>
+          <tr><td>Section padding (mobile)</td><td class="cell-mono">4.5rem 0</td></tr>
+          <tr><td>Split gap</td><td class="cell-mono">5rem</td></tr>
+          <tr><td>Card grid gap</td><td class="cell-mono">1.5rem</td></tr>
+        </tbody></table>
+      </div>
+      <div class="panel">
+        <div class="showcase-title">Spacing scale (rem rhythm)</div>
+        <div style="display:flex;flex-direction:column;gap:0.55rem;">
+          <div style="display:flex;align-items:center;gap:1rem;"><span class="mono" style="width:120px;color:var(--text-muted);font-size:0.76rem;">0.5rem · 8px</span><div style="background:var(--mauve);height:14px;width:8px;border-radius:2px;"></div></div>
+          <div style="display:flex;align-items:center;gap:1rem;"><span class="mono" style="width:120px;color:var(--text-muted);font-size:0.76rem;">0.75rem · 12px</span><div style="background:var(--mauve);height:14px;width:12px;border-radius:2px;"></div></div>
+          <div style="display:flex;align-items:center;gap:1rem;"><span class="mono" style="width:120px;color:var(--text-muted);font-size:0.76rem;">1rem · 16px</span><div style="background:var(--mauve);height:14px;width:16px;border-radius:2px;"></div></div>
+          <div style="display:flex;align-items:center;gap:1rem;"><span class="mono" style="width:120px;color:var(--text-muted);font-size:0.76rem;">1.5rem · 24px</span><div style="background:var(--mauve);height:14px;width:24px;border-radius:2px;"></div></div>
+          <div style="display:flex;align-items:center;gap:1rem;"><span class="mono" style="width:120px;color:var(--text-muted);font-size:0.76rem;">2rem · 32px</span><div style="background:var(--mauve);height:14px;width:32px;border-radius:2px;"></div></div>
+          <div style="display:flex;align-items:center;gap:1rem;"><span class="mono" style="width:120px;color:var(--text-muted);font-size:0.76rem;">4rem · 64px</span><div style="background:var(--mauve);height:14px;width:64px;border-radius:2px;"></div></div>
+          <div style="display:flex;align-items:center;gap:1rem;"><span class="mono" style="width:120px;color:var(--text-muted);font-size:0.76rem;">7rem · 112px</span><div style="background:var(--mauve);height:14px;width:112px;border-radius:2px;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection" style="margin-top:2rem;">
+      <span class="sub-label">9.1 · Section rhythm</span>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;max-width:560px;">
+        <div style="background:#fff;border:1px solid var(--steel-light);padding:0.7rem 1rem;border-radius:4px;font-size:0.82rem;color:var(--navy);">section--white · clean surfaces</div>
+        <div style="background:#f5f3f0;border:1px solid var(--steel-light);padding:0.7rem 1rem;border-radius:4px;font-size:0.82rem;color:var(--navy);">section--light · warm off-white</div>
+        <div style="background:#1a2340;padding:0.7rem 1rem;border-radius:4px;font-size:0.82rem;color:#fff;">section--navy · inverted, high impact</div>
+      </div>
+      <p class="subsection-desc" style="margin-top:0.8rem;">Alternate white ↔ light; punctuate with navy for hero, patients and contact. Never two navy sections back-to-back.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 10 · ELEVATION ════════ -->
+<section class="section" id="elevation">
+  <div class="wrap">
+    <span class="kicker">Section 10</span>
+    <h2 class="section-title">Elevation &amp; Radius</h2>
+    <p class="section-desc">Shadows are soft, low-opacity and navy-tinted — never grey, never harsh. Radii stay small: 4px is the default, 8px for larger cards and stages, full-round only for pills and status dots.</p>
+    <div class="grid-3">
+      <div class="panel" style="text-align:center;"><div style="height:60px;background:var(--off-white);border:1px solid var(--steel-light);border-radius:4px;margin-bottom:0.8rem;"></div><div class="swatch-name">Radius</div><div class="swatch-usage"><span class="mono">4px</span> default · <span class="mono">8px</span> large · <span class="mono">9999px</span> pill</div></div>
+      <div class="panel" style="text-align:center;"><div style="height:60px;background:#fff;box-shadow:var(--shadow-sm);border-radius:4px;margin-bottom:0.8rem;"></div><div class="swatch-name">shadow-sm</div><div class="swatch-usage"><span class="mono">0 2px 8px /.08</span> — nav, resting cards</div></div>
+      <div class="panel" style="text-align:center;"><div style="height:60px;background:#fff;box-shadow:var(--shadow-md);border-radius:4px;margin-bottom:0.8rem;"></div><div class="swatch-name">shadow-md</div><div class="swatch-usage"><span class="mono">0 8px 32px /.14</span> — hover lift</div></div>
+      <div class="panel" style="text-align:center;"><div style="height:60px;background:#fff;box-shadow:var(--shadow-lg);border-radius:4px;margin-bottom:0.8rem;"></div><div class="swatch-name">shadow-lg</div><div class="swatch-usage"><span class="mono">0 20px 60px /.18</span> — modals, dropdowns</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 11 · MOTION ════════ -->
+<section class="section" id="motion">
+  <div class="wrap">
+    <span class="kicker">Section 11</span>
+    <h2 class="section-title">Animation &amp; Motion</h2>
+    <p class="section-desc">Restrained and consistent. One easing curve governs nearly everything; entrances are a gentle fade-and-rise. Movement should feel like a held breath, never a bounce.</p>
+    <div class="grid-2" style="gap:2rem;align-items:start;">
+      <div class="panel">
+        <div class="showcase-title">Timing tokens</div>
+        <table class="tbl"><tbody>
+          <tr><td>Standard transition</td><td class="cell-mono">0.35s cubic-bezier(0.4,0,0.2,1)</td></tr>
+          <tr><td>Entrance (fade-rise)</td><td class="cell-mono">0.6s ease · Y 24→0</td></tr>
+          <tr><td>Stagger</td><td class="cell-mono">0.1s steps · delay-1…5</td></tr>
+          <tr><td>Hover lift</td><td class="cell-mono">translateY(-1 to -2px)</td></tr>
+          <tr><td>Ambient drift</td><td class="cell-mono">12–20s linear/alt</td></tr>
+        </tbody></table>
+      </div>
+      <div class="panel">
+        <div class="showcase-title">Principles</div>
+        <div class="feature" style="border:none;padding-top:0;"><div class="num">1</div><h4>One curve</h4><p style="font-size:0.9rem;">Use the standard ease for colour, transform and shadow. Consistency reads as quality.</p></div>
+        <div class="feature"><div class="num">2</div><h4>Reveal once</h4><p style="font-size:0.9rem;">Elements fade-and-rise as they enter, then stay. No looping, no scroll-jacking.</p></div>
+        <div class="feature"><div class="num">3</div><h4>Ambient, not loud</h4><p style="font-size:0.9rem;">The hero gradient drifts and particles float slowly. Background life — never a distraction.</p></div>
+      </div>
+    </div>
+    <div class="note"><strong>Accessibility.</strong> Honour <span class="mono">prefers-reduced-motion</span>: disable gradient drift, particle float and entrance transforms, leaving instant opacity. Functional hovers can remain.</div>
+  </div>
+</section>
+
+<!-- ════════ 12 · IMAGERY ════════ -->
+<section class="section" id="imagery">
+  <div class="wrap">
+    <span class="kicker">Section 12</span>
+    <h2 class="section-title">Imagery &amp; Backgrounds</h2>
+    <p class="section-desc">In place of stock photography, the brand's hero uses a living navy gradient overlaid with a fine particle grid — evoking a scan field, a constellation, depth without literalism. This is the most distinctive visual asset; protect it.</p>
+
+    <div style="border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--steel-light);margin-bottom:1.5rem;">
+      <div style="position:relative;min-height:240px;background:radial-gradient(ellipse 80% 60% at 70% 40%, #253058 0%, transparent 60%), radial-gradient(ellipse 60% 80% at 20% 70%, #0d1526 0%, transparent 55%), linear-gradient(135deg, #111827 0%, #1a2340 50%, #0d1526 100%);display:flex;align-items:center;padding:2.5rem;">
+        <div style="position:absolute;inset:0;background-image:radial-gradient(circle, rgba(138,155,181,0.12) 1px, transparent 1px), radial-gradient(circle, rgba(122,53,85,0.08) 1px, transparent 1px);background-size:60px 60px,100px 100px;background-position:0 0,30px 30px;"></div>
+        <div style="position:relative;">
+          <div style="color:var(--steel);font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:600;margin-bottom:0.6rem;">Nuclear Medicine</div>
+          <div style="font-family:var(--serif);font-size:2.1rem;font-weight:300;color:#fff;line-height:1.15;">Excellence, precision<br>and <em style="color:var(--steel-light);font-style:italic;">access to care</em></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="panel"><h4 style="margin-bottom:0.5rem;">Gradient recipe</h4><p style="font-size:0.82rem;">Two radial glows (navy-mid @ 70/40, navy-dark @ 20/70) over a 135° navy-dark→navy→navy-dark base. Subtle 12s hue drift.</p></div>
+      <div class="panel"><h4 style="margin-bottom:0.5rem;">Particle field</h4><p style="font-size:0.82rem;">Two dotted radial patterns (steel @ 12%, mauve @ 8%) at 60px &amp; 100px tiles, drifting 20s linear. Barely-there texture.</p></div>
+      <div class="panel"><h4 style="margin-bottom:0.5rem;">If using photography</h4><p style="font-size:0.82rem;">Real clinical environments &amp; equipment, cool-toned, clean and bright, with a navy overlay so it sits in the palette. Never warm or stocky.</p></div>
+    </div>
+    <div class="note"><strong>Don't.</strong> No off-brand bright/warm gradients · no literal radioactive/hazard iconography · no dense text over the busiest part of the field.</div>
+  </div>
+</section>
+
+<!-- ════════ 13 · VOICE ════════ -->
+<section class="section" id="voice">
+  <div class="wrap">
+    <span class="kicker">Section 13</span>
+    <h2 class="section-title">Brand Voice &amp; Tone</h2>
+    <p class="section-desc">Assured, warm, bilingual. Lutecia Care speaks with quiet confidence — precise enough for physicians, reassuring enough for patients. Every public string ships in <strong>English and French</strong> as equals (the site toggles via <span class="mono">data-en</span> / <span class="mono">data-fr</span>).</p>
+
+    <div class="grid-2" style="gap:1.5rem;">
+      <div class="panel">
+        <h4 style="margin-bottom:0.6rem;">Confident, not boastful</h4>
+        <ul style="font-size:0.88rem;color:var(--text-body);line-height:1.9;">
+          <li>· State facts; let numbers carry the claim</li>
+          <li>· No superlatives, no marketing buzzwords</li>
+        </ul>
+        <div class="note" style="margin-top:1rem;"><strong style="color:var(--success);">DO:</strong> "7 centres · &gt;33k PET-CT exams · €c.40m revenue."<br><strong style="color:var(--mauve);">NOT:</strong> "The most powerful nuclear-medicine platform ever built!"</div>
+      </div>
+      <div class="panel">
+        <h4 style="margin-bottom:0.6rem;">Human, not clinical</h4>
+        <ul style="font-size:0.88rem;color:var(--text-body);line-height:1.9;">
+          <li>· Patient copy is plain, calm, reassuring</li>
+          <li>· Explain; don't bury in jargon</li>
+        </ul>
+        <div class="note" style="margin-top:1rem;"><strong style="color:var(--success);">DO:</strong> "As clear and comfortable as possible."<br><strong style="color:var(--mauve);">NOT:</strong> "Radiopharmaceutical administration per protocol."</div>
+      </div>
+      <div class="panel">
+        <h4 style="margin-bottom:0.6rem;">Precise, not vague</h4>
+        <ul style="font-size:0.88rem;color:var(--text-body);line-height:1.9;">
+          <li>· Specifics, credentials, dates</li>
+          <li>· Short sentences, active voice, the em dash for rhythm</li>
+        </ul>
+        <div class="note" style="margin-top:1rem;"><strong style="color:var(--success);">DO:</strong> "Authorisation granted Sep. 2025; opening autumn 2027."<br><strong style="color:var(--mauve);">NOT:</strong> "Coming soon to a new region."</div>
+      </div>
+      <div class="panel">
+        <h4 style="margin-bottom:0.6rem;">Bilingual, not bolt-on</h4>
+        <ul style="font-size:0.88rem;color:var(--text-body);line-height:1.9;">
+          <li>· Write both languages from the start</li>
+          <li>· Adapt idiom; use « guillemets » &amp; French spacing</li>
+        </ul>
+        <div class="note" style="margin-top:1rem;"><strong>EN:</strong> "A leading independent player in nuclear medicine."<br><strong>FR:</strong> «&nbsp;Un acteur indépendant de référence en médecine nucléaire.&nbsp;»</div>
+      </div>
+    </div>
+    <div class="note"><strong>Terminology map.</strong> PET-CT ⇄ TEP-TDM · Scintigraphy ⇄ Scintigraphie · γ-camera ⇄ γ-caméra · Physicians ⇄ Médecins · Theranostics ⇄ Théranostique. Keep consistent everywhere.</div>
+  </div>
+</section>
+
+<!-- ════════ 14 · DO'S & DON'TS ════════ -->
+<section class="section" id="rules">
+  <div class="wrap">
+    <span class="kicker">Section 14</span>
+    <h2 class="section-title">Do's &amp; Don'ts</h2>
+    <p class="section-desc">The fast reference for applying the brand consistently across every surface.</p>
+    <div class="rules-grid">
+      <div class="rules-col do">
+        <h3><span class="mark">✓</span> Do</h3>
+        <div class="rule"><h4>Lead with navy &amp; neutrals</h4><p>The brand lives on deep navy and warm off-white. Let mauve appear only as emphasis.</p><div class="rule-demo" style="background:var(--navy);"><span style="color:#fff;font-family:var(--serif);font-size:1.4rem;">Lutecia <em style="color:var(--steel-light);font-style:italic;">Care</em></span></div></div>
+        <div class="rule"><h4>Use the serif for headings, sans for everything else</h4><p>Cormorant for display and figures; Inter for body, UI and labels. Never mix the roles.</p></div>
+        <div class="rule"><h4>Turn the key phrase italic-mauve</h4><p>In a heading, set the one phrase that matters in italic serif — it renders mauve. One accent per heading.</p></div>
+        <div class="rule"><h4>Keep the bracket open</h4><p>The logo frame is intentionally unclosed. Preserve the asymmetry and the two-line lockup.</p></div>
+        <div class="rule"><h4>Write EN &amp; FR together</h4><p>Both languages, equal weight, from the first draft.</p></div>
+      </div>
+      <div class="rules-col dont">
+        <h3><span class="mark">✗</span> Don't</h3>
+        <div class="rule"><h4>Don't flood with mauve</h4><p>Mauve is a 10% seasoning. Large mauve fields cheapen the palette and kill the accent.</p><div class="rule-demo" style="background:var(--mauve);"><span style="color:#fff;font-family:var(--serif);font-size:1.4rem;">Too much accent</span></div></div>
+        <div class="rule"><h4>Don't set the wordmark in sans</h4><p>In Inter or Arial it looks like a different company. The Cormorant serif treatment is non-negotiable.</p><div class="rule-demo" style="background:var(--off-white);"><span style="font-family:Arial,sans-serif;font-weight:700;color:var(--navy);font-size:1.3rem;">Lutecia Care</span></div></div>
+        <div class="rule"><h4>Don't close or distort the bracket</h4><p>No boxing the logo, no stretch/skew/rotate, no shadows or gradients on the mark.</p></div>
+        <div class="rule"><h4>Don't use bold serif headings</h4><p>Light/regular is the voice. Bold Cormorant reads heavy and off-brand.</p></div>
+        <div class="rule"><h4>Don't bolt French on at the end</h4><p>And never mix both languages inside one rendered string.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 15 · TOKENS ════════ -->
+<section class="section" id="tokens">
+  <div class="wrap">
+    <span class="kicker">Section 15</span>
+    <h2 class="section-title">Token Reference &amp; Copy-Paste</h2>
+    <p class="section-desc">The complete, authoritative token set. Drop it into any webapp, deck template or component library and point every build at these names — never hard-coded hexes.</p>
+
+    <div class="grid-2" style="gap:2rem;align-items:start;margin-bottom:1.5rem;">
+      <div class="panel" style="overflow-x:auto;">
+        <div class="showcase-title">Colour</div>
+        <table class="tbl"><tbody>
+          <tr><td class="cell-mono">--navy</td><td class="cell-mono">#1a2340</td></tr>
+          <tr><td class="cell-mono">--navy-dark</td><td class="cell-mono">#111827</td></tr>
+          <tr><td class="cell-mono">--navy-mid</td><td class="cell-mono">#253058</td></tr>
+          <tr><td class="cell-mono">--navy-light</td><td class="cell-mono">#3d4f7c</td></tr>
+          <tr><td class="cell-mono">--mauve</td><td class="cell-mono">#7a3555</td></tr>
+          <tr><td class="cell-mono">--mauve-light</td><td class="cell-mono">#a05070</td></tr>
+          <tr><td class="cell-mono">--steel</td><td class="cell-mono">#8a9bb5</td></tr>
+          <tr><td class="cell-mono">--steel-light</td><td class="cell-mono">#c5cfe0</td></tr>
+          <tr><td class="cell-mono">--off-white</td><td class="cell-mono">#f5f3f0</td></tr>
+          <tr><td class="cell-mono">--text-body</td><td class="cell-mono">#3d4f6a</td></tr>
+          <tr><td class="cell-mono">--text-muted</td><td class="cell-mono">#6b7a94</td></tr>
+        </tbody></table>
+      </div>
+      <div class="panel" style="overflow-x:auto;">
+        <div class="showcase-title">Type · shape · motion</div>
+        <table class="tbl"><tbody>
+          <tr><td class="cell-mono">--serif</td><td class="cell-mono">Cormorant Garamond</td></tr>
+          <tr><td class="cell-mono">--sans</td><td class="cell-mono">Inter</td></tr>
+          <tr><td class="cell-mono">--radius</td><td class="cell-mono">4px</td></tr>
+          <tr><td class="cell-mono">--radius-lg</td><td class="cell-mono">8px</td></tr>
+          <tr><td class="cell-mono">--shadow-sm</td><td class="cell-mono">0 2px 8px /.08</td></tr>
+          <tr><td class="cell-mono">--shadow-md</td><td class="cell-mono">0 8px 32px /.14</td></tr>
+          <tr><td class="cell-mono">--shadow-lg</td><td class="cell-mono">0 20px 60px /.18</td></tr>
+          <tr><td class="cell-mono">--transition</td><td class="cell-mono">0.35s cubic-bezier(.4,0,.2,1)</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <span class="sub-label">15.1 · :root — drop-in block</span>
+      <div class="code">
+        <div class="code-head"><span>tokens.css</span><button class="code-copy" data-copy="root">Copy</button></div>
+<pre><code id="root">:root {
+  --navy:#1a2340; --navy-dark:#111827; --navy-mid:#253058; --navy-light:#3d4f7c;
+  --mauve:#7a3555; --mauve-light:#a05070;
+  --steel:#8a9bb5; --steel-light:#c5cfe0;
+  --off-white:#f5f3f0; --white:#ffffff;
+  --text-dark:#1a2340; --text-body:#3d4f6a; --text-muted:#6b7a94;
+  --success:#2e7d5b; --warning:#b5852f; --danger:#b3402f; --info:#3d4f7c;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --radius:4px; --radius-lg:8px; --radius-full:9999px;
+  --transition:0.35s cubic-bezier(0.4,0,0.2,1);
+  --shadow-sm:0 2px 8px rgba(26,35,64,0.08);
+  --shadow-md:0 8px 32px rgba(26,35,64,0.14);
+  --shadow-lg:0 20px 60px rgba(26,35,64,0.18);
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <span class="sub-label">15.2 · Logo wordmark — paste this</span>
+      <div class="demo-stage--navy" style="border-radius:var(--radius-lg);padding:2.5rem;text-align:center;margin-bottom:1rem;">
+        <svg viewBox="0 0 160 72" fill="none" style="height:56px;color:#fff;margin:0 auto;"><line x1="2" y1="2" x2="2" y2="70" stroke="currentColor" stroke-width="1.4"/><line x1="2" y1="2" x2="38" y2="2" stroke="currentColor" stroke-width="1.4"/><line x1="2" y1="70" x2="58" y2="70" stroke="currentColor" stroke-width="1.4"/><line x1="58" y1="14" x2="155" y2="14" stroke="currentColor" stroke-width="1.4"/><line x1="155" y1="14" x2="155" y2="58" stroke="currentColor" stroke-width="1.4"/><text x="14" y="41" style="font-family:var(--serif);font-size:22px;fill:currentColor">Lutecia</text><text x="14" y="64" style="font-family:var(--serif);font-size:22px;fill:currentColor">Care</text></svg>
+      </div>
+      <div class="code">
+        <div class="code-head"><span>logo.svg — inherits colour via currentColor; needs Cormorant Garamond loaded</span><button class="code-copy" data-copy="logoCode">Copy</button></div>
+<pre><code id="logoCode">&lt;svg viewBox="0 0 160 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Lutecia Care"&gt;
+  &lt;line x1="2"   y1="2"  x2="2"   y2="70" stroke="currentColor" stroke-width="1.4"/&gt;
+  &lt;line x1="2"   y1="2"  x2="38"  y2="2"  stroke="currentColor" stroke-width="1.4"/&gt;
+  &lt;line x1="2"   y1="70" x2="58"  y2="70" stroke="currentColor" stroke-width="1.4"/&gt;
+  &lt;line x1="58"  y1="14" x2="155" y2="14" stroke="currentColor" stroke-width="1.4"/&gt;
+  &lt;line x1="155" y1="14" x2="155" y2="58" stroke="currentColor" stroke-width="1.4"/&gt;
+  &lt;text x="14" y="41" style="font-family:'Cormorant Garamond',serif;font-size:22px;fill:currentColor"&gt;Lutecia&lt;/text&gt;
+  &lt;text x="14" y="64" style="font-family:'Cormorant Garamond',serif;font-size:22px;fill:currentColor"&gt;Care&lt;/text&gt;
+&lt;/svg&gt;</code></pre>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <span class="sub-label">15.3 · Web-font import</span>
+      <div class="code">
+        <div class="code-head"><span>&lt;head&gt;</span><button class="code-copy" data-copy="font">Copy</button></div>
+<pre><code id="font">&lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;
+&lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;
+&lt;link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="doc-footer">
+  <div class="wrap">
+    <svg viewBox="0 0 160 72" fill="none" aria-label="Lutecia Care"><line x1="2" y1="2" x2="2" y2="70" stroke="currentColor" stroke-width="1.4"/><line x1="2" y1="2" x2="38" y2="2" stroke="currentColor" stroke-width="1.4"/><line x1="2" y1="70" x2="58" y2="70" stroke="currentColor" stroke-width="1.4"/><line x1="58" y1="14" x2="155" y2="14" stroke="currentColor" stroke-width="1.4"/><line x1="155" y1="14" x2="155" y2="58" stroke="currentColor" stroke-width="1.4"/><text x="14" y="41" style="font-family:var(--serif);font-size:22px;fill:currentColor">Lutecia</text><text x="14" y="64" style="font-family:var(--serif);font-size:22px;fill:currentColor">Care</text></svg>
+    <span>Brand Identity &amp; Design System · v2.0 · Derived from the production website · © 2026 Lutecia Care</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+  // Logo injection (DRY: one SVG string, reused across the logo lab)
+  var LOGO = '<svg viewBox="0 0 160 72" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="2" x2="2" y2="70" stroke="currentColor" stroke-width="1.4"/><line x1="2" y1="2" x2="38" y2="2" stroke="currentColor" stroke-width="1.4"/><line x1="2" y1="70" x2="58" y2="70" stroke="currentColor" stroke-width="1.4"/><line x1="58" y1="14" x2="155" y2="14" stroke="currentColor" stroke-width="1.4"/><line x1="155" y1="14" x2="155" y2="58" stroke="currentColor" stroke-width="1.4"/><text x="14" y="41" style="font-family:Cormorant Garamond,serif;font-size:22px;fill:currentColor">Lutecia</text><text x="14" y="64" style="font-family:Cormorant Garamond,serif;font-size:22px;fill:currentColor">Care</text></svg>';
+  ['logoNavy','logoLight','logoGrad','logoMauve','logoClear'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = LOGO;
+  });
+
+  // Tabs
+  document.querySelectorAll('[data-tabs]').forEach(function(group){
+    var tabs = group.querySelectorAll('.tab');
+    var root = group.parentElement;
+    tabs.forEach(function(tab){
+      tab.addEventListener('click', function(){
+        var i = tab.getAttribute('data-tab');
+        tabs.forEach(function(t){ t.classList.toggle('is-active', t === tab); });
+        root.querySelectorAll('[data-panel]').forEach(function(p){
+          p.classList.toggle('is-active', p.getAttribute('data-panel') === i);
+        });
+      });
+    });
+  });
+
+  // Copy buttons
+  document.querySelectorAll('.code-copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var src = document.getElementById(btn.getAttribute('data-copy'));
+      if (!src) return;
+      var text = src.textContent;
+      var done = function(){ var o = btn.textContent; btn.textContent = 'Copied ✓'; setTimeout(function(){ btn.textContent = o; }, 1600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done).catch(done); }
+      else { done(); }
+    });
+  });
+
+  // Smooth scroll + scrollspy for the sticky TOC
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  links.forEach(function(a){
+    a.addEventListener('click', function(e){
+      var t = document.querySelector(a.getAttribute('href'));
+      if (!t) return;
+      e.preventDefault();
+      window.scrollTo({ top: t.getBoundingClientRect().top + window.pageYOffset - 56, behavior: 'smooth' });
+    });
+  });
+  if ('IntersectionObserver' in window) {
+    var spy = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (en.isIntersecting) {
+          links.forEach(function(a){
+            a.style.color = a.getAttribute('href') === '#' + en.target.id ? 'var(--mauve)' : '';
+          });
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    document.querySelectorAll('section[id]').forEach(function(s){ spy.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
