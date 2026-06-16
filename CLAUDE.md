@@ -32,12 +32,13 @@ Toujours privilégier le résultat obtenu sur la sophistication technique.
 ## Architecture données
 
 ```
-lutecia_imports     → données brutes Excel importés (immuables)
-lutecia_output      → surcharges CRM par structure (statut, notes, corrections)
-lutecia_kpi         → KPIs financiers par structure
-lutecia_actions     → notes & actions par structure
-lutecia_journal     → journal de toutes les modifications
-lutecia_saved_filters → filtres sauvegardés (localStorage)
+lutecia_imports          → données brutes Excel importés (immuables)
+lutecia_output           → surcharges CRM par groupe (statut, notes, corrections de champs groupe)
+lutecia_centres_override → surcharges par centre individuel au sein d'un groupe (nb machines, type)
+lutecia_kpi              → KPIs financiers par structure
+lutecia_actions          → notes & actions par structure
+lutecia_journal          → journal de toutes les modifications (max 2000 entrées)
+lutecia_saved_filters    → filtres sauvegardés (localStorage)
 ```
 
 **Import Excel** : fichier pays (ex: `Screening_Italy.xlsx`) → feuille `DB` parsée → stockée dans `lutecia_imports` taguée par pays. Réimport = remplacement par pays, surcharges CRM préservées.
