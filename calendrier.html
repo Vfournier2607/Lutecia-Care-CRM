@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://alcdn.msauth.net/browser/3.27.0/js/msal-browser.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -25,16 +26,16 @@
   --shadow-sm:0 2px 8px rgba(26,35,64,0.08);
   --shadow-md:0 8px 32px rgba(26,35,64,0.14);
   --shadow-lg:0 20px 60px rgba(26,35,64,0.18);
-  /* Category colours */
+  /* Category colours — Lutecia Care palette */
   --cat-mn:#1a2340;
   --cat-thera:#7a3555;
-  --cat-onco:#2e7d5b;
-  --cat-radio:#b5852f;
-  --cat-medtech:#3d4f7c;
-  --cat-formation:#6b7a94;
-  --cat-healthcare:#8a9bb5;
+  --cat-onco:#2d4f8a;
+  --cat-radio:#5c2d47;
+  --cat-medtech:#3d608c;
+  --cat-formation:#9a4a6e;
+  --cat-healthcare:#3a5f7a;
   --cat-imagerie:#253058;
-  --cat-autre:#c5cfe0;
+  --cat-autre:#7a6890;
 }
 html{font-size:16px;scroll-behavior:smooth}
 body{font-family:var(--sans);color:var(--text-dark);background:var(--off-white);-webkit-font-smoothing:antialiased;min-height:100vh}
@@ -109,6 +110,13 @@ input,select,textarea,button{font-family:var(--sans)}
 .icon-btn:hover{background:var(--off-white);color:var(--navy);border-color:var(--steel)}
 .icon-btn.danger:hover{background:var(--danger-bg);color:var(--danger);border-color:var(--danger)}
 
+/* ── Multi-select ── */
+.event-checkbox{width:18px;height:18px;flex-shrink:0;accent-color:var(--mauve);cursor:pointer}
+.event-card.selected{background:rgba(122,53,85,0.07);border-color:rgba(122,53,85,0.4)}
+.event-card[onclick]{cursor:pointer}
+.bulk-bar{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:var(--radius-lg);padding:0.65rem 1.25rem;display:flex;align-items:center;gap:0.75rem;box-shadow:var(--shadow-lg);z-index:300;animation:toast-in 0.2s ease;white-space:nowrap}
+.bulk-bar.hidden{display:none}
+
 /* ── Buttons ── */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;padding:0.65rem 1.4rem;font-size:0.85rem;font-weight:500;letter-spacing:0.03em;border-radius:var(--radius);border:1px solid transparent;cursor:pointer;transition:var(--transition);white-space:nowrap}
 .btn--dark{background:var(--navy);color:#fff;border-color:var(--navy)}
@@ -163,6 +171,14 @@ input,select,textarea,button{font-family:var(--sans)}
 .scraper-count{font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem}
 .scraper-actions{display:flex;gap:0.5rem;align-items:center;margin-bottom:1rem}
 
+/* ── Auth ── */
+.auth-btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.35rem 0.8rem;font-size:0.78rem;font-weight:500;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.25);border-radius:var(--radius);cursor:pointer;transition:var(--transition);white-space:nowrap}
+.auth-btn:hover{background:rgba(255,255,255,0.2)}
+.auth-user{display:flex;align-items:center;gap:0.5rem;cursor:pointer;padding:0.25rem 0.6rem;border-radius:var(--radius);transition:var(--transition)}
+.auth-user:hover{background:rgba(255,255,255,0.1)}
+.auth-avatar{width:28px;height:28px;border-radius:50%;background:var(--mauve);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0}
+.auth-name{font-size:0.8rem;color:#fff;font-weight:500}
+
 /* ── Empty state ── */
 .empty{text-align:center;padding:3rem 1rem;color:var(--text-muted)}
 .empty svg{width:40px;height:40px;color:var(--steel);margin:0 auto 0.75rem}
@@ -179,10 +195,10 @@ input,select,textarea,button{font-family:var(--sans)}
 <!-- NAV -->
 <nav class="app-nav">
   <div class="nav-logo">
-    <svg viewBox="0 0 245 152" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Lutecia Care">
-      <rect x="5" y="5" width="130" height="96" stroke="currentColor" stroke-width="2.5" fill="none"/>
-      <text x="13" y="70" style="font-family:'Cormorant Garamond',serif;font-size:40px;fill:currentColor;font-weight:400">Lutecia</text>
-      <text x="72" y="140" style="font-family:'Cormorant Garamond',serif;font-size:64px;fill:currentColor;font-weight:400">Care</text>
+    <svg viewBox="0 0 292 170" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Lutecia Care">
+      <rect x="4" y="4" width="140" height="112" stroke="currentColor" stroke-width="2.8" fill="none"/>
+      <text x="14" y="82" style="font-family:'Cormorant Garamond',serif;font-size:52px;fill:currentColor;font-weight:400;letter-spacing:-0.5px">Lutecia</text>
+      <text x="82" y="164" style="font-family:'Cormorant Garamond',serif;font-size:78px;fill:currentColor;font-weight:400;letter-spacing:-0.5px">Care</text>
     </svg>
   </div>
   <div class="nav-tabs">
@@ -190,6 +206,7 @@ input,select,textarea,button{font-family:var(--sans)}
     <div class="nav-tab" onclick="switchTab('recurring')">🔁 Récurrents</div>
     <div class="nav-tab" onclick="switchTab('sources')">🔍 Sources</div>
   </div>
+  <div id="auth-zone" style="margin-left:1rem"></div>
 </nav>
 
 <div class="main">
@@ -202,6 +219,7 @@ input,select,textarea,button{font-family:var(--sans)}
     <div class="page-header">
       <h2 class="page-title">Calendrier <em>MedNuc</em></h2>
       <div class="page-actions">
+        <button class="btn btn--outline btn-sm" id="select-btn" onclick="toggleSelectMode()">☑ Sélectionner</button>
         <button class="btn btn--dark" onclick="openModal()">+ Ajouter un événement</button>
       </div>
     </div>
@@ -233,7 +251,6 @@ input,select,textarea,button{font-family:var(--sans)}
     <div class="page-header">
       <h2 class="page-title">Événements <em>récurrents</em></h2>
       <div class="page-actions">
-        <button class="btn btn--light" onclick="launchScraper()" title="Lance le scraping des sources prédéfinies">🔍 Lancer le scraping</button>
         <button class="btn btn--dark" onclick="openModalRecur()">+ Ajouter récurrent</button>
       </div>
     </div>
@@ -250,6 +267,13 @@ input,select,textarea,button{font-family:var(--sans)}
     <div id="sources-container"></div>
   </div>
 
+</div>
+
+<!-- ═══ BULK ACTION BAR ═══ -->
+<div class="bulk-bar hidden" id="bulk-bar">
+  <span id="bulk-count" style="font-size:0.82rem">0 sélectionné(s)</span>
+  <button class="btn btn--light btn-sm" onclick="bulkExportICS()">📅 Exporter vers Outlook</button>
+  <button style="background:none;border:1px solid rgba(255,255,255,0.3);color:#fff;padding:0.4rem 0.8rem;border-radius:var(--radius);font-size:0.78rem;cursor:pointer" onclick="toggleSelectMode()">✕ Annuler</button>
 </div>
 
 <!-- ═══ MODAL: AJOUTER ÉVÉNEMENT ═══ -->
@@ -398,19 +422,99 @@ input,select,textarea,button{font-family:var(--sans)}
 
 <script>
 // ═══════════════════════════════════════
+// MSAL — Microsoft Authentication
+// ═══════════════════════════════════════
+// ⚠ Remplacer par l'ID d'application (client) de ton App Registration Azure AD
+const MSAL_CLIENT_ID = '7f7950f5-9397-4bf7-989d-9c7115ac1d52';
+
+let msalInstance = null;
+let currentUser = null; // { name, email }
+
+// ── Multi-select state ──
+let selectMode = false;
+let selectedIds = new Set();
+
+function initMsal() {
+  if (!window.msal || MSAL_CLIENT_ID === 'YOUR_CLIENT_ID_HERE') {
+    // Pas configuré → afficher bouton quand même (désactivé)
+    updateAuthUI();
+    return;
+  }
+  try {
+    const msalConfig = {
+      auth: {
+        clientId: MSAL_CLIENT_ID,
+        authority: 'https://login.microsoftonline.com/common',
+        redirectUri: window.location.origin,
+      },
+      cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
+    };
+    msalInstance = new msal.PublicClientApplication(msalConfig);
+    msalInstance.initialize().then(() => {
+      msalInstance.handleRedirectPromise().then(resp => {
+        if (resp) {
+          _setUser(resp.account);
+        } else {
+          const accounts = msalInstance.getAllAccounts();
+          if (accounts.length > 0) _setUser(accounts[0]);
+        }
+        updateAuthUI();
+      });
+    });
+  } catch(e) { console.error('MSAL init error:', e); updateAuthUI(); }
+}
+
+function _setUser(account) {
+  currentUser = { name: account.name || account.username, email: account.username };
+  toast(`Connecté : ${currentUser.name} ✓`);
+}
+
+function signIn() {
+  if (!msalInstance) { toast('MSAL non configuré — ajoutez le Client ID Azure AD'); return; }
+  msalInstance.loginPopup({ scopes: ['openid', 'profile', 'email'] })
+    .then(resp => { _setUser(resp.account); updateAuthUI(); })
+    .catch(e => { if (e.errorCode !== 'user_cancelled') toast('Erreur: ' + e.message); });
+}
+
+function signOut() {
+  if (!msalInstance || !currentUser) return;
+  msalInstance.logoutPopup().then(() => { currentUser = null; updateAuthUI(); });
+}
+
+function updateAuthUI() {
+  const zone = document.getElementById('auth-zone');
+  if (!zone) return;
+  if (currentUser) {
+    const initials = currentUser.name.split(/\s+/).map(n => n[0]).join('').slice(0,2).toUpperCase();
+    zone.innerHTML = `
+      <div class="auth-user" onclick="signOut()" title="Déconnecter — ${currentUser.email}">
+        <div class="auth-avatar">${initials}</div>
+        <span class="auth-name">${currentUser.name.split(' ')[0]}</span>
+      </div>`;
+  } else {
+    const disabled = MSAL_CLIENT_ID === 'YOUR_CLIENT_ID_HERE' ? 'title="Configurez MSAL_CLIENT_ID dans le code" style="opacity:0.55"' : '';
+    zone.innerHTML = `
+      <button class="auth-btn" onclick="signIn()" ${disabled}>
+        <svg width="14" height="14" viewBox="0 0 22 22" fill="none"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="12" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="12" width="9" height="9" fill="#00a4ef"/><rect x="12" y="12" width="9" height="9" fill="#ffb900"/></svg>
+        Connexion Microsoft
+      </button>`;
+  }
+}
+
+// ═══════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════
 
 const CAT_COLORS = {
-  'medecine-nucleaire': '#1a2340',
-  'theranostique':      '#7a3555',
-  'oncologie':          '#2e7d5b',
-  'radiotherapie':      '#b5852f',
-  'medtech':            '#3d4f7c',
-  'formation':          '#6b7a94',
-  'healthcare':         '#8a9bb5',
-  'imagerie':           '#253058',
-  'autre':              '#c5cfe0',
+  'medecine-nucleaire': '#1a2340',  // navy profond (primaire)
+  'theranostique':      '#7a3555',  // mauve (secondaire)
+  'oncologie':          '#2d4f8a',  // bleu royal
+  'radiotherapie':      '#5c2d47',  // prune foncé
+  'medtech':            '#3d608c',  // bleu acier
+  'formation':          '#9a4a6e',  // mauve rosé
+  'healthcare':         '#3a5f7a',  // ardoise bleue
+  'imagerie':           '#253058',  // navy sombre
+  'autre':              '#7a6890',  // mauve grisé
 };
 
 const CAT_LABELS = {
@@ -427,6 +531,17 @@ const CAT_LABELS = {
 
 const MONTHS_FR = ['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const MONTHS_SHORT = ['','jan.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+
+const COUNTRY_FLAGS = {
+  'France':'🇫🇷','Italie':'🇮🇹','Pologne':'🇵🇱','Suède':'🇸🇪',
+  'Allemagne':'🇩🇪','Espagne':'🇪🇸','Roumanie':'🇷🇴','Pays-Bas':'🇳🇱',
+  'États-Unis':'🇺🇸','Autriche':'🇦🇹','UAE':'🇦🇪','Égypte':'🇪🇬',
+  'Belgique':'🇧🇪','Royaume-Uni':'🇬🇧','Suisse':'🇨🇭','Portugal':'🇵🇹',
+  'Grèce':'🇬🇷','Danemark':'🇩🇰','Finlande':'🇫🇮','Norvège':'🇳🇴',
+  'Japon':'🇯🇵','Chine':'🇨🇳','Australie':'🇦🇺','Canada':'🇨🇦',
+  'Brésil':'🇧🇷','Israël':'🇮🇱','Turquie':'🇹🇷','Inde':'🇮🇳',
+  'Corée du Sud':'🇰🇷','Singapour':'🇸🇬','Mexique':'🇲🇽',
+};
 
 const DEFAULT_EVENTS = [
   // MAI 2026
@@ -472,6 +587,16 @@ const DEFAULT_EVENTS = [
   {id:'e34',title:'BIO-Europe',startDate:'2026-11-09',endDate:'2026-11-11',city:'Cologne',country:'Allemagne',category:'healthcare',notes:'Partnering biopharma.'},
   {id:'e35',title:'HLTH USA',startDate:'2026-11-15',endDate:'2026-11-18',city:'Las Vegas',country:'États-Unis',category:'healthcare',notes:'Health innovation / digital health.'},
   {id:'e36',title:'RSNA',startDate:'2026-11-29',endDate:'2026-12-03',city:'Chicago',country:'États-Unis',category:'imagerie',notes:'Imagerie médicale mondiale.'},
+  // JUILLET 2026 (suite)
+  {id:'e42',title:'ASCO Annual Meeting 2026',startDate:'2026-06-05',endDate:'2026-06-09',city:'Chicago',country:'États-Unis',category:'oncologie',notes:'American Society of Clinical Oncology — plus grand congrès oncologie mondial. asco.org'},
+  {id:'e43',title:'SNMMI Annual Meeting 2026',startDate:'2026-06-14',endDate:'2026-06-17',city:'Nashville',country:'États-Unis',category:'medecine-nucleaire',notes:'Society of Nuclear Medicine and Molecular Imaging. snmmi.org'},
+  {id:'e44',title:'ASNC 2026',startDate:'2026-09-10',endDate:'2026-09-13',city:'San Diego',country:'États-Unis',category:'medecine-nucleaire',notes:'American Society of Nuclear Cardiology. asnc.org'},
+  {id:'e45',title:'CIRSE 2026',startDate:'2026-09-19',endDate:'2026-09-22',city:'Lisbonne',country:'Portugal',category:'imagerie',notes:'Cardiovascular and Interventional Radiological Society of Europe. cirse.org'},
+  {id:'e46',title:'ASTRO Annual Meeting 2026',startDate:'2026-10-25',endDate:'2026-10-28',city:'Houston',country:'États-Unis',category:'radiotherapie',notes:'American Society for Radiation Oncology. astro.org'},
+  {id:'e47',title:'DGN Jahrestagung 2026',startDate:'2026-04-22',endDate:'2026-04-26',city:'Leipzig',country:'Allemagne',category:'medecine-nucleaire',notes:'Congrès annuel de la Deutsche Gesellschaft für Nuklearmedizin. nuklearmedizin.de — à confirmer'},
+  {id:'e48',title:'AACR Annual Meeting 2026',startDate:'2026-04-25',endDate:'2026-04-29',city:'Los Angeles',country:'États-Unis',category:'oncologie',notes:'American Association for Cancer Research. aacr.org'},
+  {id:'e49',title:'ESGAR 2026',startDate:'2026-06-17',endDate:'2026-06-20',city:'Vienne',country:'Autriche',category:'imagerie',notes:'European Society of Gastrointestinal and Abdominal Radiology. esgar.org'},
+  {id:'e50',title:'EACR Congress 2026',startDate:'2026-06-24',endDate:'2026-06-27',city:'Barcelone',country:'Espagne',category:'oncologie',notes:'European Association for Cancer Research. eacr.org'},
   // JANVIER 2027
   {id:'e37',title:'Hivernales 2027',startDate:'2027-01-24',endDate:'2027-01-27',city:'France',country:'France',category:'medecine-nucleaire',notes:'cnp-mn.fr'},
   {id:'e38',title:'WHX Dubai 2027',startDate:'2027-01-25',endDate:'2027-01-28',city:'Dubai',country:'UAE',category:'healthcare',notes:'Très gros salon santé du Moyen-Orient. worldhealthexpo.com'},
@@ -642,6 +767,8 @@ function exportICS(ev) {
     location ? `LOCATION:${escapeICS(location)}` : '',
     desc ? `DESCRIPTION:${desc}` : '',
     `CATEGORIES:${escapeICS(CAT_LABELS[ev.category]||ev.category)}`,
+    currentUser ? `ORGANIZER;CN="${escapeICS(currentUser.name)}":mailto:${currentUser.email}` : '',
+    currentUser ? `ATTENDEE;CN="${escapeICS(currentUser.name)}";ROLE=REQ-PARTICIPANT;RSVP=FALSE:mailto:${currentUser.email}` : '',
     'END:VEVENT',
     'END:VCALENDAR',
   ].filter(Boolean).join('\r\n');
@@ -654,6 +781,80 @@ function exportICS(ev) {
   a.click();
   URL.revokeObjectURL(url);
   toast('Invitation Outlook générée ✓');
+}
+
+// ═══════════════════════════════════════
+// MULTI-SELECT & BULK EXPORT
+// ═══════════════════════════════════════
+function toggleSelectMode() {
+  selectMode = !selectMode;
+  selectedIds.clear();
+  const btn = document.getElementById('select-btn');
+  if (btn) btn.textContent = selectMode ? '✕ Annuler' : '☑ Sélectionner';
+  updateBulkBar();
+  renderCalendar();
+}
+
+function toggleSelect(id) {
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  const card = document.getElementById('card-' + id);
+  if (card) {
+    card.classList.toggle('selected', selectedIds.has(id));
+    const cb = card.querySelector('.event-checkbox');
+    if (cb) cb.checked = selectedIds.has(id);
+  }
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  const countEl = document.getElementById('bulk-count');
+  if (!bar) return;
+  if (selectMode && selectedIds.size > 0) {
+    bar.classList.remove('hidden');
+    countEl.textContent = selectedIds.size + ' sélectionné' + (selectedIds.size > 1 ? 's' : '');
+  } else {
+    bar.classList.add('hidden');
+  }
+}
+
+function bulkExportICS() {
+  const selected = events.filter(function(ev) { return selectedIds.has(ev.id); });
+  if (selected.length === 0) { toast('Aucun événement sélectionné'); return; }
+
+  const vevents = selected.map(function(ev) {
+    const end = ev.endDate || ev.startDate;
+    const endDt = new Date(end + 'T00:00:00');
+    endDt.setDate(endDt.getDate() + 1);
+    const endStr = [endDt.getFullYear(), String(endDt.getMonth()+1).padStart(2,'0'), String(endDt.getDate()).padStart(2,'0')].join('');
+    const location = [ev.city, ev.country].filter(Boolean).join(', ');
+    const desc = escapeICS(ev.notes || '');
+    return [
+      'BEGIN:VEVENT',
+      'UID:' + ev.id + '@luteciacare',
+      'DTSTART;VALUE=DATE:' + toICSDate(ev.startDate),
+      'DTEND;VALUE=DATE:' + endStr,
+      'SUMMARY:' + escapeICS(ev.title),
+      location ? 'LOCATION:' + escapeICS(location) : '',
+      desc ? 'DESCRIPTION:' + desc : '',
+      'CATEGORIES:' + escapeICS(CAT_LABELS[ev.category]||ev.category),
+      currentUser ? 'ORGANIZER;CN="' + escapeICS(currentUser.name) + '":mailto:' + currentUser.email : '',
+      currentUser ? 'ATTENDEE;CN="' + escapeICS(currentUser.name) + '";ROLE=REQ-PARTICIPANT;RSVP=FALSE:mailto:' + currentUser.email : '',
+      'END:VEVENT',
+    ].filter(Boolean).join('\r\n');
+  }).join('\r\n');
+
+  const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Lutecia Care//Calendar//FR','CALSCALE:GREGORIAN','METHOD:PUBLISH',vevents,'END:VCALENDAR'].join('\r\n');
+  const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'LuteciaCare_' + selected.length + '_evenements.ics';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✓ ' + selected.length + ' événement' + (selected.length>1?'s exportés':' exporté'));
+  toggleSelectMode();
 }
 
 // ═══════════════════════════════════════
@@ -741,12 +942,16 @@ function renderCalendar() {
 }
 
 function renderEventCard(ev) {
-  const color = CAT_COLORS[ev.category] || '#c5cfe0';
+  const color = CAT_COLORS[ev.category] || '#7a6890';
   const label = CAT_LABELS[ev.category] || ev.category;
   const dates = formatDateRange(ev.startDate, ev.endDate);
-  const loc = [ev.city, ev.country].filter(Boolean).join(', ');
+  const flag = COUNTRY_FLAGS[ev.country] || '';
+  const loc = [ev.city, ev.country ? (flag ? flag + ' ' + ev.country : ev.country) : ''].filter(Boolean).join(', ');
+  const isSelected = selectedIds.has(ev.id);
+  const gridCols = selectMode ? 'grid-template-columns:22px 4px 1fr auto' : '';
   return `
-    <div class="event-card" id="card-${ev.id}">
+    <div class="event-card${isSelected ? ' selected' : ''}" id="card-${ev.id}" style="${gridCols}" ${selectMode ? 'onclick="toggleSelect(\'' + ev.id + '\')"' : ''}>
+      ${selectMode ? '<input type="checkbox" class="event-checkbox"' + (isSelected ? ' checked' : '') + ' onclick="event.stopPropagation();toggleSelect(\'' + ev.id + '\')" style="margin:auto 0">' : ''}
       <div class="event-bar" style="background:${color}"></div>
       <div class="event-body">
         <div class="event-title">${ev.title}</div>
@@ -758,9 +963,9 @@ function renderEventCard(ev) {
         ${ev.notes ? `<div style="font-size:0.76rem;color:var(--text-muted);margin-top:0.3rem">${ev.notes}</div>` : ''}
       </div>
       <div class="event-actions">
-        <button class="icon-btn" title="Exporter vers Outlook (.ics)" onclick="exportICS(${JSON.stringify(ev).replace(/"/g,'&quot;')})">📅</button>
-        <button class="icon-btn" title="Modifier" onclick="editEvent('${ev.id}')">✏️</button>
-        <button class="icon-btn danger" title="Supprimer" onclick="deleteEvent('${ev.id}')">🗑</button>
+        <button class="icon-btn" title="Exporter vers Outlook (.ics)" onclick="event.stopPropagation();exportICS(${JSON.stringify(ev).replace(/"/g,'&quot;')})">📅</button>
+        <button class="icon-btn" title="Modifier" onclick="event.stopPropagation();editEvent('${ev.id}')">✏️</button>
+        <button class="icon-btn danger" title="Supprimer" onclick="event.stopPropagation();deleteEvent('${ev.id}')">🗑</button>
       </div>
     </div>`;
 }
@@ -796,12 +1001,11 @@ function renderRecurCard(r) {
   return `
     <div class="recur-card">
       <div class="recur-month-badge" style="background:${color}">
-        <span class="month">${MONTHS_SHORT[r.typicalMonth]}</span>
-        <span class="num">${r.typicalMonth}</span>
+        <span class="month" style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;opacity:1">${MONTHS_SHORT[r.typicalMonth]}</span>
       </div>
       <div class="recur-body">
         <div class="recur-name">${r.name}</div>
-        <div class="recur-detail">${[r.city, r.country].filter(Boolean).join(', ')}${r.notes ? ' — ' + r.notes : ''}</div>
+        <div class="recur-detail">${[r.city, r.country ? (COUNTRY_FLAGS[r.country]||'') + ' ' + r.country : ''].filter(Boolean).join(', ')}${r.notes ? ' — ' + r.notes : ''}</div>
       </div>
       ${statusHtml}
       <button class="icon-btn danger" title="Supprimer" onclick="deleteRecur('${r.id}')">🗑</button>
@@ -814,24 +1018,20 @@ function renderRecurCard(r) {
 function deleteEvent(id) {
   if (!confirm('Supprimer cet événement ?')) return;
   events = events.filter(e => e.id !== id);
-  saveData();
-  renderAll();
-  toast('Événement supprimé');
+  saveData(); renderAll(); toast('Événement supprimé');
 }
 
 function deleteRecur(id) {
   if (!confirm('Supprimer cet événement récurrent ?')) return;
   recurring = recurring.filter(r => r.id !== id);
-  saveData();
-  renderRecurring();
-  toast('Supprimé');
+  saveData(); renderRecurring(); toast('Supprimé');
 }
 
 function editEvent(id) {
   const ev = events.find(e => e.id === id);
   if (!ev) return;
   editingId = id;
-  document.getElementById('modal-title').textContent = 'Modifier l\'événement';
+  document.getElementById('modal-title').textContent = "Modifier l'événement";
   document.getElementById('f-title').value = ev.title;
   document.getElementById('f-start').value = ev.startDate;
   document.getElementById('f-end').value = ev.endDate || '';
@@ -880,9 +1080,7 @@ function saveEvent() {
   } else {
     events.push(ev);
   }
-  saveData();
-  closeModal();
-  renderAll();
+  saveData(); closeModal(); renderAll();
   toast(editingId ? 'Événement modifié ✓' : 'Événement ajouté ✓');
 }
 
@@ -896,26 +1094,20 @@ function openModalRecur() {
   document.getElementById('modal-recur').classList.remove('hidden');
 }
 
-function closeModalRecur() {
-  document.getElementById('modal-recur').classList.add('hidden');
-}
+function closeModalRecur() { document.getElementById('modal-recur').classList.add('hidden'); }
 
 function saveRecur() {
   const name = document.getElementById('rf-name').value.trim();
   if (!name) { alert('Nom requis.'); return; }
   recurring.push({
-    id: uid(),
-    name,
+    id: uid(), name,
     typicalMonth: parseInt(document.getElementById('rf-month').value),
     category: document.getElementById('rf-category').value,
     country: document.getElementById('rf-country').value.trim(),
     city: document.getElementById('rf-city').value.trim(),
     notes: document.getElementById('rf-notes').value.trim(),
   });
-  saveData();
-  closeModalRecur();
-  renderRecurring();
-  toast('Événement récurrent ajouté ✓');
+  saveData(); closeModalRecur(); renderRecurring(); toast('Événement récurrent ajouté ✓');
 }
 
 function applyFilters() {
@@ -925,8 +1117,7 @@ function applyFilters() {
 }
 
 function resetFilters() {
-  filterCategory = '';
-  filterCountry = '';
+  filterCategory = ''; filterCountry = '';
   document.getElementById('filter-category').value = '';
   document.getElementById('filter-country').value = '';
   renderCalendar();
@@ -937,7 +1128,7 @@ function renderFilters() {
   const current = sel.value;
   const countries = [...new Set(events.map(e => e.country).filter(Boolean))].sort((a,b) => a.localeCompare(b,'fr'));
   sel.innerHTML = '<option value="">🌍 Tous les pays</option>' +
-    countries.map(c => `<option value="${c}"${c===current?' selected':''}>${c}</option>`).join('');
+    countries.map(c => '<option value="' + c + '"' + (c===current?' selected':'') + '>' + c + '</option>').join('');
 }
 
 // ═══════════════════════════════════════
@@ -947,50 +1138,39 @@ let scraperResults = [];
 
 async function launchScraper() {
   const btn = document.querySelector('[onclick="launchScraper()"]');
-  btn.disabled = true;
-  btn.textContent = '⏳ Scraping…';
-
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Scraping…'; }
   try {
     let results;
     if (!SCRAPER_URL) {
-      // Mode démo — simule un délai réseau
       await new Promise(r => setTimeout(r, 900));
       results = { events: SCRAPER_DEMO, count: SCRAPER_DEMO.length, errors: [], demo: true };
     } else {
       const r = await fetch(SCRAPER_URL);
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
       results = await r.json();
     }
     openScraperModal(results);
   } catch (err) {
-    toast(`Erreur scraper : ${err.message}`);
+    toast('Erreur scraper : ' + err.message);
   } finally {
-    btn.disabled = false;
-    btn.textContent = '🔍 Lancer le scraping';
+    if (btn) { btn.disabled = false; btn.textContent = '🔍 Lancer le scraping'; }
   }
 }
 
 function openScraperModal(results) {
   scraperResults = results.events || [];
   const isDemoMode = results.demo === true;
-
   document.getElementById('scraper-modal-title').textContent =
-    isDemoMode ? `🧪 Démo — ${scraperResults.length} événements simulés` : `🔍 ${scraperResults.length} événements trouvés`;
-
-  // Mark duplicates
-  const existingKeys = new Set(
-    events.map(e => e.title.toLowerCase().replace(/\s+/g,'').slice(0,25))
-  );
+    isDemoMode ? ('🧪 D\xe9mo — ' + scraperResults.length + ' \xe9v\xe9nements simul\xe9s') : ('🔍 ' + scraperResults.length + ' \xe9v\xe9nements trouv\xe9s');
+  const existingKeys = new Set(events.map(e => e.title.toLowerCase().replace(/\s+/g,'').slice(0,25)));
   scraperResults.forEach(ev => {
     ev._isDuplicate = existingKeys.has(ev.title.toLowerCase().replace(/\s+/g,'').slice(0,25));
   });
-
   const newCount = scraperResults.filter(e => !e._isDuplicate).length;
   document.getElementById('scraper-status').innerHTML =
     isDemoMode
-      ? `<span style="color:var(--warning);font-weight:600">Mode démo</span> — configurez <code>SCRAPER_URL</code> après déploiement Azure. <b>${newCount}</b> nouveaux · <b>${scraperResults.length - newCount}</b> déjà présents.`
-      : `<b>${newCount}</b> nouveaux événements · <b>${scraperResults.length - newCount}</b> déjà présents dans le calendrier.`;
-
+      ? '<span style="color:var(--warning);font-weight:600">Mode d\xe9mo</span> — <b>' + newCount + '</b> nouveaux \xb7 <b>' + (scraperResults.length - newCount) + '</b> d\xe9j\xe0 pr\xe9sents.'
+      : '<b>' + newCount + '</b> nouveaux \xb7 <b>' + (scraperResults.length - newCount) + '</b> d\xe9j\xe0 pr\xe9sents.';
   renderScraperList();
   document.getElementById('modal-scraper').classList.remove('hidden');
 }
@@ -998,76 +1178,49 @@ function openScraperModal(results) {
 function renderScraperList() {
   const container = document.getElementById('scraper-event-list');
   if (scraperResults.length === 0) {
-    container.innerHTML = '<div class="empty"><p>Aucun événement pertinent trouvé.</p></div>';
-    return;
+    container.innerHTML = '<div class="empty"><p>Aucun \xe9v\xe9nement trouv\xe9.</p></div>'; return;
   }
-  container.innerHTML = scraperResults.map((ev, i) => {
+  container.innerHTML = scraperResults.map(function(ev, i) {
     const color = CAT_COLORS[ev.category] || '#999';
     const label = CAT_LABELS[ev.category] || ev.category;
     const dates = formatDateRange(ev.startDate, ev.endDate);
     const loc = [ev.city, ev.country].filter(Boolean).join(', ');
-    const dupBadge = ev._isDuplicate
-      ? '<span class="scraper-duplicate">déjà présent</span>' : '';
-    return `
-      <div class="scraper-event">
-        <input type="checkbox" id="sc-${i}" ${ev._isDuplicate ? '' : 'checked'}
-               onchange="updateScraperCount()">
-        <div class="scraper-event-body">
-          <div class="scraper-event-title">${ev.title}</div>
-          <div class="scraper-event-meta">
-            <span>${dates}</span>
-            ${loc ? `<span>· ${loc}</span>` : ''}
-            <span class="cat-badge" style="background:${color}">${label}</span>
-            ${dupBadge}
-            <span style="font-size:0.68rem;color:var(--text-muted)">${ev.source || ''}</span>
-          </div>
-        </div>
-      </div>`;
+    const dup = ev._isDuplicate ? '<span class="scraper-duplicate">d\xe9j\xe0 pr\xe9sent</span>' : '';
+    return '<div class="scraper-event">'
+      + '<input type="checkbox" id="sc-' + i + '" ' + (ev._isDuplicate ? '' : 'checked') + ' onchange="updateScraperCount()">'
+      + '<div class="scraper-event-body">'
+      + '<div class="scraper-event-title">' + ev.title + '</div>'
+      + '<div class="scraper-event-meta"><span>' + dates + '</span>'
+      + (loc ? '<span>\xb7 ' + loc + '</span>' : '')
+      + '<span class="cat-badge" style="background:' + color + '">' + label + '</span>' + dup
+      + '<span style="font-size:0.68rem;color:var(--text-muted)">' + (ev.source || '') + '</span>'
+      + '</div></div></div>';
   }).join('');
   updateScraperCount();
 }
 
 function updateScraperCount() {
-  const checked = scraperResults.filter((_, i) =>
-    document.getElementById(`sc-${i}`)?.checked
-  ).length;
-  document.getElementById('scraper-selection-count').textContent =
-    `${checked} sélectionné${checked !== 1 ? 's' : ''}`;
-  document.getElementById('scraper-import-btn').textContent =
-    `Importer ${checked > 0 ? `(${checked})` : ''}`;
+  const checked = scraperResults.filter(function(_, i) { return document.getElementById('sc-' + i) && document.getElementById('sc-' + i).checked; }).length;
+  document.getElementById('scraper-selection-count').textContent = checked + ' s\xe9lectionn\xe9' + (checked !== 1 ? 's' : '');
+  document.getElementById('scraper-import-btn').textContent = 'Importer' + (checked > 0 ? ' (' + checked + ')' : '');
 }
 
 function selectAllScraper(val) {
-  scraperResults.forEach((_, i) => {
-    const cb = document.getElementById(`sc-${i}`);
-    if (cb) cb.checked = val;
-  });
+  scraperResults.forEach(function(_, i) { var cb = document.getElementById('sc-' + i); if (cb) cb.checked = val; });
   updateScraperCount();
 }
 
 function importScraperSelection() {
-  const selected = scraperResults.filter((_, i) =>
-    document.getElementById(`sc-${i}`)?.checked && !scraperResults[i]._isDuplicate
-  );
-  if (selected.length === 0) { toast('Aucun nouvel événement sélectionné.'); return; }
-
-  selected.forEach(ev => {
-    events.push({
-      id: uid(),
-      title: ev.title,
-      startDate: ev.startDate,
-      endDate: ev.endDate || ev.startDate,
-      city: ev.city || '',
-      country: ev.country || '',
-      category: ev.category || 'autre',
-      notes: ev.notes || '',
-    });
+  const selected = scraperResults.filter(function(ev, i) {
+    var cb = document.getElementById('sc-' + i);
+    return cb && cb.checked && !ev._isDuplicate;
   });
-
-  saveData();
-  closeScraperModal();
-  renderAll();
-  toast(`✓ ${selected.length} événement${selected.length > 1 ? 's' : ''} importé${selected.length > 1 ? 's' : ''}`);
+  if (selected.length === 0) { toast('Aucun nouvel \xe9v\xe9nement s\xe9lectionn\xe9.'); return; }
+  selected.forEach(function(ev) {
+    events.push({ id: uid(), title: ev.title, startDate: ev.startDate, endDate: ev.endDate || ev.startDate, city: ev.city || '', country: ev.country || '', category: ev.category || 'autre', notes: ev.notes || '' });
+  });
+  saveData(); closeScraperModal(); renderAll();
+  toast('✓ ' + selected.length + ' \xe9v\xe9nement' + (selected.length > 1 ? 's import\xe9s' : ' import\xe9'));
 }
 
 function closeScraperModal() {
@@ -1080,24 +1233,18 @@ function closeScraperModal() {
 // ═══════════════════════════════════════
 function renderSources() {
   const container = document.getElementById('sources-container');
-  container.innerHTML = SOURCES.map(tier => {
-    const sitesHtml = tier.sites.map(s => {
-      const tags = s.tags.map(t => `<span class="source-tag" style="background:${CAT_COLORS[t]||'#999'}">${CAT_LABELS[t]||t}</span>`).join('');
-      return `
-        <div class="source-card">
-          <a href="${s.url}" target="_blank" rel="noopener">${s.name} ↗</a>
-          <div class="source-card-meta">${tags}<span style="margin-left:0.25rem">${s.desc}</span></div>
-        </div>`;
+  container.innerHTML = SOURCES.map(function(tier) {
+    const sitesHtml = tier.sites.map(function(s) {
+      const tags = s.tags.map(function(t) {
+        return '<span class="source-tag" style="background:' + (CAT_COLORS[t]||'#999') + '">' + (CAT_LABELS[t]||t) + '</span>';
+      }).join('');
+      return '<div class="source-card"><a href="' + s.url + '" target="_blank" rel="noopener">' + s.name + ' ↗</a>'
+        + '<div class="source-card-meta">' + tags + '<span style="margin-left:0.25rem">' + s.desc + '</span></div></div>';
     }).join('');
-    return `
-      <div class="sources-tier">
-        <div class="sources-tier-title">
-          <span class="sources-tier-badge">${tier.tier}</span>
-          ${tier.label}
-        </div>
-        <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem">${tier.desc}</p>
-        <div class="sources-grid">${sitesHtml}</div>
-      </div>`;
+    return '<div class="sources-tier">'
+      + '<div class="sources-tier-title"><span class="sources-tier-badge">' + tier.tier + '</span>' + tier.label + '</div>'
+      + '<p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem">' + tier.desc + '</p>'
+      + '<div class="sources-grid">' + sitesHtml + '</div></div>';
   }).join('');
 }
 
@@ -1105,9 +1252,9 @@ function renderSources() {
 // TABS
 // ═══════════════════════════════════════
 function switchTab(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => {
-    t.classList.toggle('active', t.getAttribute('onclick') === `switchTab('${name}')`);
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t) {
+    t.classList.toggle('active', t.getAttribute('onclick') === "switchTab('" + name + "')");
   });
   document.getElementById('view-' + name).classList.add('active');
 }
@@ -1120,7 +1267,7 @@ function toast(msg) {
   el.className = 'toast';
   el.textContent = msg;
   document.getElementById('toast').appendChild(el);
-  setTimeout(() => el.remove(), 2800);
+  setTimeout(function() { el.remove(); }, 2800);
 }
 
 // ═══════════════════════════════════════
@@ -1134,19 +1281,13 @@ function renderAll() {
   renderSources();
 }
 
-// Close modals on overlay click
-document.getElementById('modal-event').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-document.getElementById('modal-recur').addEventListener('click', function(e) {
-  if (e.target === this) closeModalRecur();
-});
-document.getElementById('modal-scraper').addEventListener('click', function(e) {
-  if (e.target === this) closeScraperModal();
-});
+document.getElementById('modal-event').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.getElementById('modal-recur').addEventListener('click', function(e) { if (e.target === this) closeModalRecur(); });
+document.getElementById('modal-scraper').addEventListener('click', function(e) { if (e.target === this) closeScraperModal(); });
 
 loadData();
 renderAll();
+initMsal();
 </script>
 </body>
 </html>
