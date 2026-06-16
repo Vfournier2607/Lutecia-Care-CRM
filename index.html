@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deal Flow — Lutecia Care</title>
+  <meta name="description" content="Lutecia Care — Suivi du deal flow Europe">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%231a2340'/><text y='.9em' font-size='80' x='10'>L</text></svg>" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -13,11 +15,8 @@
     :root {
       --navy:        #1a2340;
       --navy-dark:   #111827;
-      --navy-mid:    #253058;
       --navy-light:  #3d4f7c;
       --mauve:       #7a3555;
-      --mauve-light: #a05070;
-      --steel:       #8a9bb5;
       --steel-light: #c5cfe0;
       --off-white:   #f5f3f0;
       --white:       #ffffff;
@@ -41,9 +40,7 @@
       --sidebar: 200px;
       --topbar:  44px;
       --r:       4px;
-      --r-lg:    8px;
       --shadow:  0 2px 8px rgba(26,35,64,0.08);
-      --shadow-sm: 0 2px 8px rgba(26,35,64,0.08);
       --shadow-md: 0 8px 32px rgba(26,35,64,0.14);
     }
 
@@ -439,7 +436,7 @@
       vertical-align: middle;
     }
 
-    .cell-nom { font-weight: 600; color: var(--navy); transition: color .12s; }
+    .cell-nom { font-weight: 600; color: var(--navy); transition: color .12s; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .cell-nd  { color: var(--text-muted); font-style: italic; }
 
     /* ══════════════════════════════════════
@@ -590,6 +587,17 @@
     }
     .toast.toast-warn { background: var(--mauve); }
     @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+    .saved-filters-section { display: flex; flex-direction: column; gap: 0; }
+
+    .btn-export {
+      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+      padding: 7px 16px; border-radius: var(--r); border: none;
+      background: #fff; color: var(--navy); cursor: pointer;
+      display: flex; align-items: center; gap: 7px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .btn-export:hover { opacity: .9; }
   </style>
 </head>
 <body>
@@ -597,7 +605,7 @@
 <!-- ══ CHARGEMENT ══ -->
 <div id="loading-overlay" style="position:fixed;inset:0;background:#1a2340;display:flex;align-items:center;justify-content:center;z-index:1000;">
   <div style="text-align:center;">
-    <img id="loading-logo" style="height:120px;width:auto;display:block;margin:0 auto 20px;" />
+    <img id="loading-logo" alt="" style="height:120px;width:auto;display:block;margin:0 auto 20px;" />
     <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Connexion en cours…</div>
   </div>
 </div>
@@ -612,13 +620,13 @@
     </div>
     <nav class="sidebar-nav">
       <div class="nav-label">Navigation</div>
-      <a class="nav-item active" onclick="void(0)">
+      <span class="nav-item active" aria-current="page">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
           <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
         </svg>
         Deal Flow
-      </a>
+      </span>
       <a class="nav-item" onclick="openImportPanel()" style="cursor:pointer;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
@@ -638,7 +646,7 @@
       <div class="topbar-title">Deal Flow Europe</div>
       <div class="topbar-date" id="topbar-date"></div>
     </div>
-    <button onclick="exporterExcel()" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;padding:7px 16px;border-radius:var(--r);border:none;background:#fff;color:var(--navy);cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 2px 8px rgba(0,0,0,0.15);" title="Exporter toutes les données en Excel">
+    <button onclick="exporterExcel()" class="btn-export" title="Exporter toutes les données en Excel">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Exporter Excel
     </button>
@@ -735,7 +743,7 @@
         <div class="filter-sep"></div>
 
         <!-- Filtres sauvegardés -->
-        <div>
+        <div class="saved-filters-section">
           <span class="sf-label">Filtres sauvegardés</span>
           <div class="sf-chips" id="saved-filters-bar"></div>
           <button class="btn-save-filter" onclick="promptSaveFilter()">＋ Sauvegarder ce filtre</button>
@@ -744,13 +752,13 @@
       </div>
       <div class="filter-panel-footer">
         <button class="btn-reset-filter" onclick="resetFiltres()">Réinitialiser</button>
-        <button class="btn-apply-filter" onclick="closeFilterPanel()">Appliquer</button>
+        <button class="btn-apply-filter" onclick="closeFilterPanel()">Fermer</button>
       </div>
     </div>
 
     <!-- Panneau Import -->
     <div class="filter-overlay" id="import-overlay" onclick="closeImportPanel()"></div>
-    <div class="filter-panel" id="import-panel" style="width:360px;">
+    <div class="filter-panel" id="import-panel" style="width:360px;right:-380px;">
       <div class="filter-panel-head">
         <span class="filter-panel-title">Importer des données</span>
         <button class="filter-panel-close" onclick="closeImportPanel()">✕</button>
@@ -1683,7 +1691,15 @@ document.addEventListener('DOMContentLoaded', function() {
     renderTable();
     renderStats();
   } else {
+    var loadingTimeout = setTimeout(function() {
+      var overlay = document.getElementById('loading-overlay');
+      if (overlay && overlay.style.display !== 'none') {
+        var msg = overlay.querySelector('div > div:last-child');
+        if (msg) msg.textContent = 'La connexion a échoué. Veuillez rafraîchir la page.';
+      }
+    }, 15000);
     graphConnect().then(function(ok) {
+      clearTimeout(loadingTimeout);
       var overlay = document.getElementById('loading-overlay');
       if (overlay) overlay.style.display = 'none';
       if (!ok) {
