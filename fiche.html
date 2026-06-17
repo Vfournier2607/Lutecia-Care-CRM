@@ -695,21 +695,9 @@
             <div class="info-row"><div class="info-label">Région</div><input class="info-input" id="i-region" placeholder="—" onchange="sauver('region', this.value)" /></div>
             <div class="info-row"><div class="info-label">Ville</div><input class="info-input" id="i-ville" placeholder="—" onchange="sauver('ville', this.value)" /></div>
             <div class="info-row"><div class="info-label">Adresse</div><input class="info-input" id="i-adresse" placeholder="—" onchange="sauver('adresse', this.value)" /></div>
-            <div class="info-row"><div class="info-label">TEP</div>
-              <select class="info-input" id="i-tep" onchange="sauver('tep', this.value)" style="padding:3px 6px;">
-                <option value="">—</option><option value="Oui">Oui</option><option value="Non">Non</option><option value="N/D">N/D</option>
-              </select>
-            </div>
-            <div class="info-row"><div class="info-label">Gamma cam.</div>
-              <select class="info-input" id="i-gamma" onchange="sauver('gamma_cam', this.value)" style="padding:3px 6px;">
-                <option value="">—</option><option value="Oui">Oui</option><option value="Non">Non</option><option value="N/D">N/D</option>
-              </select>
-            </div>
-            <div class="info-row"><div class="info-label">Radiothérap.</div>
-              <select class="info-input" id="i-radio" onchange="sauver('radiotherapie', this.value)" style="padding:3px 6px;">
-                <option value="">—</option><option value="Oui">Oui</option><option value="Non">Non</option><option value="N/D">N/D</option>
-              </select>
-            </div>
+            <div class="info-row"><div class="info-label">TEP</div><div class="info-value" id="i-tep">—</div></div>
+            <div class="info-row"><div class="info-label">Gamma cam.</div><div class="info-value" id="i-gamma">—</div></div>
+            <div class="info-row"><div class="info-label">Radiothérap.</div><div class="info-value" id="i-radio">—</div></div>
             <div class="info-row"><div class="info-label">Nb TEP</div><input class="info-input" id="i-nb-tep" type="number" min="0" placeholder="—" onchange="sauver('nb_tep', this.value)" /></div>
             <div class="info-row"><div class="info-label">Nb Gamma</div><input class="info-input" id="i-nb-gamma" type="number" min="0" placeholder="—" onchange="sauver('nb_gamma', this.value)" /></div>
             <div class="info-row"><div class="info-label">Lien</div><input class="info-input" id="i-lien" placeholder="https://…" onchange="sauver('contact', this.value)" /></div>
@@ -845,6 +833,12 @@ var anneesActives = TOUTES_ANNEES.slice();
 var kpiLignes     = KPI_DEFAUT.slice();
 
 // Helper: échapper le HTML pour éviter les XSS dans les gabarits innerHTML
+function badgeVal(v) {
+  if (v === "Oui") return "<span style="color:#1a6b3c;background:#e8f5ee;border:1px solid #b8dfc8;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;">Oui</span>";
+  if (v === "Non") return "<span style="color:#6b7a94;background:#f5f3f0;border:1px solid #c5cfe0;padding:2px 8px;border-radius:20px;font-size:10px;">Non</span>";
+  return "<span style="color:#6b7a94;background:#c5cfe0;padding:2px 8px;border-radius:20px;font-size:10px;">N/D</span>";
+}
+
 function esc(str) {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -1031,9 +1025,9 @@ function chargerFiche() {
     setInput('i-region',   val('region',         'region'));
     setInput('i-ville',    val('ville',          'ville'));
     setInput('i-adresse',  val('adresse',        'adresse'));
-    setSelect('i-tep',     val('tep',            'tep'));
-    setSelect('i-gamma',   val('gamma_cam',      'gamma_cam'));
-    setSelect('i-radio',   val('radiotherapie',  'radiotherapie'));
+    document.getElementById('i-tep').innerHTML   = badgeVal(val('tep',           'tep'));
+    document.getElementById('i-gamma').innerHTML = badgeVal(val('gamma_cam',     'gamma_cam'));
+    document.getElementById('i-radio').innerHTML = badgeVal(val('radiotherapie', 'radiotherapie'));
     setInput('i-nb-tep',   val('nb_tep',         'nb_tep') !== '' ? val('nb_tep','nb_tep') : (currentGroupe.nb_tep || ''));
     setInput('i-nb-gamma', val('nb_gamma',       'nb_gamma') !== '' ? val('nb_gamma','nb_gamma') : (currentGroupe.nb_gamma || ''));
     setInput('i-lien',     val('contact',        'contact'));
