@@ -1751,63 +1751,175 @@ function exporterExcel() {
   var imports  = loadImports();
   var output   = loadOutput();
   var journal  = JSON.parse(localStorage.getItem('lutecia_journal') || '[]');
-  var kpis     = JSON.parse(localStorage.getItem('lutecia_kpi')     || '{}');
-  var actions  = JSON.parse(localStorage.getItem('lutecia_actions') || '{}');
 
   if (!imports.length) { alert('Aucune donnée importée. Importez d\'abord un fichier Excel.'); return; }
 
   var wb = XLSX.utils.book_new();
+  wb.Props = { Title: 'Lutecia Care — Deal Flow', Author: currentUser || 'Lutecia Care' };
 
-  // Colonnes de base (depuis Excel source)
+  // ── Couleurs brand ──
+  var C = {
+    navy:       '0B1E46',
+    navyMid:    '1B2F6E',
+    mauve:      '622346',
+    blueClair:  'C8CDE8',
+    offWhite:   'F5F3F0',
+    white:      'FFFFFF',
+    text:       '2E3138',
+    textMuted:  '4A4A6A',
+    rowAlt:     'EEF1F8'
+  };
+
+  // ── Helpers style ──
+  function cs(font, fill, align, border) {
+    var cell = {};
+    if (font)  cell.font  = font;
+    if (fill)  cell.fill  = { patternType: 'solid', fgColor: { rgb: fill } };
+    if (align) cell.alignment = align;
+    if (border) cell.border = border;
+    return cell;
+  }
+
+  var sHeader = cs(
+    { bold: true, sz: 10, color: { rgb: C.white }, name: 'Jost' },
+    C.navy,
+    { horizontal: 'left', vertical: 'center', wrapText: false }
+  );
+  var sHeaderMauve = cs(
+    { bold: true, sz: 10, color: { rgb: C.white }, name: 'Jost' },
+    C.mauve,
+    { horizontal: 'left', vertical: 'center' }
+  );
+  var sData = cs(
+    { sz: 10, color: { rgb: C.text }, name: 'Jost' },
+    C.white,
+    { horizontal: 'left', vertical: 'center' }
+  );
+  var sDataAlt = cs(
+    { sz: 10, color: { rgb: C.text }, name: 'Jost' },
+    C.rowAlt,
+    { horizontal: 'left', vertical: 'center' }
+  );
+
+  // ── Colonnes ──
   var colsBase = ['Nom du centre','Type','Réseau','Nom réseau','TEP','Gamma cam.','Nb TEP','Nb Gamma','Adresse','CP','Région','Ville','Mapping','Lien','Notes'];
-  // Colonnes CRM ajoutées
   var colsCRM  = ['Statut deal','Label','Responsable M&A','Contact clé','Source','Note CRM'];
+  var allCols  = colsBase.concat(colsCRM);
+  var nbBase   = colsBase.length;
+  var nbTotal  = allCols.length;
+
+  // Largeurs colonnes
+  var colWidths = allCols.map(function(_, i) {
+    if (i === 0) return { wch: 38 };
+    if (i === 8) return { wch: 30 }; // adresse
+    if (i >= nbBase) return { wch: 18 }; // CRM
+    return { wch: 12 };
+  });
+
+  function letterCol(n) {
+    var s = '';
+    n++;
+    while (n > 0) { s = String.fromCharCode(65 + (n-1)%26) + s; n = Math.floor((n-1)/26); }
+    return s;
+  }
+
+  function applySheet(ws, dataRows, hasCRM) {
+    ws['!cols'] = colWidths;
+    ws['!rows'] = [{ hpt: 22 }]; // header height
+    ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+    // Style header
+    for (var c = 0; c < nbTotal; c++) {
+      var addr = letterCol(c) + '1';
+      if (ws[addr]) ws[addr].s = (hasCRM && c >= nbBase) ? sHeaderMauve : sHeader;
+    }
+    // Style data rows
+    dataRows.forEach(function(_, ri) {
+      var isAlt = ri % 2 === 1;
+      for (var c = 0; c < nbTotal; c++) {
+        var addr2 = letterCol(c) + (ri + 2);
+        if (ws[addr2]) ws[addr2].s = isAlt ? sDataAlt : sData;
+      }
+    });
+    ws['!autofilter'] = { ref: 'A1:' + letterCol(nbTotal-1) + '1' };
+  }
 
   var allRows = [];
 
-  // Une feuille par pays
+  // ── Feuilles par pays ──
   imports.forEach(function(imp) {
-    var rows = [colsBase.concat(colsCRM)]; // header
+    var dataRows = [];
     imp.data.forEach(function(c) {
-      var id  = (c.reseau === 'Oui' && c.nom_reseau)
+      var id = (c.reseau === 'Oui' && c.nom_reseau)
         ? 'reseau_' + c.nom_reseau.toLowerCase().replace(/[^a-z0-9]/g, '_')
         : 'centre_' + c.nom.toLowerCase().replace(/[^a-z0-9]/g, '_');
       var rec = output[id] || {};
       var row = [
         c.nom,
-        rec.type          || c.type          || '',
-        c.reseau          || '',
-        c.nom_reseau      || '',
-        rec.tep           || c.tep           || '',
-        rec.gamma_cam     || c.gamma_cam     || '',
-        rec.nb_tep        !== undefined ? rec.nb_tep        : (c.nb_tep   || 0),
-        rec.nb_gamma      !== undefined ? rec.nb_gamma      : (c.nb_gamma || 0),
-        rec.adresse       || c.adresse       || '',
-        c.cp              || '',
-        rec.region        || c.region        || '',
-        rec.ville         || c.ville         || '',
-        rec.mapping       || c.mapping       || '',
-        rec.contact       || c.contact       || '',
-        rec.notes_db      || c.notes         || '',
-        // CRM
-        rec.statut        || '',
-        rec.label         || '',
-        rec.responsable   || '',
-        rec.contact_cle   || '',
-        rec.source        || '',
-        rec.note          || ''
+        rec.type       || c.type       || '',
+        c.reseau       || '',
+        c.nom_reseau   || '',
+        rec.tep        || c.tep        || '',
+        rec.gamma_cam  || c.gamma_cam  || '',
+        rec.nb_tep     !== undefined ? rec.nb_tep     : (c.nb_tep   || 0),
+        rec.nb_gamma   !== undefined ? rec.nb_gamma   : (c.nb_gamma || 0),
+        rec.adresse    || c.adresse    || '',
+        c.cp           || '',
+        rec.region     || c.region     || '',
+        rec.ville      || c.ville      || '',
+        rec.mapping    || c.mapping    || '',
+        rec.contact    || c.contact    || '',
+        rec.notes_db   || c.notes      || '',
+        rec.statut     || '',
+        rec.label      || '',
+        rec.responsable|| '',
+        rec.contact_cle|| '',
+        rec.source     || '',
+        rec.note       || ''
       ];
-      rows.push(row);
+      dataRows.push(row);
       allRows.push(row);
     });
-    var ws = XLSX.utils.aoa_to_sheet(rows);
-    styleSheetHeader(ws, colsBase.length + colsCRM.length);
+    var ws = XLSX.utils.aoa_to_sheet([allCols].concat(dataRows));
+    applySheet(ws, dataRows, true);
     XLSX.utils.book_append_sheet(wb, ws, 'DB_' + imp.pays.substring(0, 28));
   });
 
-  // Feuille Agrégat
+  // ── Feuille Agrégat ──
   if (allRows.length) {
-    var wsAgg = XLSX.utils.aoa_to_sheet([colsBase.concat(colsCRM)].concat(allRows));
+    var wsAgg = XLSX.utils.aoa_to_sheet([allCols].concat(allRows));
+    applySheet(wsAgg, allRows, true);
+    XLSX.utils.book_append_sheet(wb, wsAgg, 'Agrégat');
+  }
+
+  // ── Feuille Journal ──
+  var journalHeader = ['Date','Auteur','Type','ID entité','Nom entité','Champ modifié','Ancienne valeur','Nouvelle valeur','Pays'];
+  var journalRows = journal.map(function(l) {
+    return [
+      l.timestamp ? new Date(l.timestamp).toLocaleString('fr-FR') : '',
+      l.auteur || '', l.type_entite || '', l.id_entite || '',
+      l.nom_entite || '', l.champ_modifie || '',
+      l.ancienne_valeur || '', l.nouvelle_valeur || '', l.pays || ''
+    ];
+  });
+  var wsJournal = XLSX.utils.aoa_to_sheet([journalHeader].concat(journalRows));
+  wsJournal['!cols'] = [18,16,10,28,28,20,20,20,12].map(function(w) { return { wch: w }; });
+  wsJournal['!rows'] = [{ hpt: 22 }];
+  // Style journal header (mauve)
+  journalHeader.forEach(function(_, c) {
+    var addr = letterCol(c) + '1';
+    if (wsJournal[addr]) wsJournal[addr].s = sHeaderMauve;
+  });
+  journalRows.forEach(function(_, ri) {
+    journalHeader.forEach(function(__, c) {
+      var addr = letterCol(c) + (ri + 2);
+      if (wsJournal[addr]) wsJournal[addr].s = ri % 2 === 1 ? sDataAlt : sData;
+    });
+  });
+  XLSX.utils.book_append_sheet(wb, wsJournal, 'Journal');
+
+  var date = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, 'LuteciaCare_Export_' + date + '.xlsx');
+}
     styleSheetHeader(wsAgg, colsBase.length + colsCRM.length);
     XLSX.utils.book_append_sheet(wb, wsAgg, 'Agrégat');
   }
@@ -1834,12 +1946,6 @@ function exporterExcel() {
   XLSX.writeFile(wb, 'LuteciaCare_Export_' + date + '.xlsx');
 }
 
-function styleSheetHeader(ws, nbCols) {
-  // Largeurs de colonnes
-  ws['!cols'] = Array.from({length: nbCols}, function(_, i) {
-    return { wch: i === 0 ? 35 : i < 8 ? 12 : 22 };
-  });
-}
 </script>
 <!-- Popup Alertes (Pack 7) -->
 <div id="popup-alertes-list" class="popup-overlay hidden" style="position:fixed;inset:0;background:rgba(26,35,64,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;">
