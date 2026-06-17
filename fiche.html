@@ -380,14 +380,16 @@
       background: transparent;
       position: relative;
       align-self: stretch;
-      z-index: 10;
+      z-index: 2;
       transition: background .15s;
     }
     .col-resizer:hover, .col-resizer.active { background: var(--navy-light); opacity: .4; }
     .fiche-col { display: flex; flex-direction: column; gap: 14px; }
     .fiche-col#fcol-2 > .card { flex: 1; }
+    .fiche-col#fcol-3 > .card:last-child { flex: 1; }
     .notes-body { overflow-y: auto; max-height: 600px; }
     .fiche-full-row { padding: 0; }
+    .fiche-full-row .card-body { min-height: 100px; }
 
     /* ══ Machines compactes ══ */
     .machines { display: flex; flex-direction: column; gap: 6px; }
@@ -689,21 +691,9 @@
             <div class="info-row"><div class="info-label">Région</div><input class="info-input" id="i-region" placeholder="—" onchange="sauver('region', this.value)" /></div>
             <div class="info-row"><div class="info-label">Ville</div><input class="info-input" id="i-ville" placeholder="—" onchange="sauver('ville', this.value)" /></div>
             <div class="info-row"><div class="info-label">Adresse</div><input class="info-input" id="i-adresse" placeholder="—" onchange="sauver('adresse', this.value)" /></div>
-            <div class="info-row"><div class="info-label">TEP</div>
-              <select class="info-input" id="i-tep" onchange="sauver('tep', this.value)" style="padding:3px 6px;">
-                <option value="">—</option><option value="Oui">Oui</option><option value="Non">Non</option><option value="N/D">N/D</option>
-              </select>
-            </div>
-            <div class="info-row"><div class="info-label">Gamma cam.</div>
-              <select class="info-input" id="i-gamma" onchange="sauver('gamma_cam', this.value)" style="padding:3px 6px;">
-                <option value="">—</option><option value="Oui">Oui</option><option value="Non">Non</option><option value="N/D">N/D</option>
-              </select>
-            </div>
-            <div class="info-row"><div class="info-label">Radiothérap.</div>
-              <select class="info-input" id="i-radio" onchange="sauver('radiotherapie', this.value)" style="padding:3px 6px;">
-                <option value="">—</option><option value="Oui">Oui</option><option value="Non">Non</option><option value="N/D">N/D</option>
-              </select>
-            </div>
+            <div class="info-row"><div class="info-label">TEP</div><input class="info-input" id="i-tep" placeholder="—" onchange="sauver('tep', this.value)" /></div>
+            <div class="info-row"><div class="info-label">Gamma cam.</div><input class="info-input" id="i-gamma" placeholder="—" onchange="sauver('gamma_cam', this.value)" /></div>
+            <div class="info-row"><div class="info-label">Radiothérap.</div><input class="info-input" id="i-radio" placeholder="—" onchange="sauver('radiotherapie', this.value)" /></div>
             <div class="info-row"><div class="info-label">Nb TEP</div><input class="info-input" id="i-nb-tep" type="number" min="0" placeholder="—" onchange="sauver('nb_tep', this.value)" /></div>
             <div class="info-row"><div class="info-label">Nb Gamma</div><input class="info-input" id="i-nb-gamma" type="number" min="0" placeholder="—" onchange="sauver('nb_gamma', this.value)" /></div>
             <div class="info-row"><div class="info-label">Lien</div><input class="info-input" id="i-lien" placeholder="https://…" onchange="sauver('contact', this.value)" /></div>
@@ -723,7 +713,7 @@
       <!-- Col 2 : Notes & actions -->
       <div class="col-resizer" data-col="1"></div>
       <div class="fiche-col" id="fcol-2">
-        <div class="card" style="height:100%;">
+        <div class="card">
           <div class="card-header">
             <div class="card-title">Notes & actions</div>
             <button class="btn-add-action" onclick="ouvrirPopup()">
@@ -1010,9 +1000,7 @@ function chargerFiche() {
     document.getElementById('i-type').textContent   = currentGroupe.mapping || '—';
     document.getElementById('i-reseau').textContent = currentGroupe.estReseau ? currentGroupe.nom : 'Ind\u00e9pendant';
     document.getElementById('i-nb').textContent     = currentGroupe.nb_centres || '—';
-    document.getElementById('i-tep').textContent    = currentGroupe.tep    || '—';
-    document.getElementById('i-gamma').textContent  = currentGroupe.gamma_cam || '—';
-    document.getElementById('i-radio').textContent  = currentGroupe.radiotherapie || '—';
+    // i-tep/i-gamma/i-radio : text inputs, handled below via setInput
     var nbGammaAff = (rec.nb_gamma !== undefined && rec.nb_gamma !== '') ? rec.nb_gamma : (currentGroupe.nb_gamma || '—');
     var nbPetAff   = (rec.nb_tep   !== undefined && rec.nb_tep   !== '') ? rec.nb_tep   : (currentGroupe.nb_tep   || '—');
     document.getElementById('k-gamma').textContent = nbGammaAff;
@@ -1031,9 +1019,9 @@ function chargerFiche() {
     setInput('i-region',   val('region',         'region'));
     setInput('i-ville',    val('ville',          'ville'));
     setInput('i-adresse',  val('adresse',        'adresse'));
-    setSelect('i-tep',     val('tep',            'tep'));
-    setSelect('i-gamma',   val('gamma_cam',      'gamma_cam'));
-    setSelect('i-radio',   val('radiotherapie',  'radiotherapie'));
+    setInput('i-tep',      val('tep',            'tep'));
+    setInput('i-gamma',   val('gamma_cam',      'gamma_cam'));
+    setInput('i-radio',   val('radiotherapie',  'radiotherapie'));
     setInput('i-nb-tep',   val('nb_tep',         'nb_tep') !== '' ? val('nb_tep','nb_tep') : (currentGroupe.nb_tep || ''));
     setInput('i-nb-gamma', val('nb_gamma',       'nb_gamma') !== '' ? val('nb_gamma','nb_gamma') : (currentGroupe.nb_gamma || ''));
     setInput('i-lien',     val('contact',        'contact'));
