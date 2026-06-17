@@ -393,7 +393,7 @@
     .col-resizer:hover, .col-resizer.active { background: var(--navy-light); opacity: .4; }
     .fiche-col { display: flex; flex-direction: column; gap: 10px; }
     .notes-body { overflow-y: auto; max-height: 500px; }
-    .fiche-full-row { padding: 0 28px 20px; }
+    .fiche-full-row { padding: 0; }
 
     /* ══ Machines compactes ══ */
     .machines { display: flex; flex-direction: column; gap: 6px; }
@@ -786,10 +786,8 @@
         </div>
 
       </div>
-    </div>
-
-    <!-- ══ Alertes (pleine largeur) ══ -->
-    <div class="fiche-full-row">
+      <!-- Col full : Alertes -->
+      <div class="fiche-full-row" style="grid-column:1/-1;padding:10px 5px 0;">
       <div class="card">
         <div class="card-header">
           <div class="card-title">Alertes &amp; rappels</div>
@@ -806,7 +804,8 @@
           <div id="alertes-preview" style="display:flex;flex-direction:column;gap:5px;"></div>
         </div>
       </div>
-    </div>    </div>
+      </div>
+    </div>
 
   </div>
 </div>
