@@ -163,7 +163,8 @@
     .btn-add-action:hover { background: var(--mauve); color: var(--white); }
 
     /* ── Popup action ── */
-    .popup-overlay { position: fixed; inset: 0; background: rgba(26,35,64,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .popup-overlay { position: fixed; inset: 0; background: rgba(26,35,64,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+    .btn-add-action { pointer-events: auto !important; }
     .popup-box { background: var(--white); border-radius: 10px; padding: 28px 32px; width: 420px; box-shadow: 0 24px 64px rgba(26,35,64,0.2); animation: fadeUp .2s ease; }
     @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
     @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
@@ -400,16 +401,27 @@
       transition: background .15s;
     }
     .col-resizer:hover, .col-resizer.active { background: var(--navy-light); opacity: .4; }
-    .fiche-col { display: flex; flex-direction: column; gap: 10px; overflow: hidden; min-height: 0; }
-    .fiche-col > .card { flex: 1; }
+    .fiche-col { display: flex; flex-direction: column; gap: 10px; overflow-x: hidden; overflow-y: hidden; min-height: 0; }
+    .fiche-col > .card { flex: 1; min-height: 0; }
     .fiche-col#fcol-3 > .card:first-child { flex: 0 0 auto; }
     .fiche-col#fcol-3 > .card:last-child { flex: 1; min-height: 0; }
     .fiche-col#fcol-3 > .card:last-child .card-body { display: flex; flex-direction: column; }
     .fiche-col#fcol-3 > .card:last-child .kpi-table-wrap { flex: 1; overflow: auto; min-height: 0; }
     .notes-body { overflow-y: auto; }
-    .fiche-full-row { grid-column: 1/-1; padding: 0 7px 14px; }
-    .fiche-full-row .card-body { overflow-y: auto; }
-    .col-resizer { padding-bottom: 14px; }
+    /* ══ Barre Alertes ══ */
+    .fiche-full-row { grid-column: 1/-1; padding: 0 7px 12px; }
+    .alertes-bar { background: var(--white); border: 1px solid var(--steel-light); border-radius: var(--r); box-shadow: var(--shadow); display: flex; align-items: center; gap: 0; overflow: hidden; }
+    .alertes-bar-head { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-right: 1px solid var(--steel-light); flex-shrink: 0; }
+    .alertes-bar-title { font-family: 'Cormorant Garamond', serif; font-size: 14px; font-weight: 600; color: var(--navy); white-space: nowrap; }
+    .alertes-bar-count { font-size: 10px; font-weight: 600; color: #DC2626; }
+    .alertes-chips { flex: 1; display: flex; gap: 8px; align-items: center; padding: 10px 14px; overflow-x: auto; min-width: 0; }
+    .alertes-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; padding: 4px 10px; border-radius: 20px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
+    .alertes-chip.overdue { border-color: #991B1B; color: #991B1B; background: #FEF2F2; }
+    .alertes-chip.upcoming { border-color: #DC2626; color: #DC2626; background: #FFF5F5; }
+    .alertes-empty { font-size: 11px; color: var(--text-muted); font-style: italic; }
+    .alertes-bar-add { display: flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500; padding: 6px 14px; margin: 6px 10px; border-radius: 20px; border: 1px solid #DC2626; color: #DC2626; background: transparent; cursor: pointer; transition: all .15s; flex-shrink: 0; pointer-events: auto; }
+    .alertes-bar-add:hover { background: #DC2626; color: var(--white); }
+    .col-resizer { padding-bottom: 12px; }
 
     /* ══ Machines compactes ══ */
     .machines { display: flex; flex-direction: column; gap: 6px; }
@@ -787,24 +799,20 @@
         </div>
 
       </div>
-      <!-- Col full : Alertes -->
-      <div class="fiche-full-row" style="grid-column:1/-1;padding:0 8px;">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Alertes &amp; rappels</div>
-          <span id="alertes-counter" style="font-size:10px;color:var(--text-muted);"></span>
-          <button class="btn-add-action" onclick="ouvrirPopupAlerte()" style="border-color:#DC2626;color:#DC2626;margin-left:auto;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-            </svg>
+      <!-- Barre Alertes -->
+      <div class="fiche-full-row">
+        <div class="alertes-bar">
+          <div class="alertes-bar-head">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="alertes-bar-title">Alertes</span>
+            <span class="alertes-bar-count" id="alertes-counter"></span>
+          </div>
+          <div class="alertes-chips" id="alertes-preview"></div>
+          <button class="alertes-bar-add" onclick="ouvrirPopupAlerte()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Nouvelle alerte
           </button>
         </div>
-        <div class="card-body">
-          <div id="alertes-preview" style="display:flex;flex-direction:column;gap:5px;"></div>
-        </div>
-      </div>
       </div>
     </div>
 
@@ -1419,28 +1427,25 @@ function renderActions() {
 }
 
 function majAlertesPreview(actifs) {
-  // Compteur dans la card Alertes
   var counter = document.getElementById('alertes-counter');
   var preview = document.getElementById('alertes-preview');
   if (!counter || !preview) return;
   if (!actifs || actifs.length === 0) {
     counter.textContent = '';
-    preview.innerHTML = '<div style="font-size:11px;color:var(--text-muted);font-style:italic;text-align:center;padding:6px 0;">Aucune alerte active</div>';
+    preview.innerHTML = '<span class="alertes-empty">Aucune alerte active</span>';
     return;
   }
-  counter.textContent = actifs.length + ' active' + (actifs.length > 1 ? 's' : '');
-  counter.style.color = '#DC2626';
-  counter.style.fontWeight = '600';
-  preview.innerHTML = actifs.slice(0, 3).map(function(a) {
+  counter.textContent = actifs.length;
+  var today = new Date(); today.setHours(0,0,0,0);
+  preview.innerHTML = actifs.map(function(a) {
     var d = new Date(a.echeance); d.setHours(0,0,0,0);
-    var today = new Date(); today.setHours(0,0,0,0);
-    var color = d.getTime() < today.getTime() ? '#0a0a0a' : '#DC2626';
-    var note = esc((a.note || '').slice(0, 50) + ((a.note || '').length > 50 ? '...' : ''));
-    return '<div style="font-size:11px;display:flex;align-items:center;gap:6px;padding:4px 6px;background:var(--off-white);border-radius:4px;">'
-      + '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:' + color + ';"></span>'
-      + '<span style="color:' + color + ';font-weight:600;white-space:nowrap;">' + esc(formatDate(a.echeance)) + '</span>'
-      + '<span style="color:var(--text-body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">— ' + note + '</span>'
-      + '</div>';
+    var overdue = d.getTime() < today.getTime();
+    var cls = overdue ? 'alertes-chip overdue' : 'alertes-chip upcoming';
+    var note = esc((a.note || '').slice(0, 40) + ((a.note || '').length > 40 ? '…' : ''));
+    return '<span class="' + cls + '">'
+      + '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+      + esc(formatDate(a.echeance)) + ' — ' + note
+      + '</span>';
   }).join('');
 }
 
