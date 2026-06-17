@@ -1738,7 +1738,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Authentification MSAL — identité tirée du compte Microsoft
   graphConnect().then(function(ok) {
-    if (!ok) { window.location.href = 'index.html'; return; }
+    if (!ok) { console.warn('[auth] Graph indisponible, mode données locales.'); return; }
     currentUser = graphGetUserName();
     document.getElementById('sidebar-avatar').textContent = currentUser[0].toUpperCase();
     document.getElementById('sidebar-name').textContent   = currentUser;
