@@ -627,12 +627,6 @@
         </svg>
         Importer <span id="import-badge" style="display:none;background:var(--mauve);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px;"></span>
       </a>
-      <a class="nav-item" onclick="openImportPanel()" style="cursor:pointer;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-        Importer <span id="import-badge" style="display:none;background:var(--mauve);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px;"></span>
-      </a>
     </nav>
     <div class="sidebar-user">
       <div class="user-avatar" id="sidebar-avatar">?</div>
@@ -758,7 +752,7 @@
 
     <!-- Panneau Import -->
     <div class="filter-overlay" id="import-overlay" onclick="closeImportPanel()"></div>
-    <div class="filter-panel" id="import-panel" style="width:360px;">
+    <div class="filter-panel" id="import-panel" style="width:360px;right:-380px;">
       <div class="filter-panel-head">
         <span class="filter-panel-title">Importer des données</span>
         <button class="filter-panel-close" onclick="closeImportPanel()">✕</button>
