@@ -367,12 +367,13 @@
     .fiche-grid-3 {
       display: grid;
       grid-template-columns: var(--fcol1,300px) 6px var(--fcol2,1fr) 6px var(--fcol3,340px);
-      gap: 10px 0;
-      padding: 16px 28px;
-      align-items: start;
+      grid-template-rows: auto auto;
+      gap: 14px 0;
+      padding: 20px 28px;
+      align-items: stretch;
       column-gap: 0;
     }
-    .fiche-grid-3 .fiche-col { padding: 0 5px; }
+    .fiche-grid-3 .fiche-col { padding: 0 8px; }
     .col-resizer {
       width: 6px;
       cursor: col-resize;
@@ -383,8 +384,9 @@
       transition: background .15s;
     }
     .col-resizer:hover, .col-resizer.active { background: var(--navy-light); opacity: .4; }
-    .fiche-col { display: flex; flex-direction: column; gap: 10px; }
-    .notes-body { overflow-y: auto; max-height: 500px; }
+    .fiche-col { display: flex; flex-direction: column; gap: 14px; }
+    .fiche-col#fcol-2 > .card { flex: 1; }
+    .notes-body { overflow-y: auto; max-height: 600px; }
     .fiche-full-row { padding: 0; }
 
     /* ══ Machines compactes ══ */
@@ -779,7 +781,7 @@
 
       </div>
       <!-- Col full : Alertes -->
-      <div class="fiche-full-row" style="grid-column:1/-1;padding:10px 5px 0;">
+      <div class="fiche-full-row" style="grid-column:1/-1;padding:0 8px;">
       <div class="card">
         <div class="card-header">
           <div class="card-title">Alertes &amp; rappels</div>
