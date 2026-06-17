@@ -444,17 +444,33 @@
     /* ══ Cartes ══ */
     .card-draggable {
       cursor: default;
-      user-select: none;
       position: relative;
       min-height: 80px;
     }
+    .card-draggable input,
+    .card-draggable textarea,
+    .card-draggable select,
+    .card-draggable button {
+      user-select: auto;
+    }
     .drag-handle {
       position: absolute;
-      top: 0; left: 0; right: 0;
+      top: 0; left: 0;
+      width: 28px;
       height: 36px;
       cursor: grab;
       z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+    .drag-handle::before {
+      content: '⠿';
+      font-size: 14px;
+      color: var(--steel-light);
+      opacity: 0.6;
+    }
+    .drag-handle:hover::before { opacity: 1; color: var(--navy-light); }
     .drag-handle:active { cursor: grabbing; }
     .card-dragging {
       opacity: .55;
