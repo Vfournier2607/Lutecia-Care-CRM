@@ -830,9 +830,9 @@ var kpiLignes     = KPI_DEFAUT.slice();
 
 // Helper: échapper le HTML pour éviter les XSS dans les gabarits innerHTML
 function badgeVal(v) {
-  if (v === "Oui") return "<span style="color:#1a6b3c;background:#e8f5ee;border:1px solid #b8dfc8;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;">Oui</span>";
-  if (v === "Non") return "<span style="color:#6b7a94;background:#f5f3f0;border:1px solid #c5cfe0;padding:2px 8px;border-radius:20px;font-size:10px;">Non</span>";
-  return "<span style="color:#6b7a94;background:#c5cfe0;padding:2px 8px;border-radius:20px;font-size:10px;">N/D</span>";
+  if (v === "Oui") return '<span style="color:#1a6b3c;background:#e8f5ee;border:1px solid #b8dfc8;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;">Oui</span>';
+  if (v === "Non") return '<span style="color:#6b7a94;background:#f5f3f0;border:1px solid #c5cfe0;padding:2px 8px;border-radius:20px;font-size:10px;">Non</span>';
+  return '<span style="color:#6b7a94;background:#c5cfe0;padding:2px 8px;border-radius:20px;font-size:10px;">N/D</span>';
 }
 
 function esc(str) {
