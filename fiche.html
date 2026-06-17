@@ -98,10 +98,10 @@
     .fiche-grid.has-centres { grid-template-columns: 260px 1fr 300px; }
 
     /* ── Cards ── */
-    .card { background: var(--white); border: 1px solid var(--steel-light); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; }
-    .card-header { padding: 12px 16px; border-bottom: 2px solid var(--off-white); display: flex; align-items: center; justify-content: space-between; background: var(--white); }
-    .card-title { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 600; color: var(--navy); letter-spacing: 0.01em; }
-    .card-body { padding: 14px 16px; }
+    .card { background: var(--white); border: 1px solid var(--steel-light); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+    .card-header { padding: 10px 14px; border-bottom: 1px solid var(--off-white); display: flex; align-items: center; justify-content: space-between; background: var(--white); flex: 0 0 auto; }
+    .card-title { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--navy); letter-spacing: 0.01em; }
+    .card-body { padding: 10px 14px; flex: 1; overflow-y: auto; min-height: 0; }
 
     /* ── Infos ── */
     .info-row { padding: 7px 0; border-bottom: 1px solid var(--steel-light); }
@@ -361,25 +361,35 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1;
     }
     .fiche-project-label:empty { display: none; }
-    .fiche-structure-name { font-size: 12px; font-weight: 500; color: var(--text-body); }
+    .fiche-structure-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: var(--navy); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .fiche-meta-line { font-size: 10px; color: var(--text-muted); }
-    .fiche-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 3px; }
+    .fiche-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
     .fiche-tag { font-size: 9px; padding: 1px 7px; border-radius: 20px; border: 1px solid var(--steel-light); color: var(--text-muted); background: var(--off-white); }
-    .fiche-topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
-    .statut-wrap { display: flex; flex-direction: column; gap: 2px; }
-    .statut-lbl { font-size: 8px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); }
+    .fiche-topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
+
+    /* ══ Statut picker ══ */
+    .statut-picker { display: flex; gap: 4px; align-items: center; }
+    .spick { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500; padding: 4px 11px; border-radius: 20px; border: 1px solid var(--steel-light); background: transparent; color: var(--text-muted); cursor: pointer; transition: all .15s; white-space: nowrap; }
+    .spick:hover { background: var(--off-white); }
+    .spick.active[data-s="contact"]    { background: rgba(107,91,158,.15); border-color: var(--s-contact);    color: var(--s-contact); font-weight: 600; }
+    .spick.active[data-s="discussion"] { background: rgba(74,111,165,.15); border-color: var(--s-discussion); color: var(--s-discussion); font-weight: 600; }
+    .spick.active[data-s="advanced"]   { background: rgba(61,79,124,.15);  border-color: var(--navy-light);   color: var(--navy-light); font-weight: 600; }
+    .spick.active[data-s="loi"]        { background: rgba(122,53,85,.15);  border-color: var(--mauve);        color: var(--mauve); font-weight: 600; }
 
     /* ══ Grille 3 colonnes ══ */
     .fiche-grid-3 {
       display: grid;
       grid-template-columns: var(--fcol1,300px) 6px var(--fcol2,1fr) 6px var(--fcol3,340px);
-      grid-template-rows: auto auto;
-      gap: 14px 0;
-      padding: 20px 28px;
+      grid-template-rows: 1fr auto;
+      gap: 0;
+      padding: 14px 22px 0;
       align-items: stretch;
       column-gap: 0;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
     }
-    .fiche-grid-3 .fiche-col { padding: 0 8px; }
+    .fiche-grid-3 .fiche-col { padding: 0 7px 14px; }
     .col-resizer {
       width: 6px;
       cursor: col-resize;
@@ -390,12 +400,16 @@
       transition: background .15s;
     }
     .col-resizer:hover, .col-resizer.active { background: var(--navy-light); opacity: .4; }
-    .fiche-col { display: flex; flex-direction: column; gap: 14px; }
-    .fiche-col#fcol-2 > .card { flex: 1; }
-    .fiche-col#fcol-3 > .card:last-child { flex: 1; }
-    .notes-body { overflow-y: auto; max-height: 600px; }
-    .fiche-full-row { padding: 0; }
-    .fiche-full-row .card-body { min-height: 100px; }
+    .fiche-col { display: flex; flex-direction: column; gap: 10px; overflow: hidden; min-height: 0; }
+    .fiche-col > .card { flex: 1; }
+    .fiche-col#fcol-3 > .card:first-child { flex: 0 0 auto; }
+    .fiche-col#fcol-3 > .card:last-child { flex: 1; min-height: 0; }
+    .fiche-col#fcol-3 > .card:last-child .card-body { display: flex; flex-direction: column; }
+    .fiche-col#fcol-3 > .card:last-child .kpi-table-wrap { flex: 1; overflow: auto; min-height: 0; }
+    .notes-body { overflow-y: auto; }
+    .fiche-full-row { grid-column: 1/-1; padding: 0 7px 14px; }
+    .fiche-full-row .card-body { max-height: 120px; overflow-y: auto; }
+    .col-resizer { padding-bottom: 14px; }
 
     /* ══ Machines compactes ══ */
     .machines { display: flex; flex-direction: column; gap: 6px; }
@@ -404,7 +418,7 @@
     .machine-label { font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
 
     /* ══ Info rows inline ══ */
-    .info-row { display: flex; align-items: baseline; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--steel-light); }
+    .info-row { display: flex; align-items: baseline; gap: 8px; padding: 3px 0; border-bottom: 1px solid var(--steel-light); }
     .info-row:last-child { border-bottom: none; }
     .info-label { font-size: 8px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; width: 88px; }
     .info-value { font-size: 11px; color: var(--text); flex: 1; }
@@ -637,7 +651,7 @@
   </aside>
 
   <!-- Zone principale -->
-  <div style="display:flex;flex-direction:column;overflow-y:auto;grid-column:2;grid-row:1/3;">
+  <div style="display:flex;flex-direction:column;overflow:hidden;grid-column:2;grid-row:1/3;">
 
     <!-- Topbar -->
     <header class="fiche-topbar">
@@ -649,15 +663,12 @@
       </div>
       <div class="fiche-topbar-right">
         <div id="hero-badge"></div>
-        <div class="statut-wrap">
-          <span class="statut-lbl">Statut</span>
-          <select class="statut-select" id="statut-select" onchange="changerStatut(this.value)">
-            <option value="">— Aucun —</option>
-            <option value="contact">Prise de contact</option>
-            <option value="discussion">Discussion</option>
-            <option value="advanced">Discussion avancée</option>
-            <option value="loi">LOI signée</option>
-          </select>
+        <input type="hidden" id="statut-select" />
+        <div class="statut-picker" id="statut-picker">
+          <button class="spick" data-s="contact"    onclick="changerStatut('contact')">Contact</button>
+          <button class="spick" data-s="discussion" onclick="changerStatut('discussion')">Discussion</button>
+          <button class="spick" data-s="advanced"   onclick="changerStatut('advanced')">Avancée</button>
+          <button class="spick" data-s="loi"        onclick="changerStatut('loi')">LOI</button>
         </div>
         <div style="display:flex;align-items:center;gap:5px;">
           <button id="btn-modifier" class="btn-edit" onclick="passerEnEdition()">
@@ -997,8 +1008,8 @@ function chargerFiche() {
 
   // Statut
   var stat = rec.statut || '';
-  document.getElementById('statut-select').value = stat;
   majBadgeStatut(stat);
+  majStatutPicker(stat);
 
   // Infos
   if (currentGroupe) {
@@ -1083,9 +1094,17 @@ function majBadgeStatut(val) {
     : '';
 }
 
+function majStatutPicker(val) {
+  var hidden = document.getElementById('statut-select');
+  if (hidden) hidden.value = val || '';
+  document.querySelectorAll('.spick').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.s === val);
+  });
+}
 function changerStatut(val) {
   sauver('statut', val);
   majBadgeStatut(val);
+  majStatutPicker(val);
 }
 
 // ══════════════════════════════════════
@@ -1634,8 +1653,7 @@ var EDIT_BACKUP = null;
 
 function getSnapshotChamps() {
   return {
-    label:  (document.getElementById('i-label')       || {}).value || '',
-    statut: (document.getElementById('statut-select') || {}).value || ''
+    label: (document.getElementById('i-label') || {}).value || ''
   };
 }
 
@@ -1645,8 +1663,6 @@ function appliquerModeLecture() {
   // Mettre les champs structurels en readonly
   var lbl = document.getElementById('i-label');
   if (lbl) lbl.setAttribute('readonly', 'readonly');
-  var sel = document.getElementById('statut-select');
-  if (sel) sel.setAttribute('disabled', 'disabled');
   // KPI inputs
   document.querySelectorAll('.kpi-input, .kpi-row-name').forEach(function(el){
     el.setAttribute('readonly', 'readonly');
@@ -1664,8 +1680,6 @@ function passerEnEdition() {
   document.body.classList.add('edit-mode');
   var lbl = document.getElementById('i-label');
   if (lbl) lbl.removeAttribute('readonly');
-  var sel = document.getElementById('statut-select');
-  if (sel) sel.removeAttribute('disabled');
   document.querySelectorAll('.kpi-input, .kpi-row-name').forEach(function(el){
     el.removeAttribute('readonly');
   });
@@ -1694,9 +1708,9 @@ function annulerEdition() {
   if (EDIT_BACKUP) {
     var bk = EDIT_BACKUP;
     if (document.getElementById('i-label')) document.getElementById('i-label').value = bk.label;
-    if (document.getElementById('statut-select')) {
-      document.getElementById('statut-select').value = bk.statut;
+    if (bk.statut !== undefined) {
       majBadgeStatut(bk.statut);
+      majStatutPicker(bk.statut);
     }
   }
   appliquerModeLecture();
