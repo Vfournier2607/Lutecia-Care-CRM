@@ -244,19 +244,11 @@
     }
     .sidebar-deal .sd-input::placeholder,
     .sidebar-deal .sd-textarea::placeholder { color: rgba(255,255,255,0.45); }
-    /* En mode lecture : neutralise visuellement mais texte reste lisible */
+    /* Sidebar deal : toujours éditable (pas de gate Modifier) */
     body.read-mode .sidebar-deal .sd-input,
     body.read-mode .sidebar-deal .sd-textarea {
-      background: rgba(255,255,255,0.04) !important;
-      border-color: transparent !important;
-      cursor: default;
-      color: #FFFFFF !important;
-    }
-    /* En mode édition : appuie le contour */
-    body.edit-mode .sidebar-deal .sd-input,
-    body.edit-mode .sidebar-deal .sd-textarea {
-      background: rgba(255,255,255,0.08);
-      border-color: rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.18);
     }
 
     /* ── Fix menu déroulant statut (options blanc sur fond bleu) ── */
@@ -323,7 +315,7 @@
     body.read-mode .btn-annee {
       opacity: 0.35; pointer-events: none;
     }
-    body.read-mode .btn-add-action { opacity: 0.5; pointer-events: none; }
+    /* btn-add-action toujours accessible (notes & actions, alertes sans gate) */
 
     /* En mode édition : surligner légèrement les champs éditables */
     body.edit-mode .info-input,
@@ -1630,23 +1622,17 @@ var EDIT_BACKUP = null;
 
 function getSnapshotChamps() {
   return {
-    label:       (document.getElementById('i-label')   || {}).value || '',
-    responsable: (document.getElementById('d-resp')    || {}).value || '',
-    contact:     (document.getElementById('d-contact') || {}).value || '',
-    source:     (document.getElementById('d-source')  || {}).value || '',
-    note:       (document.getElementById('d-note')    || {}).value || '',
-    statut:     (document.getElementById('statut-select') || {}).value || ''
+    label:  (document.getElementById('i-label')       || {}).value || '',
+    statut: (document.getElementById('statut-select') || {}).value || ''
   };
 }
 
 function appliquerModeLecture() {
   document.body.classList.add('read-mode');
   document.body.classList.remove('edit-mode');
-  // Mettre tous les champs éditables en readonly
-  ['i-label','d-resp','d-contact','d-source','d-note'].forEach(function(id){
-    var el = document.getElementById(id);
-    if (el) el.setAttribute('readonly', 'readonly');
-  });
+  // Mettre les champs structurels en readonly
+  var lbl = document.getElementById('i-label');
+  if (lbl) lbl.setAttribute('readonly', 'readonly');
   var sel = document.getElementById('statut-select');
   if (sel) sel.setAttribute('disabled', 'disabled');
   // KPI inputs
@@ -1664,10 +1650,8 @@ function passerEnEdition() {
   EDIT_BACKUP = getSnapshotChamps();
   document.body.classList.remove('read-mode');
   document.body.classList.add('edit-mode');
-  ['i-label','d-resp','d-contact','d-source','d-note'].forEach(function(id){
-    var el = document.getElementById(id);
-    if (el) el.removeAttribute('readonly');
-  });
+  var lbl = document.getElementById('i-label');
+  if (lbl) lbl.removeAttribute('readonly');
   var sel = document.getElementById('statut-select');
   if (sel) sel.removeAttribute('disabled');
   document.querySelectorAll('.kpi-input, .kpi-row-name').forEach(function(el){
@@ -1695,14 +1679,9 @@ function enregistrerModifs() {
 }
 
 function annulerEdition() {
-  // Remettre les valeurs du backup
   if (EDIT_BACKUP) {
     var bk = EDIT_BACKUP;
-    if (document.getElementById('i-label'))   document.getElementById('i-label').value   = bk.label;
-    if (document.getElementById('d-resp'))    document.getElementById('d-resp').value    = bk.responsable;
-    if (document.getElementById('d-contact')) document.getElementById('d-contact').value = bk.contact;
-    if (document.getElementById('d-source'))  document.getElementById('d-source').value  = bk.source;
-    if (document.getElementById('d-note'))    document.getElementById('d-note').value    = bk.note;
+    if (document.getElementById('i-label')) document.getElementById('i-label').value = bk.label;
     if (document.getElementById('statut-select')) {
       document.getElementById('statut-select').value = bk.statut;
       majBadgeStatut(bk.statut);
