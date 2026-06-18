@@ -36,7 +36,7 @@ const ETAT_HEADERS = [
 ];
 
 const KPI_HEADERS     = ['id_entite', 'lignes', 'valeurs', 'annees', 'modifiedBy', 'modifiedAt'];
-const ACTIONS_HEADERS = ['id_entite', 'type', 'date', 'note', 'auteur', 'createdAt'];
+const ACTIONS_HEADERS = ['id_entite', 'type', 'date', 'note', 'auteur', 'createdAt', 'echeance', 'realise', 'modifiedBy', 'modifiedAt'];
 
 const DEBUG = {
   enabled:      false,
