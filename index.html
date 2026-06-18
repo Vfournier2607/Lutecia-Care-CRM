@@ -1689,10 +1689,9 @@ document.addEventListener('DOMContentLoaded', function() {
       var overlay = document.getElementById('loading-overlay');
       if (overlay) overlay.style.display = 'none';
       if (!ok) {
-        if (overlay) {
-          overlay.style.display = 'flex';
-          overlay.querySelector('div > div:last-child').textContent = 'Connexion impossible. Rechargez la page.';
-        }
+        console.warn('[auth] Graph indisponible, mode données locales.');
+        renderTable();
+        renderStats();
         return;
       }
       currentUser = graphGetUserName();

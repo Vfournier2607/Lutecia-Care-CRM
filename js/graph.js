@@ -66,13 +66,20 @@ const Graph = (function() {
   }
 
   // ── Écrire un onglet en entier ──────────────────────────────────
+  // Vide d'abord le contenu existant pour éviter les lignes orphelines.
   async function writeSheet(sheetName, headers, rows) {
-    const wb     = await _wbUrl();
-    const values = [headers].concat(rows.map(r => headers.map(h => r[h] !== undefined ? String(r[h]) : '')));
+    const wb      = await _wbUrl();
+    const wsBase  = wb + '/worksheets/' + encodeURIComponent(sheetName);
+    // 1. Vider le contenu de la plage utilisée (sans supprimer les cellules)
+    try {
+      await _fetch('POST', wsBase + '/usedRange/clear', { applyTo: 'Contents' });
+    } catch(_) { /* feuille vide : normal */ }
+    // 2. Écrire les nouvelles données
+    const values  = [headers].concat(rows.map(r => headers.map(h => r[h] !== undefined ? String(r[h]) : '')));
     const lastCol = String.fromCharCode(64 + headers.length);
     const lastRow = values.length;
     await _fetch('PATCH',
-      wb + '/worksheets/' + encodeURIComponent(sheetName) + '/range(address=\'A1:' + lastCol + lastRow + '\')',
+      wsBase + '/range(address=\'A1:' + lastCol + lastRow + '\')',
       { values }
     );
   }
