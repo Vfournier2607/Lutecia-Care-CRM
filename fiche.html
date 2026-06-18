@@ -410,16 +410,16 @@
     .notes-body { overflow-y: auto; }
     /* ══ Barre Alertes ══ */
     .fiche-full-row { grid-column: 1/-1; padding: 0 7px 12px; }
-    .alertes-bar { background: var(--white); border: 1px solid var(--steel-light); border-radius: var(--r); box-shadow: var(--shadow); display: flex; align-items: center; gap: 0; overflow: hidden; }
-    .alertes-bar-head { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-right: 1px solid var(--steel-light); flex-shrink: 0; }
+    .alertes-bar { background: var(--white); border: 1px solid var(--steel-light); border-radius: var(--r); box-shadow: var(--shadow); display: flex; align-items: stretch; gap: 0; overflow: hidden; min-height: 80px; }
+    .alertes-bar-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-right: 1px solid var(--steel-light); flex-shrink: 0; justify-content: center; flex-direction: column; }
     .alertes-bar-title { font-family: 'Cormorant Garamond', serif; font-size: 14px; font-weight: 600; color: var(--navy); white-space: nowrap; }
     .alertes-bar-count { font-size: 10px; font-weight: 600; color: #DC2626; }
-    .alertes-chips { flex: 1; display: flex; gap: 8px; align-items: center; padding: 10px 14px; overflow-x: auto; min-width: 0; }
+    .alertes-chips { flex: 1; display: flex; gap: 8px; align-items: center; padding: 12px 16px; overflow-x: auto; min-width: 0; flex-wrap: wrap; }
     .alertes-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; padding: 4px 10px; border-radius: 20px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
     .alertes-chip.overdue { border-color: #991B1B; color: #991B1B; background: #FEF2F2; }
     .alertes-chip.upcoming { border-color: #DC2626; color: #DC2626; background: #FFF5F5; }
     .alertes-empty { font-size: 11px; color: var(--text-muted); font-style: italic; }
-    .alertes-bar-add { display: flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500; padding: 6px 14px; margin: 6px 10px; border-radius: 20px; border: 1px solid #DC2626; color: #DC2626; background: transparent; cursor: pointer; transition: all .15s; flex-shrink: 0; pointer-events: auto; }
+    .alertes-bar-add { display: flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500; padding: 6px 14px; margin: auto 12px; border-radius: 20px; border: 1px solid #DC2626; color: #DC2626; background: transparent; cursor: pointer; transition: all .15s; flex-shrink: 0; pointer-events: auto; align-self: center; }
     .alertes-bar-add:hover { background: #DC2626; color: var(--white); }
     .col-resizer { padding-bottom: 12px; }
 
