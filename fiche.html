@@ -1057,9 +1057,7 @@ function chargerFiche() {
   // Infos
   if (currentGroupe) {
     document.getElementById('i-pays').textContent   = currentGroupe.pays    || '—';
-    document.getElementById('i-type').textContent   = currentGroupe.mapping || '—';
     document.getElementById('i-reseau').textContent = currentGroupe.estReseau ? currentGroupe.nom : 'Ind\u00e9pendant';
-    document.getElementById('i-nb').textContent     = currentGroupe.nb_centres || '—';
     // i-tep/i-gamma/i-radio : text inputs, handled below via setInput
     // renderMachines() est appelé après setInput pour que les inputs soient remplis d'abord
 
@@ -1747,10 +1745,7 @@ function appliquerModeLecture() {
   document.body.classList.add('read-mode');
   document.body.classList.remove('edit-mode');
   // Mettre les champs structurels en readonly
-  var lbl = document.getElementById('i-label');
-  if (lbl) lbl.setAttribute('readonly', 'readonly');
-  // KPI inputs
-  document.querySelectorAll('.kpi-input, .kpi-row-name').forEach(function(el){
+  document.querySelectorAll('.info-input, .info-textarea, .kpi-input, .kpi-row-name').forEach(function(el){
     el.setAttribute('readonly', 'readonly');
   });
   // Boutons UI
@@ -1764,9 +1759,7 @@ function passerEnEdition() {
   EDIT_BACKUP = getSnapshotChamps();
   document.body.classList.remove('read-mode');
   document.body.classList.add('edit-mode');
-  var lbl = document.getElementById('i-label');
-  if (lbl) lbl.removeAttribute('readonly');
-  document.querySelectorAll('.kpi-input, .kpi-row-name').forEach(function(el){
+  document.querySelectorAll('.info-input, .info-textarea, .kpi-input, .kpi-row-name').forEach(function(el){
     el.removeAttribute('readonly');
   });
   document.getElementById('btn-modifier').classList.add('hidden');

@@ -893,33 +893,77 @@ function paysFromFilename(name) {
 function parseDbSheet(ws, pays) {
   var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
   if (!rows.length) return [];
-  var header = rows[0];
+  var header = rows[0].map(function(h) { return String(h || '').trim().toLowerCase(); });
+
+  // Mapping flexible par en-tête (VLookup)
+  function col(names) {
+    for (var i = 0; i < names.length; i++) {
+      var idx = header.indexOf(names[i].toLowerCase());
+      if (idx >= 0) return idx;
+    }
+    return -1;
+  }
+
+  var C_NOM    = col(['nom du centre','nom','name','centre']);
+  var C_TYPE   = col(['type']);
+  var C_RESEAU = col(['réseau','reseau','network','réseau (0/1)','reseau (0/1)']);
+  var C_NOMRES = col(['nom réseau','nom reseau','nom du réseau','network name','nom_reseau']);
+  var C_NM     = col(['nm']);
+  var C_PET_B  = col(['pet','tep','pet (oui/non)','tep booléen']);
+  var C_GAM_B  = col(['gamma','gamma cam','gamma cam.','gamma (oui/non)']);
+  var C_PET_N  = col(['nb pet','nb tep','pet absolu','nb_pet','nb_tep']);
+  var C_GAM_N  = col(['nb gamma','gamma absolu','nb_gamma']);
+  var C_ADR    = col(['adresse','adresse complète','address','adresse complete']);
+  var C_CP     = col(['cp','code postal','zip','postal']);
+  var C_REG    = col(['région','region','région']);
+  var C_VILLE  = col(['ville','city','town']);
+  var C_MAP    = col(['mapping','type structure','type de structure']);
+  var C_LIEN   = col(['lien','url','link','site']);
+  var C_NOTES  = col(['notes','note','remarques','commentaires']);
+
+  // Fallback aux indices si en-têtes non trouvés (format original A-Q)
+  if (C_NOM < 0)   C_NOM   = 0;
+  if (C_TYPE < 0)  C_TYPE  = 2;
+  if (C_RESEAU < 0) C_RESEAU = 3;
+  if (C_NOMRES < 0) C_NOMRES = 4;
+  if (C_PET_B < 0) C_PET_B = 6;
+  if (C_GAM_B < 0) C_GAM_B = 7;
+  if (C_PET_N < 0) C_PET_N = 8;
+  if (C_GAM_N < 0) C_GAM_N = 9;
+  if (C_ADR < 0)   C_ADR   = 10;
+  if (C_CP < 0)    C_CP    = 11;
+  if (C_REG < 0)   C_REG   = 12;
+  if (C_VILLE < 0) C_VILLE = 13;
+  if (C_MAP < 0)   C_MAP   = 14;
+  if (C_LIEN < 0)  C_LIEN  = 15;
+  if (C_NOTES < 0) C_NOTES = 16;
+
   var centres = [];
   for (var i = 1; i < rows.length; i++) {
     var r = rows[i];
-    if (!r[0] || String(r[0]).startsWith('=')) continue;
-    var nom = String(r[0] || '').trim();
+    if (!r[C_NOM] || String(r[C_NOM]).startsWith('=')) continue;
+    var nom = String(r[C_NOM] || '').trim();
     if (!nom) continue;
-    var nbTep   = parseFloat(r[8]) || 0;
-    var nbGamma = parseFloat(r[9]) || 0;
-    var estReseau = r[3] === 1 || r[3] === '1' || r[3] === true;
+    var nbTep   = parseFloat(r[C_PET_N]) || 0;
+    var nbGamma = parseFloat(r[C_GAM_N]) || 0;
+    var estReseau = r[C_RESEAU] === 1 || r[C_RESEAU] === '1' || r[C_RESEAU] === true;
     centres.push({
       nom:           nom,
       pays:          pays,
-      type:          String(r[2] || '').trim(),
+      type:          String(r[C_TYPE]  || '').trim(),
       reseau:        estReseau ? 'Oui' : 'Non',
-      nom_reseau:    String(r[4] || '').trim(),
-      tep:           nbTep > 0 ? 'Oui' : (nbTep === 0 && r[6] !== null ? 'Non' : 'N/D'),
-      gamma_cam:     nbGamma > 0 ? 'Oui' : (nbGamma === 0 && r[7] !== null ? 'Non' : 'N/D'),
+      nom_reseau:    String(r[C_NOMRES] || '').trim(),
+      tep:           nbTep > 0 ? 'Oui' : (r[C_PET_B] !== null ? 'Non' : 'N/D'),
+      gamma_cam:     nbGamma > 0 ? 'Oui' : (r[C_GAM_B] !== null ? 'Non' : 'N/D'),
       nb_tep:        nbTep,
       nb_gamma:      nbGamma,
-      adresse:       String(r[10] || '').trim(),
-      cp:            String(r[11] || '').trim(),
-      region:        String(r[12] || '').trim(),
-      ville:         String(r[13] || '').trim(),
-      mapping:       String(r[14] || '').trim() || 'Autre',
-      contact:       String(r[15] || '').trim(),
-      notes:         String(r[16] || '').trim(),
+      adresse:       String(r[C_ADR]   || '').trim(),
+      cp:            String(r[C_CP]    || '').trim(),
+      region:        String(r[C_REG]   || '').trim(),
+      ville:         String(r[C_VILLE] || '').trim(),
+      mapping:       String(r[C_MAP]   || '').trim() || 'Autre',
+      contact:       String(r[C_LIEN]  || '').trim(),
+      notes:         String(r[C_NOTES] || '').trim(),
       radiotherapie: 'N/D',
       nb_centres:    1
     });
