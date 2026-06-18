@@ -137,9 +137,14 @@
       padding: 10px 14px;
       border-top: 1px solid rgba(255,255,255,0.07);
       display: flex;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
+      gap: 6px;
     }
+    .sidebar-user-row { display: flex; align-items: center; gap: 8px; }
+    .sync-badge { display: flex; align-items: center; gap: 6px; font-size: 9px; color: rgba(255,255,255,0.35); letter-spacing: 0.04em; }
+    .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; transition: background .4s; }
+    .sync-badge.synced .sync-dot { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+    .sync-badge.synced { color: rgba(255,255,255,0.55); }
 
     .user-avatar {
       width: 28px; height: 28px;
@@ -629,8 +634,14 @@
       </a>
     </nav>
     <div class="sidebar-user">
-      <div class="user-avatar" id="sidebar-avatar">?</div>
-      <div class="user-name" id="sidebar-name">—</div>
+      <div class="sidebar-user-row">
+        <div class="user-avatar" id="sidebar-avatar">?</div>
+        <div class="user-name" id="sidebar-name">—</div>
+      </div>
+      <div class="sync-badge" id="sync-badge">
+        <span class="sync-dot"></span>
+        <span id="sync-label">Mode local</span>
+      </div>
     </div>
   </aside>
 
@@ -1703,6 +1714,10 @@ document.addEventListener('DOMContentLoaded', function() {
         renderStats();
         return;
       }
+      var badge = document.getElementById('sync-badge');
+      var lbl   = document.getElementById('sync-label');
+      if (badge) badge.classList.add('synced');
+      if (lbl)   lbl.textContent = 'SharePoint';
       currentUser = graphGetUserName();
       majSidebar(currentUser);
       graphLoadEtat().then(function(etat) {
