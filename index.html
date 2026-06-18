@@ -1736,7 +1736,7 @@ function exporterExcel() {
   // Colonnes de base (depuis Excel source)
   var colsBase = ['Nom du centre','Type','Réseau','Nom réseau','TEP','Gamma cam.','Nb TEP','Nb Gamma','Adresse','CP','Région','Ville','Mapping','Lien','Notes'];
   // Colonnes CRM ajoutées
-  var colsCRM  = ['Statut deal','Label','Responsable M&A','Contact clé','Source','Note CRM'];
+  var colsCRM  = ['Statut deal','Label','Responsable M&A','Contact clé','Source','Note CRM','Lien CRM'];
 
   var allRows = [];
 
@@ -1768,9 +1768,10 @@ function exporterExcel() {
         rec.statut        || '',
         rec.label         || '',
         rec.responsable   || '',
-        rec.contact_cle   || '',
+        rec.contact       || '',
         rec.source        || '',
-        rec.note          || ''
+        rec.note          || '',
+        rec.lien          || c.contact || ''
       ];
       rows.push(row);
       allRows.push(row);
@@ -1803,6 +1804,52 @@ function exporterExcel() {
   var wsJournal = XLSX.utils.aoa_to_sheet([journalHeader].concat(journalRows));
   styleSheetHeader(wsJournal, journalHeader.length);
   XLSX.utils.book_append_sheet(wb, wsJournal, 'Journal');
+
+  // Feuille Actions
+  var actionsHeader = ['Structure','Type','Date','Note','Auteur','Créé le','Échéance','Réalisé'];
+  var actionsRows = [];
+  Object.keys(actions).forEach(function(id) {
+    var groupe = GROUPES.find(function(g) { return g.id === id; });
+    var nom = groupe ? groupe.nom : id;
+    (actions[id] || []).forEach(function(a) {
+      actionsRows.push([
+        nom,
+        a.type || '',
+        a.date || '',
+        a.note || '',
+        a.auteur || '',
+        a.createdAt ? new Date(a.createdAt).toLocaleString('fr-FR') : '',
+        a.echeance || '',
+        a.realise ? 'Oui' : (a.echeance ? 'Non' : '')
+      ]);
+    });
+  });
+  if (actionsRows.length) {
+    var wsActions = XLSX.utils.aoa_to_sheet([actionsHeader].concat(actionsRows));
+    styleSheetHeader(wsActions, actionsHeader.length);
+    XLSX.utils.book_append_sheet(wb, wsActions, 'Actions & alertes');
+  }
+
+  // Feuille KPIs
+  var kpiHeader = ['Structure','Indicateur','Année','Valeur'];
+  var kpiRows = [];
+  Object.keys(kpis).forEach(function(id) {
+    var groupe = GROUPES.find(function(g) { return g.id === id; });
+    var nom = groupe ? groupe.nom : id;
+    var k = kpis[id];
+    if (!k || !k.lignes || !k.valeurs) return;
+    k.lignes.forEach(function(li, li_i) {
+      (k.annees || []).forEach(function(annee) {
+        var v = k.valeurs[li_i + '_' + annee];
+        if (v !== undefined && v !== '') kpiRows.push([nom, li, annee, v]);
+      });
+    });
+  });
+  if (kpiRows.length) {
+    var wsKpi = XLSX.utils.aoa_to_sheet([kpiHeader].concat(kpiRows));
+    styleSheetHeader(wsKpi, kpiHeader.length);
+    XLSX.utils.book_append_sheet(wb, wsKpi, 'KPIs');
+  }
 
   // Téléchargement
   var date = new Date().toISOString().slice(0,10);

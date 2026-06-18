@@ -753,7 +753,7 @@
             <div class="info-row"><div class="info-label">Radiothérap.</div><input class="info-input" id="i-radio" placeholder="—" onchange="sauver('radiotherapie', this.value); renderMachines()" /></div>
             <div class="info-row"><div class="info-label">Nb TEP</div><input class="info-input" id="i-nb-tep" type="number" min="0" placeholder="—" onchange="sauver('nb_tep', this.value); renderMachines()" /></div>
             <div class="info-row"><div class="info-label">Nb Gamma</div><input class="info-input" id="i-nb-gamma" type="number" min="0" placeholder="—" onchange="sauver('nb_gamma', this.value); renderMachines()" /></div>
-            <div class="info-row"><div class="info-label">Lien</div><input class="info-input" id="i-lien" placeholder="https://…" onchange="sauver('contact', this.value)" /></div>
+            <div class="info-row"><div class="info-label">Lien</div><input class="info-input" id="i-lien" placeholder="https://…" onchange="sauver('lien', this.value)" /></div>
             <div class="info-row"><div class="info-label">Notes DB</div><input class="info-input" id="i-notes-db" placeholder="—" onchange="sauver('notes_db', this.value)" /></div>
             <div class="info-row">
               <div class="info-label">Label</div>
@@ -1074,7 +1074,7 @@ function chargerFiche() {
     setInput('i-radio',   val('radiotherapie',  'radiotherapie'));
     setInput('i-nb-tep',   val('nb_tep',         'nb_tep') !== '' ? val('nb_tep','nb_tep') : (currentGroupe.nb_tep || ''));
     setInput('i-nb-gamma', val('nb_gamma',       'nb_gamma') !== '' ? val('nb_gamma','nb_gamma') : (currentGroupe.nb_gamma || ''));
-    setInput('i-lien',     val('contact',        'contact'));
+    setInput('i-lien',     val('lien',           'contact'));
     setInput('i-notes-db', val('notes_db',       'notes'));
 
     // Centres du réseau
