@@ -813,9 +813,9 @@
         <tbody id="tbody"></tbody>
       </table>
       <div id="empty" class="empty hidden">
-        <div class="empty-icon">◎</div>
-        <div class="empty-title">Aucun résultat</div>
-        <div class="empty-sub">Aucune structure ne correspond à vos filtres.</div>
+        <div class="empty-icon" id="empty-icon">◎</div>
+        <div class="empty-title" id="empty-title">Aucun résultat</div>
+        <div class="empty-sub" id="empty-sub">Aucune structure ne correspond à vos filtres.</div>
       </div>
     </div>
 
@@ -1036,9 +1036,12 @@ function renderImportList() {
       + '<div class="import-file-name">' + esc(imp.pays) + '</div>'
       + '<div class="import-file-meta">' + esc(imp.filename) + ' · ' + imp.nb + ' centres · ' + date + '</div>'
       + '</div>'
-      + '<button class="import-file-del" onclick="deleteImport(\'' + esc(imp.pays) + '\')" title="Supprimer">✕</button>'
+      + '<button class="import-file-del" data-pays="' + esc(imp.pays) + '" title="Supprimer">✕</button>'
       + '</div>';
   }).join('');
+  list.querySelectorAll('.import-file-del').forEach(function(btn) {
+    btn.addEventListener('click', function() { deleteImport(this.dataset.pays); });
+  });
 }
 
 function updateImportBadge() {
@@ -1516,6 +1519,12 @@ function renderTable() {
   if (!sorted.length) {
     tbody.innerHTML = '';
     empty.classList.remove('hidden');
+    var noImport = !loadImports().length;
+    document.getElementById('empty-icon').textContent  = noImport ? '📂' : '◎';
+    document.getElementById('empty-title').textContent = noImport ? 'Aucune donnée importée' : 'Aucun résultat';
+    document.getElementById('empty-sub').textContent   = noImport
+      ? 'Importez un fichier Excel (onglet Importer) pour commencer.'
+      : 'Aucune structure ne correspond à vos filtres.';
     renderStats();
     return;
   }

@@ -1151,9 +1151,13 @@ function renderMachines() {
 function majBadgeStatut(val) {
   var el = document.getElementById('hero-badge');
   if (!el) return;
-  el.innerHTML = val && STATUT_LABELS[val]
-    ? '<span class="status-badge s-' + esc(val) + '">' + esc(STATUT_LABELS[val]) + '</span>'
-    : '';
+  el.textContent = '';
+  if (val && STATUT_LABELS[val]) {
+    var span = document.createElement('span');
+    span.className = 'status-badge s-' + val;
+    span.textContent = STATUT_LABELS[val];
+    el.appendChild(span);
+  }
 }
 
 function majStatutPicker(val) {
@@ -1306,6 +1310,8 @@ function sauverKpi(li, annee, valeur) {
 function renommerLigne(li, nom) {
   kpiLignes[li] = nom;
   var k = getKpi(currentId); k.lignes = kpiLignes; saveKpi(currentId, k);
+  renderKpiTable();
+  if (GRAPH_READY) graphSaveKpi(currentId, k).catch(function(e) { console.warn('Graph KPI rename:', e.message); });
 }
 
 function ajouterLigneKpi() {
