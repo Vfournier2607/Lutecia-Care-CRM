@@ -748,11 +748,11 @@
             <div class="info-row"><div class="info-label">Région</div><input class="info-input" id="i-region" placeholder="—" onchange="sauver('region', this.value)" /></div>
             <div class="info-row"><div class="info-label">Ville</div><input class="info-input" id="i-ville" placeholder="—" onchange="sauver('ville', this.value)" /></div>
             <div class="info-row"><div class="info-label">Adresse</div><input class="info-input" id="i-adresse" placeholder="—" onchange="sauver('adresse', this.value)" /></div>
-            <div class="info-row"><div class="info-label">TEP</div><input class="info-input" id="i-tep" placeholder="—" onchange="sauver('tep', this.value)" /></div>
-            <div class="info-row"><div class="info-label">Gamma cam.</div><input class="info-input" id="i-gamma" placeholder="—" onchange="sauver('gamma_cam', this.value)" /></div>
-            <div class="info-row"><div class="info-label">Radiothérap.</div><input class="info-input" id="i-radio" placeholder="—" onchange="sauver('radiotherapie', this.value)" /></div>
-            <div class="info-row"><div class="info-label">Nb TEP</div><input class="info-input" id="i-nb-tep" type="number" min="0" placeholder="—" onchange="sauver('nb_tep', this.value)" /></div>
-            <div class="info-row"><div class="info-label">Nb Gamma</div><input class="info-input" id="i-nb-gamma" type="number" min="0" placeholder="—" onchange="sauver('nb_gamma', this.value)" /></div>
+            <div class="info-row"><div class="info-label">TEP</div><input class="info-input" id="i-tep" placeholder="—" onchange="sauver('tep', this.value); renderMachines()" /></div>
+            <div class="info-row"><div class="info-label">Gamma cam.</div><input class="info-input" id="i-gamma" placeholder="—" onchange="sauver('gamma_cam', this.value); renderMachines()" /></div>
+            <div class="info-row"><div class="info-label">Radiothérap.</div><input class="info-input" id="i-radio" placeholder="—" onchange="sauver('radiotherapie', this.value); renderMachines()" /></div>
+            <div class="info-row"><div class="info-label">Nb TEP</div><input class="info-input" id="i-nb-tep" type="number" min="0" placeholder="—" onchange="sauver('nb_tep', this.value); renderMachines()" /></div>
+            <div class="info-row"><div class="info-label">Nb Gamma</div><input class="info-input" id="i-nb-gamma" type="number" min="0" placeholder="—" onchange="sauver('nb_gamma', this.value); renderMachines()" /></div>
             <div class="info-row"><div class="info-label">Lien</div><input class="info-input" id="i-lien" placeholder="https://…" onchange="sauver('contact', this.value)" /></div>
             <div class="info-row"><div class="info-label">Notes DB</div><input class="info-input" id="i-notes-db" placeholder="—" onchange="sauver('notes_db', this.value)" /></div>
             <div class="info-row">
@@ -1054,10 +1054,7 @@ function chargerFiche() {
     document.getElementById('i-reseau').textContent = currentGroupe.estReseau ? currentGroupe.nom : 'Ind\u00e9pendant';
     document.getElementById('i-nb').textContent     = currentGroupe.nb_centres || '—';
     // i-tep/i-gamma/i-radio : text inputs, handled below via setInput
-    var nbGammaAff = (rec.nb_gamma !== undefined && rec.nb_gamma !== '') ? rec.nb_gamma : (currentGroupe.nb_gamma || '—');
-    var nbPetAff   = (rec.nb_tep   !== undefined && rec.nb_tep   !== '') ? rec.nb_tep   : (currentGroupe.nb_tep   || '—');
-    document.getElementById('k-gamma').textContent = nbGammaAff;
-    document.getElementById('k-pet').textContent   = nbPetAff;
+    // renderMachines() est appelé après setInput pour que les inputs soient remplis d'abord
 
     // Champs de la matrice Excel — valeur = surcharge CRM si existe, sinon valeur Excel
     var c0 = currentGroupe.centres && currentGroupe.centres[0];
@@ -1115,8 +1112,37 @@ function chargerFiche() {
   // Actions
   renderActions();
 
+  // Équipement (après que les inputs soient remplis par setInput)
+  renderMachines();
+
   // Dernière modif
   majDerniereModif();
+}
+
+function renderMachines() {
+  var nbGamma = document.getElementById('i-nb-gamma') ? (document.getElementById('i-nb-gamma').value || '') : '';
+  var nbPet   = document.getElementById('i-nb-tep')   ? (document.getElementById('i-nb-tep').value   || '') : '';
+  var tep     = document.getElementById('i-tep')      ? (document.getElementById('i-tep').value      || '') : '';
+  var gamma   = document.getElementById('i-gamma')    ? (document.getElementById('i-gamma').value    || '') : '';
+  var radio   = document.getElementById('i-radio')    ? (document.getElementById('i-radio').value    || '') : '';
+
+  if (!currentGroupe) return;
+  // Nb machines : surcharge si saisie, sinon total groupé
+  var affGamma = nbGamma !== '' ? nbGamma : (currentGroupe.nb_gamma || '—');
+  var affPet   = nbPet   !== '' ? nbPet   : (currentGroupe.nb_tep   || '—');
+
+  var elG = document.getElementById('k-gamma');
+  var elP = document.getElementById('k-pet');
+  if (elG) elG.textContent = affGamma;
+  if (elP) elP.textContent = affPet;
+
+  // Couleur des machine-box selon présence
+  var boxG = elG ? elG.closest('.machine-box') : null;
+  var boxP = elP ? elP.closest('.machine-box') : null;
+  var hasGamma = gamma === 'Oui' || (affGamma !== '—' && affGamma !== '0' && affGamma !== 0);
+  var hasPet   = tep   === 'Oui' || (affPet   !== '—' && affPet   !== '0' && affPet   !== 0);
+  if (boxG) boxG.style.borderLeftColor = hasGamma ? 'var(--navy-light)' : 'var(--steel-light)';
+  if (boxP) boxP.style.borderLeftColor = hasPet   ? 'var(--navy-light)' : 'var(--steel-light)';
 }
 
 // ══════════════════════════════════════
