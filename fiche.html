@@ -356,9 +356,12 @@
     .fiche-topbar {
       background: var(--white);
       border-bottom: 1px solid var(--steel-light);
-      padding: 8px 16px;
+      padding: 0 16px;
+      height: 52px;
+      min-height: 52px;
+      max-height: 52px;
       display: flex; align-items: center; justify-content: space-between; gap: 16px;
-      position: sticky; top: 0; z-index: 10; flex-shrink: 0;
+      position: sticky; top: 0; z-index: 10; flex-shrink: 0; overflow: hidden;
     }
     .fiche-topbar-left { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
     .fiche-project-label {
@@ -371,7 +374,9 @@
     .fiche-meta-line { font-size: 10px; color: var(--text-muted); }
     .fiche-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
     .fiche-tag { font-size: 9px; padding: 1px 7px; border-radius: 20px; border: 1px solid var(--steel-light); color: var(--text-muted); background: var(--off-white); }
-    .fiche-topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
+    .fiche-topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .spick-clear { font-family: 'Inter', sans-serif; font-size: 10px; padding: 3px 7px; border-radius: 20px; border: 1px solid var(--steel-light); background: transparent; color: var(--text-muted); cursor: pointer; transition: all .15s; }
+    .spick-clear:hover { background: var(--off-white); color: var(--navy); }
 
     /* ══ Statut picker ══ */
     .statut-picker { display: flex; gap: 4px; align-items: center; }
@@ -709,6 +714,7 @@
           <button class="spick" data-s="discussion" onclick="changerStatut('discussion')">Discussion</button>
           <button class="spick" data-s="advanced"   onclick="changerStatut('advanced')">Avancée</button>
           <button class="spick" data-s="loi"        onclick="changerStatut('loi')">LOI</button>
+          <button class="spick-clear" id="btn-clear-statut" onclick="changerStatut('')" title="Effacer le statut" style="display:none">✕</button>
         </div>
         <div style="display:flex;align-items:center;gap:5px;">
           <button id="btn-modifier" class="btn-edit" onclick="passerEnEdition()">
@@ -1166,6 +1172,8 @@ function majStatutPicker(val) {
   document.querySelectorAll('.spick').forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.s === val);
   });
+  var clearBtn = document.getElementById('btn-clear-statut');
+  if (clearBtn) clearBtn.style.display = val ? '' : 'none';
 }
 function changerStatut(val) {
   sauver('statut', val);
