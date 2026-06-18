@@ -1223,8 +1223,12 @@ function kpiNav(e) {
 function renderAnneesBar() {
   var bar = document.getElementById('annees-bar');
   if (!bar) return;
+  // Afficher l'union de la plage de base et des ann\u00e9es actives (tri\u00e9e)
+  var visibles = TOUTES_ANNEES.slice();
+  anneesActives.forEach(function(y) { if (visibles.indexOf(y) < 0) visibles.push(y); });
+  visibles.sort(function(a,b){return a-b;});
   bar.innerHTML = '<span style="font-size:10px;color:var(--text-muted);margin-right:4px;">Ann\u00e9es :</span>';
-  TOUTES_ANNEES.forEach(function(y) {
+  visibles.forEach(function(y) {
     var btn = document.createElement('button');
     btn.className = 'btn-annee' + (anneesActives.indexOf(y) >= 0 ? ' active' : '');
     btn.textContent = y;
@@ -1242,10 +1246,15 @@ function toggleAnnee(annee, btn) {
 }
 
 function ajouterAnnee() {
-  var prochaine = Math.max.apply(null, TOUTES_ANNEES) + 1;
-  if (TOUTES_ANNEES.indexOf(prochaine) < 0) TOUTES_ANNEES.push(prochaine);
+  // Plafond : année courante + 5
+  var max = new Date().getFullYear() + 5;
+  var toutes = TOUTES_ANNEES.slice();
+  anneesActives.forEach(function(y) { if (toutes.indexOf(y) < 0) toutes.push(y); });
+  var prochaine = Math.max.apply(null, toutes) + 1;
+  if (prochaine > max) { showToast('Limite d\'années atteinte (' + max + ')', true); return; }
   if (anneesActives.indexOf(prochaine) < 0) { anneesActives.push(prochaine); anneesActives.sort(); }
   var k = getKpi(currentId); k.annees = anneesActives; saveKpi(currentId, k);
+  if (GRAPH_READY) graphSaveKpi(currentId, k).catch(function(e){ console.warn('Graph KPI:', e.message); });
   renderAnneesBar();
   renderKpiTable();
 }
@@ -1337,7 +1346,10 @@ function supprimerLigne(li) {
 
 function supprimerAnneeCol(annee) {
   anneesActives = anneesActives.filter(function(y) { return y !== annee; });
+  // Retirer aussi de TOUTES_ANNEES si c'est une année ajoutée manuellement
+  TOUTES_ANNEES = TOUTES_ANNEES.filter(function(y) { return y !== annee; });
   var k = getKpi(currentId); k.annees = anneesActives; saveKpi(currentId, k);
+  if (GRAPH_READY) graphSaveKpi(currentId, k).catch(function(e){ console.warn('Graph KPI:', e.message); });
   renderAnneesBar();
   renderKpiTable();
 }
