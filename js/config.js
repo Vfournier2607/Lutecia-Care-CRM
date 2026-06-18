@@ -31,7 +31,9 @@ const JOURNAL_HEADERS = [
 
 const ETAT_HEADERS = [
   'id_entite', 'nom_entite', 'pays',
-  'statut', 'label', 'responsable', 'contact', 'source', 'note',
+  'statut', 'label', 'responsable', 'contact', 'source', 'note', 'lien',
+  'tep', 'gamma_cam', 'radiotherapie', 'nb_tep', 'nb_gamma',
+  'notes_db', 'region', 'ville', 'adresse', 'nb_centres',
   'modifiedBy', 'modifiedAt'
 ];
 
