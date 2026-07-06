@@ -112,6 +112,7 @@ const Graph = (function() {
     await _ensureSheet('KPIs',      KPI_HEADERS);
     await _ensureSheet('Actions',   ACTIONS_HEADERS);
     await _ensureSheet('Screening', SCREENING_HEADERS);
+    await _ensureSheet('Geo',       GEO_HEADERS);
     GRAPH_READY = true;
   }
 

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carte — Lutecia Care</title>
+  <meta name="description" content="Lutecia Care — Carte des centres du deal flow">
+  <link rel="icon" type="image/png" href="lc_ligne_hires_color.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="js/leaflet/leaflet.css" />
+  <style>
+    :root {
+      --navy:        #1a2340;
+      --navy-dark:   #111827;
+      --navy-mid:    #253058;
+      --navy-light:  #3d4f7c;
+      --mauve:       #7a3555;
+      --mauve-light: #a05070;
+      --steel:       #8a9bb5;
+      --steel-light: #c5cfe0;
+      --off-white:   #f5f3f0;
+      --white:       #ffffff;
+      --text:        #1a2340;
+      --text-body:   #3d4f6a;
+      --text-muted:  #6b7a94;
+      --success:    #2e7d5b; --success-bg: rgba(46,125,91,0.10);
+      --warning:    #b5852f; --warning-bg: rgba(181,133,47,0.12);
+      --danger:     #b3402f; --danger-bg:  rgba(179,64,47,0.10);
+      --s-contact:    #6B5B9E;
+      --s-discussion: #4A6FA5;
+      --s-advanced:   var(--navy-light);
+      --s-loi:        var(--mauve);
+      --sidebar: 200px;
+      --r: 4px; --r-lg: 8px;
+      --shadow: 0 2px 8px rgba(26,35,64,0.08);
+      --shadow-md: 0 8px 32px rgba(26,35,64,0.14);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Inter', sans-serif; color: var(--text); background: var(--off-white); }
+    .layout { display: grid; grid-template-columns: var(--sidebar) 1fr; grid-template-rows: 56px 1fr; height: 100vh; }
+
+    /* ── Sidebar (identique aux autres pages) ── */
+    .sidebar { grid-row: 1 / 3; background: var(--navy); display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); }
+    .sidebar-logo { height: 72px; display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .sidebar-logo img { max-height: 64px; max-width: 100%; object-fit: contain; }
+    .sidebar-nav { padding: 20px 0; flex: 1; }
+    .nav-label { font-size: 9px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.25); padding: 0 20px; margin: 18px 0 6px; }
+    .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 16px; color: rgba(255,255,255,0.5); font-size: 11px; cursor: pointer; transition: all .15s; border-left: 2px solid transparent; text-decoration: none; }
+    .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+    .nav-item.active { color: var(--white); background: rgba(255,255,255,0.07); border-left-color: var(--mauve); font-weight: 500; }
+    .sidebar-user { padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.07); display: flex; flex-direction: column; gap: 6px; }
+    .sidebar-user-row { display: flex; align-items: center; gap: 8px; }
+    .user-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--mauve); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; flex-shrink: 0; }
+    .user-name { font-size: 11px; color: rgba(255,255,255,0.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sync-badge { display: flex; align-items: center; gap: 6px; font-size: 9px; color: rgba(255,255,255,0.35); letter-spacing: 0.04em; }
+    .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; transition: background .4s; }
+    .sync-badge.synced .sync-dot { background: var(--success); box-shadow: 0 0 6px rgba(46,125,91,0.5); }
+    .sync-badge.synced { color: rgba(255,255,255,0.55); }
+    .sync-badge.sync-error .sync-dot { background: var(--danger); box-shadow: 0 0 6px rgba(179,64,47,0.55); }
+    .sync-badge.sync-error { color: rgba(255,255,255,0.55); }
+
+    /* ── Topbar ── */
+    .topbar { background: var(--white); border-bottom: 1px solid var(--steel-light); padding: 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .topbar-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--navy); }
+    .topbar-filtres { display: flex; align-items: center; gap: 8px; }
+    .topbar-filtres select { font-family: 'Inter', sans-serif; font-size: 11px; padding: 5px 26px 5px 9px; border: 1px solid var(--steel-light); border-radius: var(--r); background: var(--white); color: var(--navy); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236b7a94' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
+    .topbar-filtres input { font-family: 'Inter', sans-serif; font-size: 11px; padding: 5px 9px; border: 1px solid var(--steel-light); border-radius: var(--r); width: 180px; }
+    .topbar-filtres input:focus, .topbar-filtres select:focus { outline: none; border-color: var(--mauve); }
+
+    /* ── Corps : liste + map (pattern Doctolib) ── */
+    .corps { display: grid; grid-template-columns: 340px 1fr; overflow: hidden; }
+    .liste { background: var(--white); border-right: 1px solid var(--steel-light); overflow-y: auto; display: flex; flex-direction: column; }
+    .liste-head { padding: 12px 16px; border-bottom: 1px solid var(--steel-light); font-size: 11px; color: var(--text-muted); position: sticky; top: 0; background: var(--white); z-index: 5; display: flex; justify-content: space-between; align-items: center; }
+    .liste-head strong { color: var(--navy); font-size: 13px; }
+
+    .centre-card { padding: 12px 16px; border-bottom: 1px solid var(--off-white); cursor: pointer; transition: background .15s; border-left: 3px solid transparent; }
+    .centre-card:hover { background: var(--off-white); }
+    .centre-card.actif { background: var(--off-white); border-left-color: var(--mauve); }
+    .cc-nom { font-size: 12px; font-weight: 600; color: var(--navy); margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+    .cc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .cc-meta { font-size: 10px; color: var(--text-muted); }
+    .cc-badges { margin-top: 5px; display: flex; gap: 4px; flex-wrap: wrap; }
+    .cc-badge { font-size: 9px; font-weight: 600; padding: 1px 7px; border-radius: 10px; background: var(--off-white); border: 1px solid var(--steel-light); color: var(--text-body); }
+    .cc-badge.oui { background: var(--success-bg); border-color: rgba(46,125,91,0.25); color: var(--success); }
+
+    .map-wrap { position: relative; }
+    #map { width: 100%; height: 100%; }
+
+    /* Légende */
+    .legende { position: absolute; bottom: 18px; left: 12px; z-index: 500; background: var(--white); border: 1px solid var(--steel-light); border-radius: var(--r-lg); box-shadow: var(--shadow-md); padding: 10px 14px; font-size: 10px; }
+    .legende-titre { font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-size: 9px; color: var(--text-muted); margin-bottom: 6px; }
+    .legende-item { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; color: var(--text-body); }
+    .legende-item .dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--white); box-shadow: 0 0 0 1px rgba(26,35,64,0.25); }
+
+    /* Bandeau géocodage */
+    .geo-progress { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 500; background: var(--navy); color: #fff; font-size: 11px; padding: 7px 16px; border-radius: 20px; box-shadow: var(--shadow-md); display: none; align-items: center; gap: 8px; }
+    .geo-progress.visible { display: flex; }
+    .geo-spinner { width: 10px; height: 10px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Empty state */
+    .vide { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 8px; padding: 40px; text-align: center; color: var(--text-muted); font-size: 12px; }
+    .vide.visible { display: flex; }
+    .vide h3 { font-family: 'Cormorant Garamond', serif; color: var(--navy); font-size: 18px; font-weight: 600; }
+
+    /* Marqueurs personnalisés */
+    .pin { border-radius: 50%; border: 2.5px solid var(--white); box-shadow: 0 1px 6px rgba(26,35,64,0.4); }
+
+    /* Popup Leaflet — mini carte d'identité */
+    .leaflet-popup-content-wrapper { border-radius: var(--r-lg); box-shadow: var(--shadow-md); font-family: 'Inter', sans-serif; }
+    .leaflet-popup-content { margin: 14px 16px; min-width: 220px; }
+    .pop-nom { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
+    .pop-meta { font-size: 10px; color: var(--text-muted); margin-bottom: 8px; }
+    .pop-row { font-size: 11px; color: var(--text-body); margin-bottom: 3px; display: flex; gap: 6px; }
+    .pop-row .lbl { color: var(--text-muted); font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; min-width: 62px; padding-top: 1px; }
+    .pop-statut { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600; padding: 2px 9px; border-radius: 10px; color: #fff; margin-bottom: 8px; }
+    .pop-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; padding: 6px 14px; background: var(--navy); color: #fff !important; border-radius: var(--r); text-decoration: none; margin-top: 6px; transition: background .15s; }
+    .pop-btn:hover { background: var(--navy-mid); }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 0 1fr; }
+      .sidebar { display: none; }
+      .corps { grid-template-columns: 1fr; grid-template-rows: 40% 60%; }
+      .liste { border-right: none; border-bottom: 1px solid var(--steel-light); }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="lc_ligne_hires_white.png" alt="Lutecia Care" />
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Navigation</div>
+      <a class="nav-item" href="index.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        Deal Flow
+      </a>
+      <span class="nav-item active" aria-current="page">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+        </svg>
+        Carte
+      </span>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-user-row">
+        <div class="user-avatar" id="sidebar-avatar">?</div>
+        <div class="user-name" id="sidebar-name">—</div>
+      </div>
+      <div class="sync-badge" id="sync-badge">
+        <span class="sync-dot"></span>
+        <span id="sync-label">Mode local</span>
+      </div>
+    </div>
+  </aside>
+
+  <header class="topbar">
+    <div class="topbar-title">Carte des centres</div>
+    <div class="topbar-filtres">
+      <input type="text" id="f-recherche" placeholder="Rechercher un centre, une ville…" oninput="appliquerFiltres()" />
+      <select id="f-pays" onchange="appliquerFiltres()"><option value="">Tous pays</option></select>
+      <select id="f-statut" onchange="appliquerFiltres()">
+        <option value="">Tous statuts</option>
+        <option value="contact">Prise de contact</option>
+        <option value="discussion">Discussion</option>
+        <option value="advanced">Discussion avancée</option>
+        <option value="loi">LOI signée</option>
+        <option value="aucun">Sans statut</option>
+      </select>
+      <select id="f-equip" onchange="appliquerFiltres()">
+        <option value="">Tout équipement</option>
+        <option value="tep">TEP</option>
+        <option value="gamma">Gamma cam.</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="corps">
+    <div class="liste">
+      <div class="liste-head"><span><strong id="liste-count">0</strong> centres</span><span id="liste-geo"></span></div>
+      <div id="liste-cards"></div>
+      <div class="vide" id="liste-vide">
+        <h3>Aucun centre à afficher</h3>
+        <p>Importez d'abord des screenings depuis la page Deal Flow,<br/>ou élargissez vos filtres.</p>
+      </div>
+    </div>
+    <div class="map-wrap">
+      <div id="map"></div>
+      <div class="geo-progress" id="geo-progress"><span class="geo-spinner"></span><span id="geo-progress-txt">Géocodage…</span></div>
+      <div class="legende">
+        <div class="legende-titre">Statut du deal</div>
+        <div class="legende-item"><span class="dot" style="background:#8a9bb5"></span> Aucun</div>
+        <div class="legende-item"><span class="dot" style="background:#6B5B9E"></span> Prise de contact</div>
+        <div class="legende-item"><span class="dot" style="background:#4A6FA5"></span> Discussion</div>
+        <div class="legende-item"><span class="dot" style="background:#3d4f7c"></span> Discussion avancée</div>
+        <div class="legende-item"><span class="dot" style="background:#7a3555"></span> LOI signée</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="msal.min.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/graph.js"></script>
+<script src="js/geo.js"></script>
+<script src="js/leaflet/leaflet.js"></script>
+<script>
+// ══════════════════════════════════════
+// CARTE DES CENTRES — pattern liste + map
+// ══════════════════════════════════════
+var STATUT_LABELS = {
+  contact: 'Prise de contact', discussion: 'Discussion',
+  advanced: 'Discussion avancée', loi: 'LOI signée'
+};
+var STATUT_COULEURS = {
+  '':          '#8a9bb5',
+  contact:     '#6B5B9E',
+  discussion:  '#4A6FA5',
+  advanced:    '#3d4f7c',
+  loi:         '#7a3555'
+};
+
+var CENTRES = [];   // tous les centres à plat, enrichis (id groupe, statut, position)
+var carte = null;
+var marqueurs = {}; // cle centre → L.marker
+var currentUser = 'Démo Local';
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function slugId(c) {
+  return (c.reseau === 'Oui' && c.nom_reseau)
+    ? 'reseau_' + c.nom_reseau.toLowerCase().replace(/[^a-z0-9]/g, '_')
+    : 'centre_' + c.nom.toLowerCase().replace(/[^a-z0-9]/g, '_');
+}
+
+function chargerCentres() {
+  var imports = [];
+  try { imports = JSON.parse(localStorage.getItem('lutecia_imports') || '[]'); } catch(e) {}
+  var output = {};
+  try { output = JSON.parse(localStorage.getItem('lutecia_output') || '{}'); } catch(e) {}
+  var geo = Geo.connues();
+
+  CENTRES = [];
+  imports.forEach(function(imp) {
+    (imp.data || []).forEach(function(c) {
+      var id  = slugId(c);
+      var rec = output[id] || {};
+      var pos = geo[Geo.cle(c)];
+      CENTRES.push({
+        centre: c, groupeId: id,
+        statut: rec.statut || '',
+        label: rec.label || '',
+        lat: pos && pos.lat !== null ? pos.lat : null,
+        lng: pos && pos.lng !== null ? pos.lng : null
+      });
+    });
+  });
+}
+
+function centresFiltres() {
+  var q      = (document.getElementById('f-recherche').value || '').toLowerCase();
+  var pays   = document.getElementById('f-pays').value;
+  var statut = document.getElementById('f-statut').value;
+  var equip  = document.getElementById('f-equip').value;
+  return CENTRES.filter(function(e) {
+    var c = e.centre;
+    if (pays && c.pays !== pays) return false;
+    if (statut === 'aucun' && e.statut) return false;
+    if (statut && statut !== 'aucun' && e.statut !== statut) return false;
+    if (equip === 'tep'   && c.tep !== 'Oui') return false;
+    if (equip === 'gamma' && c.gamma_cam !== 'Oui') return false;
+    if (q) {
+      var txt = (c.nom + ' ' + c.ville + ' ' + c.region + ' ' + (c.nom_reseau || '') + ' ' + e.label).toLowerCase();
+      if (txt.indexOf(q) < 0) return false;
+    }
+    return true;
+  });
+}
+
+function pinIcone(statut) {
+  var couleur = STATUT_COULEURS[statut] || STATUT_COULEURS[''];
+  var taille = statut ? 16 : 12;
+  return L.divIcon({
+    className: '',
+    html: '<div class="pin" style="width:' + taille + 'px;height:' + taille + 'px;background:' + couleur + ';"></div>',
+    iconSize: [taille, taille],
+    iconAnchor: [taille / 2, taille / 2]
+  });
+}
+
+function popupHtml(e) {
+  var c = e.centre;
+  var statutHtml = e.statut
+    ? '<span class="pop-statut" style="background:' + STATUT_COULEURS[e.statut] + '">' + esc(STATUT_LABELS[e.statut] || e.statut) + '</span>'
+    : '';
+  var equip = [];
+  if (c.nb_tep)   equip.push(c.nb_tep + ' TEP');
+  if (c.nb_gamma) equip.push(c.nb_gamma + ' gamma cam.');
+  return '<div class="pop-nom">' + esc(c.nom) + '</div>'
+    + '<div class="pop-meta">' + esc(c.ville || c.region || '') + ' — ' + esc(c.pays) + (c.nom_reseau ? ' · Réseau ' + esc(c.nom_reseau) : '') + '</div>'
+    + statutHtml
+    + (c.type ? '<div class="pop-row"><span class="lbl">Type</span><span>' + esc(c.type) + '</span></div>' : '')
+    + (equip.length ? '<div class="pop-row"><span class="lbl">Équipement</span><span>' + esc(equip.join(' · ')) + '</span></div>' : '')
+    + (c.adresse ? '<div class="pop-row"><span class="lbl">Adresse</span><span>' + esc(c.adresse) + '</span></div>' : '')
+    + '<a class="pop-btn" href="fiche.html?id=' + encodeURIComponent(e.groupeId) + '">Ouvrir la fiche →</a>';
+}
+
+function rendre() {
+  var filtres = centresFiltres();
+  var cards = document.getElementById('liste-cards');
+  var vide  = document.getElementById('liste-vide');
+  document.getElementById('liste-count').textContent = filtres.length;
+
+  // Liste gauche
+  cards.innerHTML = filtres.map(function(e, i) {
+    var c = e.centre;
+    var badges = [];
+    if (c.tep === 'Oui')       badges.push('<span class="cc-badge oui">TEP</span>');
+    if (c.gamma_cam === 'Oui') badges.push('<span class="cc-badge oui">Gamma</span>');
+    if (c.nom_reseau)          badges.push('<span class="cc-badge">' + esc(c.nom_reseau) + '</span>');
+    return '<div class="centre-card" data-i="' + i + '">'
+      + '<div class="cc-nom"><span class="cc-dot" style="background:' + (STATUT_COULEURS[e.statut] || STATUT_COULEURS['']) + '"></span>' + esc(c.nom) + '</div>'
+      + '<div class="cc-meta">' + esc(c.ville || c.region || '—') + ' · ' + esc(c.pays) + (e.lat === null ? ' · <em>non localisé</em>' : '') + '</div>'
+      + (badges.length ? '<div class="cc-badges">' + badges.join('') + '</div>' : '')
+      + '</div>';
+  }).join('');
+  vide.classList.toggle('visible', !filtres.length);
+
+  // Clic sur une carte de la liste → centrer la map + ouvrir la popup
+  cards.querySelectorAll('.centre-card').forEach(function(el) {
+    el.addEventListener('click', function() {
+      cards.querySelectorAll('.centre-card.actif').forEach(function(a) { a.classList.remove('actif'); });
+      el.classList.add('actif');
+      var e = filtres[parseInt(el.dataset.i, 10)];
+      if (e.lat === null) { window.location.href = 'fiche.html?id=' + encodeURIComponent(e.groupeId); return; }
+      carte.setView([e.lat, e.lng], Math.max(carte.getZoom(), 10));
+      var m = marqueurs[Geo.cle(e.centre)];
+      if (m) m.openPopup();
+    });
+  });
+
+  // Marqueurs
+  Object.keys(marqueurs).forEach(function(k) { carte.removeLayer(marqueurs[k]); });
+  marqueurs = {};
+  var bounds = [];
+  filtres.forEach(function(e) {
+    if (e.lat === null) return;
+    var m = L.marker([e.lat, e.lng], { icon: pinIcone(e.statut) }).addTo(carte);
+    m.bindPopup(popupHtml(e));
+    marqueurs[Geo.cle(e.centre)] = m;
+    bounds.push([e.lat, e.lng]);
+  });
+  if (bounds.length) carte.fitBounds(bounds, { padding: [40, 40], maxZoom: 11 });
+
+  // Indicateur de centres non localisés
+  var nonLoc = filtres.filter(function(e) { return e.lat === null; }).length;
+  document.getElementById('liste-geo').textContent = nonLoc ? nonLoc + ' non localisés' : '';
+}
+
+function appliquerFiltres() { rendre(); }
+
+function populatePays() {
+  var sel = document.getElementById('f-pays');
+  var pays = {};
+  CENTRES.forEach(function(e) { pays[e.centre.pays] = true; });
+  Object.keys(pays).sort().forEach(function(p) {
+    var o = document.createElement('option');
+    o.value = p; o.textContent = p;
+    sel.appendChild(o);
+  });
+}
+
+// Géocodage progressif des centres sans coordonnées
+function lancerGeocodage() {
+  var manquants = CENTRES.filter(function(e) { return e.lat === null; }).map(function(e) { return e.centre; });
+  if (!manquants.length) return;
+  var bar = document.getElementById('geo-progress');
+  var txt = document.getElementById('geo-progress-txt');
+  bar.classList.add('visible');
+  Geo.geocoder(manquants, function(fait, total) {
+    txt.textContent = 'Localisation des centres… ' + fait + '/' + total;
+    if (fait % 5 === 0 || fait === total) { chargerCentres(); rendre(); }
+  }, function() {
+    bar.classList.remove('visible');
+    chargerCentres();
+    rendre();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  carte = L.map('map', { zoomControl: true }).setView([48.5, 8.5], 5);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://carto.com/attributions">CARTO</a>',
+    maxZoom: 19
+  }).addTo(carte);
+
+  chargerCentres();
+  populatePays();
+  rendre();
+
+  // Mode local : pas d'auth
+  var isLocal = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
+  if (isLocal) {
+    document.getElementById('sidebar-avatar').textContent = 'D';
+    document.getElementById('sidebar-name').textContent = 'Démo Local';
+    lancerGeocodage();
+    return;
+  }
+
+  graphConnect().then(function(ok) {
+    var badge = document.getElementById('sync-badge');
+    var lbl   = document.getElementById('sync-label');
+    if (!ok) { if (badge) badge.title = 'Non connecté au SharePoint'; lancerGeocodage(); return; }
+    if (badge) badge.classList.add('synced');
+    if (lbl)   lbl.textContent = 'SharePoint';
+    currentUser = graphGetUserName();
+    document.getElementById('sidebar-avatar').textContent = currentUser[0].toUpperCase();
+    document.getElementById('sidebar-name').textContent   = currentUser;
+
+    // 1. Récupérer les coordonnées déjà géocodées par l'équipe
+    Geo.chargerDepuisGraph().then(function() {
+      // 2. Screenings partagés si le navigateur est vierge
+      var locaux = [];
+      try { locaux = JSON.parse(localStorage.getItem('lutecia_imports') || '[]'); } catch(e) {}
+      if (!locaux.length) {
+        return graphLoadScreenings().then(function(distants) {
+          if (distants.length) {
+            try { localStorage.setItem('lutecia_imports', JSON.stringify(distants)); } catch(e) {}
+          }
+        });
+      }
+    }).then(function() {
+      chargerCentres();
+      populatePays();
+      rendre();
+      // 3. Géocoder ce qui manque encore (partagé en fin de run)
+      lancerGeocodage();
+    }).catch(function(e) { console.warn('Carte sync:', e.message); lancerGeocodage(); });
+  });
+});
+
+// Badge sync
+window.addEventListener('graph-sync-error', function() {
+  var b = document.getElementById('sync-badge'), l = document.getElementById('sync-label');
+  if (b) { b.classList.remove('synced'); b.classList.add('sync-error'); b.title = 'Échec de synchronisation'; }
+  if (l) l.textContent = 'Sync échouée';
+});
+window.addEventListener('graph-sync-ok', function() {
+  var b = document.getElementById('sync-badge'), l = document.getElementById('sync-label');
+  if (b && b.classList.contains('sync-error')) {
+    b.classList.remove('sync-error'); b.classList.add('synced'); b.title = '';
+    if (l) l.textContent = 'SharePoint';
+  }
+});
+</script>
+</body>
+</html>

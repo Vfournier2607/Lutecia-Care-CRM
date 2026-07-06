@@ -50,6 +50,8 @@ const SCREENING_HEADERS = [
 ];
 const ACTIONS_HEADERS = ['id_entite', 'type', 'date', 'note', 'auteur', 'createdAt', 'echeance', 'realise', 'modifiedBy', 'modifiedAt'];
 
+const GEO_HEADERS = ['cle', 'lat', 'lng'];
+
 const DEBUG = {
   enabled:      false,
   logGraphCalls: false

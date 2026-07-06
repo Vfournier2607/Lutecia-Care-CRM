@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fiche Structure — Lutecia Care</title>
   <link rel="icon" type="image/png" href="lc_ligne_hires_color.png" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="js/leaflet/leaflet.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -662,6 +663,12 @@
         </svg>
         Deal Flow
       </a>
+      <a class="nav-item" href="carte.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+        </svg>
+        Carte
+      </a>
       <a class="nav-item active" href="#">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -777,6 +784,10 @@
               <div class="info-label" style="margin-bottom:5px;">Centres du réseau</div>
               <div id="centres-list"></div>
             </div>
+            <div id="minimap-section" class="hidden" style="margin-top:12px;">
+              <div class="info-label" style="margin-bottom:5px;">Localisation</div>
+              <div id="minimap" style="height:180px;border-radius:6px;border:1px solid var(--steel-light);"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -865,6 +876,8 @@
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/graph.js"></script>
+<script src="js/geo.js"></script>
+<script src="js/leaflet/leaflet.js"></script>
 <script>
 // ══════════════════════════════════════
 // CONSTANTES
@@ -1100,11 +1113,15 @@ function chargerFiche() {
           + '<div class="info-label">' + esc(c.nom) + '</div>'
           + '<div class="info-value" style="font-size:11px;color:var(--text-muted)">' + esc(c.adresse || '—') + '</div></div>';
       }).join('');
-      // Délégation de dblclick sur les centres (remplace ondblclick inline)
-      listCentres.addEventListener('dblclick', function(e) {
-        var row = e.target.closest('[data-centre-idx]');
-        if (row) ouvrirPopupCentre(parseInt(row.dataset.centreIdx, 10));
-      });
+      // Délégation de dblclick sur les centres — attachée une seule fois
+      // (chargerFiche est rappelée après chaque sync Graph)
+      if (!listCentres.dataset.dblclickInit) {
+        listCentres.dataset.dblclickInit = '1';
+        listCentres.addEventListener('dblclick', function(e) {
+          var row = e.target.closest('[data-centre-idx]');
+          if (row) ouvrirPopupCentre(parseInt(row.dataset.centreIdx, 10));
+        });
+      }
     }
   }
 
@@ -1128,7 +1145,58 @@ function chargerFiche() {
   // Équipement (après que les inputs soient remplis par setInput)
   renderMachines();
 
-  // Dernière modif
+  // Mini-carte des centres
+  renderMiniMap();
+}
+
+// ══════════════════════════════════════
+// MINI-CARTE (localisation des centres du groupe)
+// ══════════════════════════════════════
+var miniMap = null;
+var miniMapPins = [];
+
+function renderMiniMap() {
+  if (typeof L === 'undefined' || !currentGroupe || !currentGroupe.centres) return;
+  var section = document.getElementById('minimap-section');
+  var geo = Geo.connues();
+  var points = [];
+  currentGroupe.centres.forEach(function(c) {
+    var pos = geo[Geo.cle(c)];
+    if (pos && pos.lat !== null) points.push({ c: c, lat: pos.lat, lng: pos.lng });
+  });
+
+  // Géocoder en arrière-plan ce qui manque, puis re-rendre
+  var manquants = currentGroupe.centres.filter(function(c) {
+    return !geo[Geo.cle(c)];
+  });
+  if (manquants.length) {
+    Geo.geocoder(manquants, null, function() { renderMiniMap(); });
+  }
+
+  if (!points.length) { if (section) section.classList.add('hidden'); return; }
+  if (section) section.classList.remove('hidden');
+
+  if (!miniMap) {
+    miniMap = L.map('minimap', { zoomControl: false, attributionControl: false, scrollWheelZoom: false });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(miniMap);
+  }
+  miniMapPins.forEach(function(p) { miniMap.removeLayer(p); });
+  miniMapPins = [];
+  var bounds = [];
+  points.forEach(function(p) {
+    var pin = L.marker([p.lat, p.lng], { icon: L.divIcon({
+      className: '',
+      html: '<div style="width:12px;height:12px;border-radius:50%;background:var(--mauve);border:2.5px solid #fff;box-shadow:0 1px 6px rgba(26,35,64,0.4);"></div>',
+      iconSize: [12, 12], iconAnchor: [6, 6]
+    }) }).addTo(miniMap);
+    pin.bindTooltip(p.c.nom, { direction: 'top', offset: [0, -6] });
+    miniMapPins.push(pin);
+    bounds.push([p.lat, p.lng]);
+  });
+  if (bounds.length === 1) miniMap.setView(bounds[0], 11);
+  else miniMap.fitBounds(bounds, { padding: [25, 25], maxZoom: 11 });
+  // Le conteneur vient d'être affiché : recalculer la taille
+  setTimeout(function() { miniMap.invalidateSize(); }, 60);
 }
 
 function renderMachines() {
