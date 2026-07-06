@@ -107,11 +107,51 @@ const Graph = (function() {
 
   // ── Initialiser les onglets nécessaires ─────────────────────────
   async function initSheets() {
-    await _ensureSheet('Journal', JOURNAL_HEADERS);
-    await _ensureSheet('Etat',    ETAT_HEADERS);
-    await _ensureSheet('KPIs',    KPI_HEADERS);
-    await _ensureSheet('Actions', ACTIONS_HEADERS);
+    await _ensureSheet('Journal',   JOURNAL_HEADERS);
+    await _ensureSheet('Etat',      ETAT_HEADERS);
+    await _ensureSheet('KPIs',      KPI_HEADERS);
+    await _ensureSheet('Actions',   ACTIONS_HEADERS);
+    await _ensureSheet('Screening', SCREENING_HEADERS);
     GRAPH_READY = true;
+  }
+
+  // ── Screenings partagés ─────────────────────────────────────────
+  // Lit l'onglet Screening et reconstruit le format lutecia_imports :
+  // [{pays, filename, importedAt, nb, data: [centres…]}]
+  async function loadScreenings() {
+    const rows = await readSheet('Screening');
+    const parPays = {};
+    rows.forEach(r => {
+      if (!r.pays || !r.nom) return;
+      if (!parPays[r.pays]) {
+        parPays[r.pays] = { pays: r.pays, filename: r.filename || '', importedAt: r.importedAt || '', nb: 0, data: [] };
+      }
+      parPays[r.pays].nb++;
+      parPays[r.pays].data.push({
+        nom: r.nom, pays: r.pays, type: r.type || '',
+        reseau: r.reseau || 'Non', nom_reseau: r.nom_reseau || '',
+        tep: r.tep || 'N/D', gamma_cam: r.gamma_cam || 'N/D',
+        nb_tep: parseFloat(r.nb_tep) || 0, nb_gamma: parseFloat(r.nb_gamma) || 0,
+        adresse: r.adresse || '', cp: r.cp || '', region: r.region || '',
+        ville: r.ville || '', mapping: r.mapping || 'Autre',
+        contact: r.contact || '', notes: r.notes || '',
+        radiotherapie: 'N/D', nb_centres: 1
+      });
+    });
+    return Object.values(parPays);
+  }
+
+  // Écrit la totalité des imports (tous pays) dans l'onglet Screening
+  async function saveScreenings(imports) {
+    const rows = [];
+    imports.forEach(imp => {
+      (imp.data || []).forEach(c => {
+        rows.push(Object.assign({}, c, {
+          pays: imp.pays, filename: imp.filename || '', importedAt: imp.importedAt || ''
+        }));
+      });
+    });
+    await writeSheet('Screening', SCREENING_HEADERS, rows);
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -186,7 +226,7 @@ const Graph = (function() {
     await writeSheet('Journal', JOURNAL_HEADERS, rows);
   }
 
-  return { readSheet, writeSheet, initSheets, loadEtat, updateEtat, loadActions, saveAction, loadKpi, saveKpi, appendJournal };
+  return { readSheet, writeSheet, initSheets, loadEtat, updateEtat, loadActions, saveAction, loadKpi, saveKpi, appendJournal, loadScreenings, saveScreenings };
 })();
 
 // ── Connexion principale appelée au démarrage de chaque page ────────
@@ -228,6 +268,8 @@ async function graphSaveAction(id, a)  { return _graphWrite(() => Graph.saveActi
 async function graphLoadKpi(id)        { return Graph.loadKpi(id); }
 async function graphSaveKpi(id, k)     { return _graphWrite(() => Graph.saveKpi(id, k)); }
 async function graphAppendJournal(l)   { return _graphWrite(() => Graph.appendJournal(l)); }
+async function graphLoadScreenings()   { return Graph.loadScreenings(); }
+async function graphSaveScreenings(i)  { return _graphWrite(() => Graph.saveScreenings(i)); }
 
 // Compare un enregistrement Etat local et distant : le plus récent gagne.
 // Retourne 'remote' | 'local' | 'equal'.

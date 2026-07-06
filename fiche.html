@@ -1826,6 +1826,16 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('sidebar-avatar').textContent = currentUser[0].toUpperCase();
     document.getElementById('sidebar-name').textContent   = currentUser;
     if (!currentId) return;
+    // Navigateur vierge (nouveau membre) : récupérer les screenings partagés
+    try {
+      if (!JSON.parse(localStorage.getItem('lutecia_imports') || '[]').length) {
+        graphLoadScreenings().then(function(distants) {
+          if (!distants.length) return;
+          try { localStorage.setItem('lutecia_imports', JSON.stringify(distants)); } catch(e) { return; }
+          chargerFiche();
+        }).catch(function(e) { console.warn('graphLoadScreenings:', e.message); });
+      }
+    } catch(e) {}
     // Actions depuis Graph — union distant + local (rien n'est perdu si une
     // action a été créée hors ligne sur ce poste)
     graphLoadActions(currentId).then(function(graphActions) {

@@ -1013,6 +1013,12 @@ function handleImportFile(file) {
       if (!saveImports(imports)) return; // quota plein : ne pas simuler un import réussi
 
       showToast('Import ' + pays + ' : ' + centres.length + ' centres');
+      // Partager le screening avec l'équipe via SharePoint
+      if (window.GRAPH_READY) {
+        graphSaveScreenings(imports)
+          .then(function() { showToast('Screening ' + pays + ' partagé avec l’équipe'); })
+          .catch(function(e) { console.warn('Graph screening:', e.message); });
+      }
       reloadData();
       renderImportList();
       updateImportBadge();
@@ -1036,16 +1042,23 @@ function handleImportDrop(e) {
 }
 
 function deleteImport(pays) {
+  if (!confirm('Supprimer le screening « ' + pays + ' » pour toute l’équipe ?')) return;
   var imports = loadImports().filter(function(imp) { return imp.pays !== pays; });
   saveImports(imports);
+  if (window.GRAPH_READY) {
+    graphSaveScreenings(imports).catch(function(e) { console.warn('Graph screening:', e.message); });
+  }
   reloadData();
   renderImportList();
   updateImportBadge();
 }
 
 function clearAllImports() {
-  if (!confirm('Supprimer tous les fichiers importés ?')) return;
+  if (!confirm('Supprimer tous les fichiers importés (pour toute l’équipe) ?')) return;
   saveImports([]);
+  if (window.GRAPH_READY) {
+    graphSaveScreenings([]).catch(function(e) { console.warn('Graph screening:', e.message); });
+  }
   reloadData();
   renderImportList();
   updateImportBadge();
@@ -1724,6 +1737,25 @@ document.addEventListener('DOMContentLoaded', function() {
       if (lbl)   lbl.textContent = 'SharePoint';
       currentUser = graphGetUserName();
       majSidebar(currentUser);
+      // Screenings partagés : SharePoint fait foi s'il contient des données
+      // (imports ET suppressions se propagent à toute l'équipe) ; si l'onglet
+      // est vide, on y pousse les imports locaux (amorçage).
+      graphLoadScreenings().then(function(distants) {
+        var locaux = loadImports();
+        if (distants.length) {
+          if (JSON.stringify(distants) !== JSON.stringify(locaux)) {
+            saveImports(distants);
+            reloadData();
+            renderImportList();
+            updateImportBadge();
+            showToast('Deal flow synchronisé depuis SharePoint');
+          }
+        } else if (locaux.length) {
+          graphSaveScreenings(locaux)
+            .then(function() { showToast('Screenings locaux partagés avec l’équipe'); })
+            .catch(function(e) { console.warn('Graph screening:', e.message); });
+        }
+      }).catch(function(e) { console.warn('graphLoadScreenings:', e.message); });
       graphLoadEtat().then(function(etat) {
         // Merge par enregistrement : le plus récent (modifiedAt) gagne, dans les deux sens
         var local = loadOutput();

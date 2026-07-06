@@ -39,6 +39,15 @@ const ETAT_HEADERS = [
 ];
 
 const KPI_HEADERS     = ['id_entite', 'lignes', 'valeurs', 'annees', 'modifiedBy', 'modifiedAt'];
+
+// Onglet Screening : données brutes importées, partagées entre les membres.
+// Une ligne par centre, taguée par pays + métadonnées d'import.
+const SCREENING_HEADERS = [
+  'pays', 'filename', 'importedAt',
+  'nom', 'type', 'reseau', 'nom_reseau',
+  'tep', 'gamma_cam', 'nb_tep', 'nb_gamma',
+  'adresse', 'cp', 'region', 'ville', 'mapping', 'contact', 'notes'
+];
 const ACTIONS_HEADERS = ['id_entite', 'type', 'date', 'note', 'auteur', 'createdAt', 'echeance', 'realise', 'modifiedBy', 'modifiedAt'];
 
 const DEBUG = {
