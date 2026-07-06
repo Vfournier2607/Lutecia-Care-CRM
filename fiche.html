@@ -400,27 +400,16 @@
     /* ══ Grille 3 colonnes ══ */
     .fiche-grid-3 {
       display: grid;
-      grid-template-columns: var(--fcol1,300px) 6px var(--fcol2,1fr) 6px var(--fcol3,340px);
+      grid-template-columns: 300px 1fr 340px;
       grid-template-rows: 1fr auto;
-      gap: 0;
+      gap: 14px;
       padding: 14px 22px 0;
       align-items: stretch;
-      column-gap: 0;
       flex: 1;
       min-height: 0;
       overflow: hidden;
     }
-    .fiche-grid-3 .fiche-col { padding: 0 7px 14px; }
-    .col-resizer {
-      width: 6px;
-      cursor: col-resize;
-      background: transparent;
-      position: relative;
-      align-self: stretch;
-      z-index: 2;
-      transition: background .15s;
-    }
-    .col-resizer:hover, .col-resizer.active { background: var(--navy-light); opacity: .4; }
+    .fiche-grid-3 .fiche-col { padding: 0 0 14px; }
     .fiche-col { display: flex; flex-direction: column; gap: 10px; overflow-x: hidden; overflow-y: hidden; min-height: 0; }
     .fiche-col > .card { flex: 1; min-height: 0; }
     .fiche-col#fcol-3 > .card:first-child { flex: 0 0 auto; }
@@ -442,7 +431,6 @@
     .alertes-empty { font-size: 11px; color: var(--text-muted); font-style: italic; }
     .alertes-bar-add { display: flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500; padding: 6px 14px; margin: auto 12px; border-radius: 20px; border: 1px solid var(--danger); color: var(--danger); background: transparent; cursor: pointer; transition: all .15s; flex-shrink: 0; pointer-events: auto; align-self: center; }
     .alertes-bar-add:hover { background: var(--danger); color: var(--white); }
-    .col-resizer { padding-bottom: 12px; }
 
     /* ══ Machines compactes ══ */
     .machines { display: flex; flex-direction: column; gap: 6px; }
@@ -463,43 +451,6 @@
 
   
     /* ══ Cartes ══ */
-    .card-draggable {
-      cursor: default;
-      position: relative;
-      min-height: 80px;
-    }
-    .card-draggable input,
-    .card-draggable textarea,
-    .card-draggable select,
-    .card-draggable button {
-      user-select: auto;
-    }
-    .drag-handle {
-      position: absolute;
-      top: 0; left: 0;
-      width: 28px;
-      height: 36px;
-      cursor: grab;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .drag-handle::before {
-      content: '⠿';
-      font-size: 14px;
-      color: var(--steel-light);
-      opacity: 0.6;
-    }
-    .drag-handle:hover::before { opacity: 1; color: var(--navy-light); }
-    .drag-handle:active { cursor: grabbing; }
-    .card-dragging {
-      opacity: .55;
-      box-shadow: 0 8px 24px rgba(26,35,64,0.18) !important;
-      z-index: 100;
-      pointer-events: none;
-    }
-    .drop-zone-over { outline: 2px dashed var(--navy-light); outline-offset: 2px; }
     .fiche-grid-3 .fiche-col { min-height: 60px; }
 
 /* ══════════════════════════════════════
@@ -793,7 +744,6 @@
       </div>
 
       <!-- Col 2 : Notes & actions -->
-      <div class="col-resizer" data-col="1"></div>
       <div class="fiche-col" id="fcol-2">
         <div class="card">
           <div class="card-header">
@@ -812,7 +762,6 @@
       </div>
 
       <!-- Col 3 : Équipement + KPIs -->
-      <div class="col-resizer" data-col="2"></div>
       <div class="fiche-col" id="fcol-3">
 
         <div class="card">
@@ -1983,109 +1932,7 @@ window.addEventListener('graph-sync-ok', function() {
 });
 
 
-// ══════════════════════════════════════
-// DRAG & DROP / RESIZE DES CARTES
-// ══════════════════════════════════════
-(function() {
-  var dragging = null, ghost = null, srcCol = null, srcIdx = null;
 
-  function initDrag() {
-    var grid = document.querySelector('.fiche-grid-3');
-    if (!grid) return;
-
-    // Rendre chaque .card dans la grille draggable
-    grid.querySelectorAll('.card').forEach(function(card) {
-      if (card.querySelector('.drag-handle')) return; // déjà initialisé
-      card.classList.add('card-draggable');
-
-      var handle = document.createElement('div');
-      handle.className = 'drag-handle';
-      handle.title = 'Glisser pour déplacer';
-      card.insertBefore(handle, card.firstChild);
-
-      handle.addEventListener('mousedown', function(e) {
-        if (e.button !== 0) return;
-        e.preventDefault();
-
-        dragging = card;
-        srcCol = card.closest('.fiche-col');
-        srcIdx = Array.from(srcCol.children).indexOf(card);
-
-        var rect = card.getBoundingClientRect();
-        var offX = e.clientX - rect.left;
-        var offY = e.clientY - rect.top;
-
-        // Ghost
-        ghost = card.cloneNode(true);
-        ghost.style.cssText = 'position:fixed;width:' + rect.width + 'px;opacity:.45;pointer-events:none;z-index:999;box-shadow:0 8px 24px rgba(26,35,64,0.2);transition:none;';
-        ghost.style.left = rect.left + 'px';
-        ghost.style.top  = rect.top  + 'px';
-        document.body.appendChild(ghost);
-        card.classList.add('card-dragging');
-
-        function onMove(ev) {
-          ghost.style.left = (ev.clientX - offX) + 'px';
-          ghost.style.top  = (ev.clientY - offY) + 'px';
-
-          // Highlight drop targets
-          grid.querySelectorAll('.fiche-col').forEach(function(col) {
-            var r = col.getBoundingClientRect();
-            if (ev.clientX >= r.left && ev.clientX <= r.right &&
-                ev.clientY >= r.top  && ev.clientY <= r.bottom) {
-              col.classList.add('drop-zone-over');
-            } else {
-              col.classList.remove('drop-zone-over');
-            }
-          });
-        }
-
-        function onUp(ev) {
-          document.removeEventListener('mousemove', onMove);
-          document.removeEventListener('mouseup', onUp);
-          if (ghost) { ghost.remove(); ghost = null; }
-          card.classList.remove('card-dragging');
-
-          // Find target col
-          grid.querySelectorAll('.fiche-col').forEach(function(col) {
-            col.classList.remove('drop-zone-over');
-            var r = col.getBoundingClientRect();
-            if (ev.clientX >= r.left && ev.clientX <= r.right &&
-                ev.clientY >= r.top  && ev.clientY <= r.bottom &&
-                col !== srcCol) {
-              // Find insertion point
-              var insertBefore = null;
-              col.querySelectorAll('.card').forEach(function(c) {
-                var cr = c.getBoundingClientRect();
-                if (ev.clientY < cr.top + cr.height / 2 && !insertBefore) {
-                  insertBefore = c;
-                }
-              });
-              if (insertBefore) col.insertBefore(card, insertBefore);
-              else col.appendChild(card);
-            }
-          });
-
-          dragging = null; srcCol = null;
-        }
-
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup', onUp);
-      });
-    });
-  }
-
-  // Init après le chargement de la fiche
-  var origChargerFiche = window.chargerFiche;
-  if (typeof origChargerFiche === 'function') {
-    window.chargerFiche = function() {
-      origChargerFiche.apply(this, arguments);
-      setTimeout(initDrag, 100);
-    };
-  }
-  document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(initDrag, 500);
-  });
-})();
 
 </script>
 </body>

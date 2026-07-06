@@ -318,7 +318,7 @@ function popupHtml(e) {
     + '<a class="pop-btn" href="fiche.html?id=' + encodeURIComponent(e.groupeId) + '">Ouvrir la fiche →</a>';
 }
 
-function rendre() {
+function rendre(fit) {
   var filtres = centresFiltres();
   var cards = document.getElementById('liste-cards');
   var vide  = document.getElementById('liste-vide');
@@ -364,14 +364,14 @@ function rendre() {
     marqueurs[Geo.cle(e.centre)] = m;
     bounds.push([e.lat, e.lng]);
   });
-  if (bounds.length) carte.fitBounds(bounds, { padding: [40, 40], maxZoom: 11 });
+  if (fit && bounds.length) carte.fitBounds(bounds, { padding: [40, 40], maxZoom: 11 });
 
   // Indicateur de centres non localisés
   var nonLoc = filtres.filter(function(e) { return e.lat === null; }).length;
   document.getElementById('liste-geo').textContent = nonLoc ? nonLoc + ' non localisés' : '';
 }
 
-function appliquerFiltres() { rendre(); }
+function appliquerFiltres() { rendre(true); }
 
 function populatePays() {
   var sel = document.getElementById('f-pays');
@@ -384,20 +384,22 @@ function populatePays() {
   });
 }
 
-// Géocodage progressif des centres sans coordonnées
+// Géocodage progressif — uniquement les centres jamais tentés
+// (un échec est mémorisé : on ne re-géocode pas en boucle à chaque visite)
 function lancerGeocodage() {
-  var manquants = CENTRES.filter(function(e) { return e.lat === null; }).map(function(e) { return e.centre; });
+  var cache = Geo.connues();
+  var manquants = CENTRES.filter(function(e) { return !cache[Geo.cle(e.centre)]; }).map(function(e) { return e.centre; });
   if (!manquants.length) return;
   var bar = document.getElementById('geo-progress');
   var txt = document.getElementById('geo-progress-txt');
   bar.classList.add('visible');
   Geo.geocoder(manquants, function(fait, total) {
     txt.textContent = 'Localisation des centres… ' + fait + '/' + total;
-    if (fait % 5 === 0 || fait === total) { chargerCentres(); rendre(); }
+    if (fait % 5 === 0 || fait === total) { chargerCentres(); rendre(false); }
   }, function() {
     bar.classList.remove('visible');
     chargerCentres();
-    rendre();
+    rendre(true);
   });
 }
 
@@ -410,7 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   chargerCentres();
   populatePays();
-  rendre();
+  rendre(true);
 
   // Mode local : pas d'auth
   var isLocal = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
@@ -446,7 +448,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }).then(function() {
       chargerCentres();
       populatePays();
-      rendre();
+      rendre(true);
       // 3. Géocoder ce qui manque encore (partagé en fin de run)
       lancerGeocodage();
     }).catch(function(e) { console.warn('Carte sync:', e.message); lancerGeocodage(); });
