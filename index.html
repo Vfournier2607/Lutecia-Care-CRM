@@ -415,7 +415,7 @@
     .table-count { font-size: 11px; color: var(--text-muted); }
     .source-label { font-size: 10px; color: var(--text-muted); font-style: italic; }
 
-    table { width: 100%; border-collapse: collapse; min-width: 980px; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 
     thead th {
       font-size: 8px; font-weight: 700;
@@ -452,7 +452,13 @@
       vertical-align: middle;
     }
 
-    .cell-nom { font-weight: 600; color: var(--navy); transition: color .12s; max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cell-nom { font-weight: 600; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cell-sub { font-size: 10px; font-weight: 400; color: var(--text-muted); }
+    .cell-equip { font-size: 11px; color: var(--text); white-space: nowrap; }
+    .cell-equip b { font-weight: 700; color: var(--navy); }
+    .equip-off { color: var(--steel); }
+    .equip-sep { color: var(--steel-light); }
+    .equip-rt { font-size: 9px; font-weight: 700; color: var(--success); background: var(--success-bg); padding: 1px 5px; border-radius: 8px; margin-left: 2px; }
     .cell-nd  { color: var(--text-muted); font-style: italic; }
 
     /* ══════════════════════════════════════
@@ -488,7 +494,7 @@
       background: transparent;
       color: var(--text);
       outline: none;
-      width: 120px;
+      width: 100%;
     }
     .inline-input:focus { border-color: var(--navy-light); background: var(--white); }
 
@@ -501,8 +507,7 @@
       background: transparent;
       color: var(--text);
       outline: none;
-      cursor: pointer;
-    }
+      cursor: pointer; width: 100%; }
 
     /* ══════════════════════════════════════
        EMPTY STATE
@@ -761,18 +766,24 @@
         </div>
       </div>
       <table>
+        <colgroup>
+          <col />
+          <col style="width:90px" />
+          <col style="width:70px" />
+          <col style="width:150px" />
+          <col style="width:140px" />
+          <col style="width:150px" />
+          <col style="width:48px" />
+        </colgroup>
         <thead>
           <tr>
             <th onclick="sortBy('nom')">Structure / Réseau <span id="sort-nom"></span></th>
-            <th onclick="sortBy('mapping')">Type <span id="sort-mapping"></span></th>
             <th onclick="sortBy('pays')">Pays <span id="sort-pays"></span></th>
-            <th style="text-align:center" onclick="sortBy('nb_centres')">Nb centres <span id="sort-nb_centres"></span></th>
-            <th style="text-align:center">TEP</th>
-            <th style="text-align:center">Gamma cam</th>
-            <th style="text-align:center">Radiothérapie</th>
+            <th style="text-align:center" onclick="sortBy('nb_centres')">Centres <span id="sort-nb_centres"></span></th>
+            <th>Équipement</th>
             <th>Label</th>
             <th>Statut du deal</th>
-            <th style="text-align:center">Alerte</th>
+            <th style="text-align:center" title="Alertes">⚑</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -1449,11 +1460,6 @@ function getSorted(arr) {
 // ══════════════════════════════════════════
 // RENDU
 // ══════════════════════════════════════════
-function badgeVal(val) {
-  if (val === 'Oui') return '<span class="badge-oui">Oui</span>';
-  if (val === 'Non') return '<span class="badge-non">Non</span>';
-  return '<span class="badge-nd">N/D</span>';
-}
 
 function renderStats() {
   var filtered = getFiltered();
@@ -1496,7 +1502,7 @@ function renderTable() {
   var output   = loadOutput();
 
   // Icônes de tri
-  ['nom','mapping','pays','nb_centres'].forEach(function(k) {
+  ['nom','pays','nb_centres'].forEach(function(k) {
     var el = document.getElementById('sort-' + k);
     if (!el) return;
     el.textContent = currentSort.key === k ? (currentSort.dir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
@@ -1527,16 +1533,21 @@ function renderTable() {
       ? '<span class="status-badge s-' + esc(statut) + '">' + esc(STATUT_LABELS[statut] || statut) + '</span>'
       : '';
 
+    var sousLigne = [];
+    if (g.mapping && g.mapping !== 'Autre') sousLigne.push(esc(g.mapping));
+    if (!g.estReseau) sousLigne.push('Indépendant');
+    var equip = [];
+    equip.push(g.nb_tep   > 0 ? '<b>' + g.nb_tep   + '</b> TEP' : '<span class="equip-off">0 TEP</span>');
+    equip.push(g.nb_gamma > 0 ? '<b>' + g.nb_gamma + '</b> GC'  : '<span class="equip-off">0 GC</span>');
+    if (g.radiotherapie === 'Oui') equip.push('<span class="equip-rt" title="Radiothérapie">RT</span>');
+
     return '<tr data-id="' + esc(g.id) + '">'
       + '<td class="cell-nom">' + (isModifie(g, output) ? '<span class="dot-modifie" title="Structure modifiée"></span>' : '') + esc(g.nom)
-        + (g.estReseau ? '' : '<br><span style="font-size:10px;color:var(--text-muted);font-style:italic">Indépendant</span>')
+        + (sousLigne.length ? '<br><span class="cell-sub">' + sousLigne.join(' · ') + '</span>' : '')
         + '</td>'
-      + '<td style="font-size:11px;color:var(--text-muted)">' + esc(g.mapping) + '</td>'
       + '<td style="font-size:11px">' + esc(g.pays) + '</td>'
       + '<td style="text-align:center;font-weight:500">' + g.nb_centres + '</td>'
-      + '<td style="text-align:center">' + badgeVal(g.tep) + '</td>'
-      + '<td style="text-align:center">' + badgeVal(g.gamma_cam) + '</td>'
-      + '<td style="text-align:center">' + badgeVal(g.radiotherapie) + '</td>'
+      + '<td class="cell-equip">' + equip.join(' <span class="equip-sep">·</span> ') + '</td>'
       + '<td onclick="event.stopPropagation()">'
         + '<input class="inline-input" type="text" value="' + esc(label) + '"'
         + ' placeholder="Nom de code..."'
