@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deal Flow — Lutecia Care</title>
   <meta name="description" content="Lutecia Care — Suivi du deal flow Europe">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%231a2340'/><text y='.9em' font-size='80' x='10'>L</text></svg>" type="image/svg+xml">
+  <link rel="icon" type="image/png" href="lc_ligne_hires_color.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -32,13 +32,6 @@
       --warning:    #b5852f; --warning-bg: rgba(181,133,47,0.12);
       --danger:     #b3402f; --danger-bg:  rgba(179,64,47,0.10);
 
-      /* legacy aliases kept for any JS that might reference them */
-      --grey:      var(--steel-light);
-      --grey-lt:   var(--off-white);
-      --text-mid:  var(--text-body);
-      --text-soft: var(--text-muted);
-      --blue:      var(--navy-light);
-      --bordeaux:  var(--mauve);
 
       --s-contact:    #6B5B9E;
       --s-discussion: #4A6FA5;
@@ -100,7 +93,7 @@
     }
 
     .sidebar-logo img {
-      max-height: 64px;
+      max-height: 56px;
       max-width: 100%;
       width: auto;
       object-fit: contain;
@@ -150,7 +143,7 @@
     .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; transition: background .4s; }
     .sync-badge.synced .sync-dot { background: var(--success); box-shadow: 0 0 6px rgba(46,125,91,0.5); }
     .sync-badge.synced { color: rgba(255,255,255,0.55); }
-    .sync-badge.sync-error .sync-dot { background: #b3402f; box-shadow: 0 0 6px rgba(179,64,47,0.55); }
+    .sync-badge.sync-error .sync-dot { background: var(--danger); box-shadow: 0 0 6px rgba(179,64,47,0.55); }
     .sync-badge.sync-error { color: rgba(255,255,255,0.55); }
 
     .user-avatar {
@@ -393,9 +386,6 @@
       vertical-align: middle;
       flex-shrink: 0;
     }
-    .check-modifie { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
-    .check-modifie input { cursor: pointer; }
-    .check-modifie label { font-size: 11px; color: var(--text-body); cursor: pointer; white-space: nowrap; }
 
     /* ══════════════════════════════════════
        TABLEAU
@@ -425,7 +415,7 @@
     .table-count { font-size: 11px; color: var(--text-muted); }
     .source-label { font-size: 10px; color: var(--text-muted); font-style: italic; }
 
-    table { width: 100%; border-collapse: collapse; }
+    table { width: 100%; border-collapse: collapse; min-width: 980px; }
 
     thead th {
       font-size: 8px; font-weight: 700;
@@ -462,7 +452,7 @@
       vertical-align: middle;
     }
 
-    .cell-nom { font-weight: 600; color: var(--navy); transition: color .12s; }
+    .cell-nom { font-weight: 600; color: var(--navy); transition: color .12s; max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .cell-nd  { color: var(--text-muted); font-style: italic; }
 
     /* ══════════════════════════════════════
@@ -527,74 +517,6 @@
     .empty-sub { font-size: 11px; color: var(--text-muted); }
 
     /* ══════════════════════════════════════
-       MODALE AUTH
-    ══════════════════════════════════════ */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(26,35,64,0.80);
-      backdrop-filter: blur(6px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1000;
-    }
-
-    .modal-box {
-      background: var(--white);
-      border-radius: 10px;
-      padding: 40px 44px;
-      width: 380px;
-      text-align: center;
-      box-shadow: 0 24px 64px rgba(26,35,64,0.25);
-      animation: fadeUp 0.2s ease;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: none; }
-    }
-
-    .modal-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 26px; font-weight: 600;
-      color: var(--navy); margin-bottom: 4px;
-    }
-
-    .modal-sub {
-      font-size: 10px; color: var(--text-muted);
-      letter-spacing: 0.10em; text-transform: uppercase;
-      margin-bottom: 28px;
-    }
-
-    .modal-label {
-      font-size: 10px; font-weight: 600;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--text-muted);
-      display: block; text-align: left; margin-bottom: 5px;
-    }
-
-    .modal-input {
-      width: 100%;
-      font-family: 'Inter', sans-serif; font-size: 13px;
-      padding: 10px 13px;
-      border: 1px solid var(--steel-light);
-      border-radius: var(--r);
-      color: var(--text); outline: none;
-      margin-bottom: 14px;
-    }
-    .modal-input:focus { border-color: var(--navy-light); }
-
-    .modal-btn {
-      width: 100%; padding: 11px;
-      background: var(--navy); color: var(--white);
-      border: none; border-radius: var(--r);
-      font-family: 'Inter', sans-serif;
-      font-size: 12px; font-weight: 500;
-      cursor: pointer; letter-spacing: 0.04em;
-      transition: background 0.15s;
-    }
-    .modal-btn:hover { background: var(--navy-light); }
-    .modal-error { font-size: 11px; color: var(--mauve); margin-top: 6px; min-height: 14px; }
-
-    /* ══════════════════════════════════════
        UTILS
     ══════════════════════════════════════ */
     .hidden { display: none !important; }
@@ -613,6 +535,16 @@
     }
     .toast.toast-warn { background: var(--mauve); }
     @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+    /* ── Responsive ── */
+    @media (max-width: 1200px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 900px) {
+      :root { --sidebar: 0px; }
+      .sidebar { display: none; }
+      .layout { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
