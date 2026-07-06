@@ -111,6 +111,9 @@
 
     /* Marqueurs personnalisés */
     .pin { border-radius: 50%; border: 2px solid var(--white); outline: 1px solid rgba(26,35,64,0.25); }
+    .cluster { background: var(--navy); color: var(--white); border-radius: 50%; border: 2px solid var(--white); outline: 1px solid rgba(26,35,64,0.3); display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-weight: 600; }
+    .cluster.c-md { background: var(--navy-mid); }
+    .cluster.c-lg { background: var(--mauve); }
 
     /* Popup Leaflet — mini carte d'identité */
     .leaflet-popup-content-wrapper { border-radius: var(--r-lg); box-shadow: var(--shadow-md); font-family: 'Inter', sans-serif; }
@@ -200,7 +203,11 @@
       <div id="map"></div>
       <div class="geo-progress" id="geo-progress"><span class="geo-spinner"></span><span id="geo-progress-txt">Géocodage…</span></div>
       <div class="legende">
-        <div class="legende-titre">Statut du deal</div>
+        <div class="legende-titre">Densité</div>
+        <div class="legende-item"><span class="cluster" style="width:16px;height:16px;font-size:8px;position:static;">9</span> &lt; 10 centres</div>
+        <div class="legende-item"><span class="cluster c-md" style="width:16px;height:16px;font-size:8px;position:static;">30</span> 10 – 49</div>
+        <div class="legende-item"><span class="cluster c-lg" style="width:16px;height:16px;font-size:8px;position:static;">80</span> 50 et +</div>
+        <div class="legende-titre" style="margin-top:8px;">Statut du deal</div>
         <div class="legende-item"><span class="dot" style="background:var(--steel)"></span> Aucun</div>
         <div class="legende-item"><span class="dot" style="background:var(--s-contact)"></span> Prise de contact</div>
         <div class="legende-item"><span class="dot" style="background:var(--s-discussion)"></span> Discussion</div>
@@ -217,6 +224,7 @@
 <script src="js/graph.js"></script>
 <script src="js/geo.js"></script>
 <script src="js/leaflet/leaflet.js"></script>
+<script src="js/leaflet/leaflet.markercluster.js"></script>
 <script>
 // ══════════════════════════════════════
 // CARTE DES CENTRES — pattern liste + map
@@ -236,6 +244,7 @@ var STATUT_COULEURS = {
 
 var CENTRES = [];   // tous les centres à plat, enrichis (id groupe, statut, position)
 var carte = null;
+var clusterGroup = null;
 var marqueurs = {}; // cle centre → L.marker
 var currentUser = 'Démo Local';
 
@@ -352,20 +361,24 @@ function rendre(fit) {
       el.classList.add('actif');
       var e = filtres[parseInt(el.dataset.i, 10)];
       if (e.lat === null) { window.location.href = 'fiche.html?id=' + encodeURIComponent(e.groupeId); return; }
-      carte.setView([e.lat, e.lng], Math.max(carte.getZoom(), 10));
       var m = marqueurs[Geo.cle(e.centre)];
-      if (m) m.openPopup();
+      if (m) {
+        clusterGroup.zoomToShowLayer(m, function() { m.openPopup(); });
+      } else {
+        carte.setView([e.lat, e.lng], Math.max(carte.getZoom(), 11));
+      }
     });
   });
 
-  // Marqueurs
-  Object.keys(marqueurs).forEach(function(k) { carte.removeLayer(marqueurs[k]); });
+  // Marqueurs (dans le groupe de clusters)
+  clusterGroup.clearLayers();
   marqueurs = {};
   var bounds = [];
   filtres.forEach(function(e) {
     if (e.lat === null) return;
-    var m = L.marker([e.lat, e.lng], { icon: pinIcone(e.statut) }).addTo(carte);
+    var m = L.marker([e.lat, e.lng], { icon: pinIcone(e.statut) });
     m.bindPopup(popupHtml(e));
+    clusterGroup.addLayer(m);
     marqueurs[Geo.cle(e.centre)] = m;
     bounds.push([e.lat, e.lng]);
   });
@@ -414,6 +427,25 @@ document.addEventListener('DOMContentLoaded', function() {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://carto.com/attributions">CARTO</a>',
     maxZoom: 19
   }).addTo(carte);
+
+  // Clusters : lecture immédiate des densités (taille + couleur selon le nombre)
+  clusterGroup = L.markerClusterGroup({
+    maxClusterRadius: 45,
+    disableClusteringAtZoom: 11,
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    iconCreateFunction: function(cluster) {
+      var n = cluster.getChildCount();
+      var taille = n < 10 ? 28 : n < 50 ? 36 : 44;
+      var classe = n < 10 ? '' : n < 50 ? ' c-md' : ' c-lg';
+      return L.divIcon({
+        className: '',
+        html: '<div class="cluster' + classe + '" style="width:' + taille + 'px;height:' + taille + 'px;font-size:' + (n < 100 ? 11 : 10) + 'px;">' + n + '</div>',
+        iconSize: [taille, taille], iconAnchor: [taille / 2, taille / 2]
+      });
+    }
+  });
+  carte.addLayer(clusterGroup);
 
   chargerCentres();
   populatePays();
