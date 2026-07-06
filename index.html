@@ -1651,7 +1651,12 @@ document.addEventListener('DOMContentLoaded', function() {
     return fetch('data/screenings.json')
       .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function(seed) {
-        if (!saveImports(seed)) return false;
+        // Merge : le seed remplace SES pays, mais préserve ceux importés
+        // manuellement (ex. un screening ajouté via le panneau Importer)
+        var paysSeed = {};
+        seed.forEach(function(i) { paysSeed[i.pays] = true; });
+        var manuels = loadImports().filter(function(i) { return !paysSeed[i.pays]; });
+        if (!saveImports(seed.concat(manuels))) return false;
         try { localStorage.setItem('lutecia_seed_version', SEED_VERSION); } catch(e) {}
         reloadData();
         renderImportList();

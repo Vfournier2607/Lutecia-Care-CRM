@@ -424,8 +424,12 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('data/screenings.json')
       .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function(seed) {
+        var paysSeed = {};
+        seed.forEach(function(i) { paysSeed[i.pays] = true; });
+        var manuels = [];
+        try { manuels = JSON.parse(localStorage.getItem('lutecia_imports') || '[]').filter(function(i) { return !paysSeed[i.pays]; }); } catch(e) {}
         try {
-          localStorage.setItem('lutecia_imports', JSON.stringify(seed));
+          localStorage.setItem('lutecia_imports', JSON.stringify(seed.concat(manuels)));
           localStorage.setItem('lutecia_seed_version', SEED_VERSION);
         } catch(e) { return; }
         chargerCentres();
