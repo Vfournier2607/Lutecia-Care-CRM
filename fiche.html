@@ -944,7 +944,6 @@ function sauver(champ, valeur) {
   saveOutput(data);
   appendJournal(champ, ancienne, valeur);
   showSaved();
-  majDerniereModif();
   if (window.GRAPH_READY) {
     var etatData = {};
     etatData[champ] = valeur;
@@ -1123,7 +1122,6 @@ function chargerFiche() {
   renderMachines();
 
   // Dernière modif
-  majDerniereModif();
 }
 
 function renderMachines() {
@@ -1458,7 +1456,6 @@ function confirmerAction() {
   fermerPopup();
   renderActions();
   showSaved();
-  majDerniereModif();
 }
 
 function renderActions() {
@@ -1633,13 +1630,6 @@ function confirmerAlerte() {
   fermerPopupAlerte();
   renderActions();
   showSaved();
-  majDerniereModif();
-}
-
-function majDerniereModif() {
-  // Card Dernière modification supprimée — fonction conservée comme no-op
-  // pour ne pas casser les appels existants.
-  return;
 }
 
 function formatDate(d) {
@@ -1752,8 +1742,9 @@ function confirmerPopupCentre() {
   try {
     var journal = JSON.parse(localStorage.getItem('lutecia_journal') || '[]');
     journal.push(ligne);
+    if (journal.length > 2000) journal = journal.slice(journal.length - 2000);
     localStorage.setItem('lutecia_journal', JSON.stringify(journal));
-  } catch(e) {}
+  } catch(e) { showToast('⚠ Stockage plein — journal non sauvegardé', true); }
 
   // Sync Graph si dispo : l'override centre part dans la feuille Etat
   // (id_entite = clé du centre) + une ligne de journal

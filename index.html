@@ -851,7 +851,8 @@ function loadImports() {
 }
 
 function saveImports(arr) {
-  try { localStorage.setItem(IMPORTS_KEY, JSON.stringify(arr)); } catch(e) { alert('Stockage plein : ' + e.message); }
+  try { localStorage.setItem(IMPORTS_KEY, JSON.stringify(arr)); return true; }
+  catch(e) { showToast('⚠ Stockage plein — import non sauvegardé', true); return false; }
 }
 
 function getScreeningData() {
@@ -986,8 +987,10 @@ function handleImportFile(file) {
       if (!pays) {
         pays = prompt('Pays non détecté dans le nom du fichier.\nEntrez le pays :');
         if (!pays || !pays.trim()) return;
-        pays = pays.trim();
       }
+      // Normaliser : "italie" et "Italie " ne doivent pas créer deux imports
+      pays = pays.trim();
+      pays = pays.charAt(0).toUpperCase() + pays.slice(1).toLowerCase();
 
       var centres = parseDbSheet(wb.Sheets[wsName], pays);
       if (!centres.length) { alert('Aucun centre trouvé dans la feuille DB.'); return; }
@@ -1002,8 +1005,9 @@ function handleImportFile(file) {
         data:       centres
       };
       if (idx >= 0) imports[idx] = entry; else imports.push(entry);
-      saveImports(imports);
+      if (!saveImports(imports)) return; // quota plein : ne pas simuler un import réussi
 
+      showToast('Import ' + pays + ' : ' + centres.length + ' centres');
       reloadData();
       renderImportList();
       updateImportBadge();
@@ -1011,6 +1015,9 @@ function handleImportFile(file) {
     } catch(err) {
       alert('Erreur lors de la lecture : ' + err.message);
     }
+  };
+  reader.onerror = function() {
+    showToast('⚠ Impossible de lire le fichier ' + file.name, true);
   };
   reader.readAsArrayBuffer(file);
   document.getElementById('import-file-input').value = '';
@@ -1069,6 +1076,9 @@ function reloadData() {
     });
   });
   GROUPES = Object.values(map);
+  // Fallback lu par fiche.html si les imports bruts sont indisponibles.
+  // Écrit une fois ici (pas à chaque clic de ligne) pour limiter le quota localStorage.
+  try { localStorage.setItem('lutecia_groupes', JSON.stringify(GROUPES)); } catch(e) {}
   populateFiltres();
   renderTable();
   renderStats();
@@ -1124,8 +1134,6 @@ function closeImportPanel() {
   document.getElementById('import-overlay').classList.remove('open');
 }
 
-// SCREENING_DATA désormais dynamique (chargé depuis localStorage)
-var SCREENING_DATA = getScreeningData();
 
 const STATUT_LABELS = {
   contact: 'Prise de contact', discussion: 'Discussion',
@@ -1226,48 +1234,6 @@ function appendJournal(id, champ, ancienne, nouvelle) {
 function majSidebar(nom) {
   document.getElementById('sidebar-avatar').textContent = nom[0].toUpperCase();
   document.getElementById('sidebar-name').textContent   = nom;
-}
-
-// ══════════════════════════════════════════
-// GROUPEMENT
-// ══════════════════════════════════════════
-function grouperCentres() {
-  var map = {};
-
-  SCREENING_DATA.forEach(function(c) {
-    var key;
-    if (c.reseau === 'Oui' && c.nom_reseau) {
-      key = 'reseau_' + c.nom_reseau.toLowerCase().replace(/\s+/g, '_');
-    } else {
-      key = 'centre_' + c.nom.toLowerCase().replace(/\s+/g, '_');
-    }
-
-    if (!map[key]) {
-      map[key] = {
-        id:           key,
-        nom:          c.reseau === 'Oui' && c.nom_reseau ? c.nom_reseau : c.nom,
-        mapping:      c.mapping,
-        pays:         c.pays,
-        nb_centres:   0,
-        tep:          c.tep,
-        gamma_cam:    c.gamma_cam,
-        radiotherapie: c.radiotherapie,
-        estReseau:    c.reseau === 'Oui' && !!c.nom_reseau,
-        centres:      []
-      };
-    }
-
-    map[key].nb_centres++;
-    map[key].centres.push(c);
-
-    // Agréger TEP / gamma / radio : si au moins un "Oui" -> Oui
-    ['tep', 'gamma_cam', 'radiotherapie'].forEach(function(champ) {
-      if (c[champ] === 'Oui') map[key][champ] = 'Oui';
-      else if (c[champ] === 'Non' && map[key][champ] === 'N/D') map[key][champ] = 'Non';
-    });
-  });
-
-  return Object.values(map);
 }
 
 // ══════════════════════════════════════════
@@ -1593,7 +1559,7 @@ function renderTable() {
     var label  = rec.label  || '';
 
     var statutBadge = statut
-      ? '<span class="status-badge s-' + statut + '">' + STATUT_LABELS[statut] + '</span>'
+      ? '<span class="status-badge s-' + esc(statut) + '">' + esc(STATUT_LABELS[statut] || statut) + '</span>'
       : '';
 
     return '<tr data-id="' + esc(g.id) + '">'
@@ -1678,22 +1644,9 @@ function ouvrirFicheDepuisPopup() {
 // ══════════════════════════════════════════
 // NAVIGATION VERS LA FICHE (double-clic)
 // ══════════════════════════════════════════
-var clickTimer = null;
-
 function ouvrirFiche(id) {
-  localStorage.setItem('lutecia_groupes', JSON.stringify(GROUPES));
-  localStorage.setItem('lutecia_fiche_id', id);
+  try { localStorage.setItem('lutecia_fiche_id', id); } catch(e) {}
   window.location.href = 'fiche.html?id=' + encodeURIComponent(id);
-}
-
-function handleRowClick(id) {
-  if (clickTimer) {
-    clearTimeout(clickTimer);
-    clickTimer = null;
-    ouvrirFiche(id);
-  } else {
-    clickTimer = setTimeout(function() { clickTimer = null; }, 300);
-  }
 }
 
 // ══════════════════════════════════════════
