@@ -27,6 +27,11 @@
       --text-body:   #3d4f6a;
       --text-muted:  #6b7a94;
 
+      /* Fonctionnelles (brand guide 4.4) — jamais de néon */
+      --success:    #2e7d5b; --success-bg: rgba(46,125,91,0.10);
+      --warning:    #b5852f; --warning-bg: rgba(181,133,47,0.12);
+      --danger:     #b3402f; --danger-bg:  rgba(179,64,47,0.10);
+
       /* legacy aliases kept for any JS that might reference them */
       --grey:      var(--steel-light);
       --grey-lt:   var(--off-white);
@@ -143,7 +148,7 @@
     .sidebar-user-row { display: flex; align-items: center; gap: 8px; }
     .sync-badge { display: flex; align-items: center; gap: 6px; font-size: 9px; color: rgba(255,255,255,0.35); letter-spacing: 0.04em; }
     .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; transition: background .4s; }
-    .sync-badge.synced .sync-dot { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+    .sync-badge.synced .sync-dot { background: var(--success); box-shadow: 0 0 6px rgba(46,125,91,0.5); }
     .sync-badge.synced { color: rgba(255,255,255,0.55); }
     .sync-badge.sync-error .sync-dot { background: #b3402f; box-shadow: 0 0 6px rgba(179,64,47,0.55); }
     .sync-badge.sync-error { color: rgba(255,255,255,0.55); }
@@ -454,7 +459,7 @@
     /* ══════════════════════════════════════
        BADGES
     ══════════════════════════════════════ */
-    .badge-oui  { color: #1a6b3c; background: #e8f5ee; border: 1px solid #b8dfc8; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+    .badge-oui  { color: var(--success); background: var(--success-bg); border: 1px solid rgba(46,125,91,0.25); padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; }
     .badge-non  { color: var(--text-muted); background: var(--off-white); border: 1px solid var(--steel-light); padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; }
     .badge-nd   { color: var(--text-muted); background: var(--steel-light); padding: 2px 8px; border-radius: 20px; font-size: 10px; }
 
@@ -1449,7 +1454,7 @@ function renderClocheAlerte(id) {
     var d = new Date(a.echeance); d.setHours(0,0,0,0);
     return d.getTime() < today.getTime();
   });
-  var color = enRetard ? '#0a0a0a' : '#DC2626';
+  var color = enRetard ? 'var(--navy-dark)' : 'var(--danger)';
   var n = actifs.length;
   return '<button data-alert-id="' + esc(id) + '" title="' + n + ' alerte(s) — cliquer pour voir" '
        + 'style="background:transparent;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:3px;padding:2px 4px;">'
@@ -1614,7 +1619,7 @@ function ouvrirPopupAlertes(id) {
   document.getElementById('pal-liste').innerHTML = actifs.map(function(a, i) {
     var d = new Date(a.echeance); d.setHours(0,0,0,0);
     var enRetard = d.getTime() < today.getTime();
-    var color = enRetard ? '#0a0a0a' : '#DC2626';
+    var color = enRetard ? 'var(--navy-dark)' : 'var(--danger)';
     var libelle = enRetard ? 'En retard' : 'À venir';
     return '<div style="padding:12px 14px;border:1px solid var(--steel-light);border-radius:6px;margin-bottom:8px;background:var(--off-white);">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'

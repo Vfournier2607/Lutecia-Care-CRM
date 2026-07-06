@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fiche Structure — Lutecia Care</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="icon" type="image/png" href="lc_ligne_hires_color.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -21,6 +22,11 @@
       --text:        #1a2340;
       --text-body:   #3d4f6a;
       --text-muted:  #6b7a94;
+
+      /* Fonctionnelles (brand guide 4.4) — jamais de néon */
+      --success:    #2e7d5b; --success-bg: rgba(46,125,91,0.10);
+      --warning:    #b5852f; --warning-bg: rgba(181,133,47,0.12);
+      --danger:     #b3402f; --danger-bg:  rgba(179,64,47,0.10);
 
       /* legacy aliases kept for backward compat */
       --grey:      var(--steel-light);
@@ -65,7 +71,7 @@
     .user-name { font-size: 11px; color: rgba(255,255,255,0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sync-badge { display: flex; align-items: center; gap: 6px; font-size: 9px; color: rgba(255,255,255,0.35); letter-spacing: 0.04em; }
     .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; transition: background .4s; }
-    .sync-badge.synced .sync-dot { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+    .sync-badge.synced .sync-dot { background: var(--success); box-shadow: 0 0 6px rgba(46,125,91,0.5); }
     .sync-badge.synced { color: rgba(255,255,255,0.55); }
     .sync-badge.sync-error .sync-dot { background: #b3402f; box-shadow: 0 0 6px rgba(179,64,47,0.55); }
     .sync-badge.sync-error { color: rgba(255,255,255,0.55); }
@@ -210,7 +216,7 @@
     .centre-row-clickable .info-label { margin-bottom: 4px; }
 
     /* ── Save indicator ── */
-    .save-ind { font-size: 10px; color: #15803D; opacity: 0; transition: opacity .3s; }
+    .save-ind { font-size: 10px; color: var(--success); opacity: 0; transition: opacity .3s; }
     .save-ind.visible { opacity: 1; }
 
             /* ── Sidebar Infos Deal (Pack refonte) ── */
@@ -304,8 +310,8 @@
     .btn-edit:hover { background: var(--navy); border-color: var(--navy); }
     .btn-edit.cancel { background: transparent; color: var(--text-muted); border-color: var(--steel-light); }
     .btn-edit.cancel:hover { background: var(--off-white); color: var(--text); }
-    .btn-edit.save { background: #15803D; border-color: #15803D; }
-    .btn-edit.save:hover { background: #0F6A30; border-color: #0F6A30; }
+    .btn-edit.save { background: var(--success); border-color: var(--success); }
+    .btn-edit.save:hover { background: #256a4d; border-color: #256a4d; }
     .edit-hint { font-size: 11px; color: var(--text-muted); font-style: italic; }
 
     /* En mode lecture : tous les inputs/textarea/select éditables sont neutralisés visuellement */
@@ -427,14 +433,14 @@
     .alertes-bar { background: var(--white); border: 1px solid var(--steel-light); border-radius: var(--r); box-shadow: var(--shadow); display: flex; align-items: stretch; gap: 0; overflow: hidden; min-height: 80px; }
     .alertes-bar-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-right: 1px solid var(--steel-light); flex-shrink: 0; justify-content: center; flex-direction: column; }
     .alertes-bar-title { font-family: 'Cormorant Garamond', serif; font-size: 14px; font-weight: 600; color: var(--navy); white-space: nowrap; }
-    .alertes-bar-count { font-size: 10px; font-weight: 600; color: #DC2626; }
+    .alertes-bar-count { font-size: 10px; font-weight: 600; color: var(--danger); }
     .alertes-chips { flex: 1; display: flex; gap: 8px; align-items: center; padding: 12px 16px; overflow-x: auto; min-width: 0; flex-wrap: wrap; }
     .alertes-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; padding: 4px 10px; border-radius: 20px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
-    .alertes-chip.overdue { border-color: #991B1B; color: #991B1B; background: #FEF2F2; }
-    .alertes-chip.upcoming { border-color: #DC2626; color: #DC2626; background: #FFF5F5; }
+    .alertes-chip.overdue { border-color: #8f3326; color: #8f3326; background: var(--danger-bg); }
+    .alertes-chip.upcoming { border-color: var(--danger); color: var(--danger); background: var(--danger-bg); }
     .alertes-empty { font-size: 11px; color: var(--text-muted); font-style: italic; }
-    .alertes-bar-add { display: flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500; padding: 6px 14px; margin: auto 12px; border-radius: 20px; border: 1px solid #DC2626; color: #DC2626; background: transparent; cursor: pointer; transition: all .15s; flex-shrink: 0; pointer-events: auto; align-self: center; }
-    .alertes-bar-add:hover { background: #DC2626; color: var(--white); }
+    .alertes-bar-add { display: flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500; padding: 6px 14px; margin: auto 12px; border-radius: 20px; border: 1px solid var(--danger); color: var(--danger); background: transparent; cursor: pointer; transition: all .15s; flex-shrink: 0; pointer-events: auto; align-self: center; }
+    .alertes-bar-add:hover { background: var(--danger); color: var(--white); }
     .col-resizer { padding-bottom: 12px; }
 
     /* ══ Machines compactes ══ */
@@ -601,7 +607,7 @@
     </div>
     <div class="popup-actions">
       <button class="btn-cancel" onclick="fermerPopupAlerte()">Annuler</button>
-      <button class="btn-confirm" onclick="confirmerAlerte()" style="background:#DC2626;">Créer l'alerte</button>
+      <button class="btn-confirm" onclick="confirmerAlerte()" style="background:var(--danger);">Créer l'alerte</button>
     </div>
   </div>
 </div>
@@ -839,7 +845,7 @@
       <div class="fiche-full-row">
         <div class="alertes-bar">
           <div class="alertes-bar-head">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="alertes-bar-title">Alertes</span>
             <span class="alertes-bar-count" id="alertes-counter"></span>
           </div>
@@ -891,7 +897,7 @@ var kpiLignes     = KPI_DEFAUT.slice();
 
 // Helper: échapper le HTML pour éviter les XSS dans les gabarits innerHTML
 function badgeVal(v) {
-  if (v === "Oui") return '<span style="color:#1a6b3c;background:#e8f5ee;border:1px solid #b8dfc8;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;">Oui</span>';
+  if (v === "Oui") return '<span style="color:var(--success);background:var(--success-bg);border:1px solid rgba(46,125,91,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;">Oui</span>';
   if (v === "Non") return '<span style="color:#6b7a94;background:#f5f3f0;border:1px solid #c5cfe0;padding:2px 8px;border-radius:20px;font-size:10px;">Non</span>';
   return '<span style="color:#6b7a94;background:#c5cfe0;padding:2px 8px;border-radius:20px;font-size:10px;">N/D</span>';
 }
@@ -1071,7 +1077,8 @@ function chargerFiche() {
     function setSelect(id, v) { var el = document.getElementById(id); if (el) el.value = v || ''; }
 
     setInput('i-type',     val('type',          'type'));
-    setInput('i-nb',       val('nb_centres',    'nb_centres') || (currentGroupe.nb_centres || ''));
+    // Nb centres : surcharge CRM sinon total du groupe (jamais celui du 1er centre)
+    setInput('i-nb',       (rec.nb_centres !== undefined && rec.nb_centres !== '') ? rec.nb_centres : (currentGroupe.nb_centres || ''));
     setInput('i-region',   val('region',         'region'));
     setInput('i-ville',    val('ville',          'ville'));
     setInput('i-adresse',  val('adresse',        'adresse'));
@@ -1486,18 +1493,18 @@ function renderActions() {
     var btnRealise = '';
     if (a.echeance && !a.realise) {
       var ech = new Date(a.echeance); ech.setHours(0,0,0,0);
-      dotColor = (ech.getTime() < today.getTime()) ? '#0a0a0a' : '#DC2626';
+      dotColor = (ech.getTime() < today.getTime()) ? 'var(--navy-dark)' : 'var(--danger)';
       labelEcheance = ' — Échéance : ' + esc(formatDate(a.echeance));
       btnRealise = '<button data-realise="' + a._idx + '" title="Marquer comme réalisée" '
-                 + 'style="font-family:Inter,sans-serif;font-size:10px;padding:3px 9px;border:1px solid #15803D;'
-                 + 'border-radius:20px;background:transparent;color:#15803D;cursor:pointer;margin-left:8px;">'
+                 + 'style="font-family:Inter,sans-serif;font-size:10px;padding:3px 9px;border:1px solid var(--success);'
+                 + 'border-radius:20px;background:transparent;color:var(--success);cursor:pointer;margin-left:8px;">'
                  + '✓ Réalisé</button>';
     }
     var btnEdit = '<button class="btn-edit-action" data-edit="' + a._idx + '" title="Modifier">'
                 + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
                 + '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>'
                 + '<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
-    var btnDel = '<button class="btn-edit-action" data-del="' + a._idx + '" title="Supprimer" style="color:#DC2626;">'
+    var btnDel = '<button class="btn-edit-action" data-del="' + a._idx + '" title="Supprimer" style="color:var(--danger);">'
                + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
                + '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>'
                + '</svg></button>';
