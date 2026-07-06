@@ -145,6 +145,8 @@
     .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; transition: background .4s; }
     .sync-badge.synced .sync-dot { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
     .sync-badge.synced { color: rgba(255,255,255,0.55); }
+    .sync-badge.sync-error .sync-dot { background: #b3402f; box-shadow: 0 0 6px rgba(179,64,47,0.55); }
+    .sync-badge.sync-error { color: rgba(255,255,255,0.55); }
 
     .user-avatar {
       width: 28px; height: 28px;
@@ -1184,7 +1186,7 @@ function setRecord(id, champ, valeur) {
   appendJournal(id, champ, ancienne, valeur);
 
   // Sync Graph en arrière-plan
-  if (GRAPH_READY) {
+  if (window.GRAPH_READY) {
     var groupe = GROUPES.find(function(g) { return g.id === id; });
     var etatData = {};
     etatData[champ] = valeur;
@@ -1765,11 +1767,23 @@ document.addEventListener('DOMContentLoaded', function() {
       currentUser = graphGetUserName();
       majSidebar(currentUser);
       graphLoadEtat().then(function(etat) {
+        // Merge par enregistrement : le plus récent (modifiedAt) gagne, dans les deux sens
         var local = loadOutput();
+        var aPousser = [];
         Object.keys(etat).forEach(function(id) {
-          if (!local[id]) local[id] = {};
-          Object.assign(local[id], etat[id]);
+          if (etat[id].type_entite === 'Centre') return; // overrides centre gérés par fiche.html
+          var verdict = graphCompareEtat(local[id], etat[id]);
+          if (verdict === 'remote') {
+            local[id] = Object.assign({}, local[id] || {}, etat[id]);
+          } else if (verdict === 'local') {
+            aPousser.push(id);
+          }
         });
+        // Push séquentiel : chaque écriture réécrit la feuille entière,
+        // des appels concurrents s'écraseraient mutuellement
+        aPousser.reduce(function(chaine, id) {
+          return chaine.then(function() { return graphUpdateEtat(id, local[id]); });
+        }, Promise.resolve()).catch(function(e) { console.warn('Graph push:', e.message); });
         saveOutput(local);
         renderTable();
         renderStats();
@@ -1795,7 +1809,10 @@ function exporterExcel() {
   // Colonnes de base (depuis Excel source)
   var colsBase = ['Nom du centre','Type','Réseau','Nom réseau','TEP','Gamma cam.','Nb TEP','Nb Gamma','Adresse','CP','Région','Ville','Mapping','Lien','Notes'];
   // Colonnes CRM ajoutées
-  var colsCRM  = ['Statut deal','Label','Responsable M&A','Contact clé','Source','Note CRM','Lien CRM'];
+  var colsCRM  = ['Statut deal','Label','Responsable M&A','Contact clé','Source','Note CRM','Lien CRM',
+                  'Statut centre','Label centre','Nb machines centre','Note centre'];
+  var centresOv = {};
+  try { centresOv = JSON.parse(localStorage.getItem('lutecia_centres_override') || '{}'); } catch(e) {}
 
   var allRows = [];
 
@@ -1807,6 +1824,7 @@ function exporterExcel() {
         ? 'reseau_' + c.nom_reseau.toLowerCase().replace(/[^a-z0-9]/g, '_')
         : 'centre_' + c.nom.toLowerCase().replace(/[^a-z0-9]/g, '_');
       var rec = output[id] || {};
+      var ov  = centresOv[id + '__' + c.nom.toLowerCase().replace(/[^a-z0-9]/g, '_')] || {};
       var row = [
         c.nom,
         rec.type          || c.type          || '',
@@ -1816,21 +1834,26 @@ function exporterExcel() {
         rec.gamma_cam     || c.gamma_cam     || '',
         rec.nb_tep        !== undefined ? rec.nb_tep        : (c.nb_tep   || 0),
         rec.nb_gamma      !== undefined ? rec.nb_gamma      : (c.nb_gamma || 0),
-        rec.adresse       || c.adresse       || '',
+        ov.adresse        || rec.adresse     || c.adresse   || '',
         c.cp              || '',
         rec.region        || c.region        || '',
         rec.ville         || c.ville         || '',
         rec.mapping       || c.mapping       || '',
-        rec.contact       || c.contact       || '',
+        rec.lien          || c.contact       || '',
         rec.notes_db      || c.notes         || '',
-        // CRM
+        // CRM groupe
         rec.statut        || '',
         rec.label         || '',
         rec.responsable   || '',
         rec.contact       || '',
         rec.source        || '',
         rec.note          || '',
-        rec.lien          || c.contact || ''
+        rec.lien          || '',
+        // CRM centre (surcharges individuelles)
+        ov.statut         || '',
+        ov.label          || '',
+        ov.nb_machines    || '',
+        ov.note           || ''
       ];
       rows.push(row);
       allRows.push(row);
@@ -1921,6 +1944,22 @@ function styleSheetHeader(ws, nbCols) {
     return { wch: i === 0 ? 35 : i < 8 ? 12 : 22 };
   });
 }
+
+
+// Badge sync : reflète en direct les échecs / reprises d'écriture Graph
+window.addEventListener('graph-sync-error', function() {
+  var b = document.getElementById('sync-badge'), l = document.getElementById('sync-label');
+  if (b) { b.classList.remove('synced'); b.classList.add('sync-error'); b.title = 'Échec de synchronisation — données sauvegardées en local uniquement'; }
+  if (l) l.textContent = 'Sync échouée';
+});
+window.addEventListener('graph-sync-ok', function() {
+  var b = document.getElementById('sync-badge'), l = document.getElementById('sync-label');
+  if (b && b.classList.contains('sync-error')) {
+    b.classList.remove('sync-error'); b.classList.add('synced'); b.title = '';
+    if (l) l.textContent = 'SharePoint';
+  }
+});
+
 </script>
 <!-- Popup Alertes (Pack 7) -->
 <div id="popup-alertes-list" class="popup-overlay hidden" style="position:fixed;inset:0;background:rgba(26,35,64,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;">

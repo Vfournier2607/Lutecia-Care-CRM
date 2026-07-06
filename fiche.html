@@ -67,6 +67,8 @@
     .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; transition: background .4s; }
     .sync-badge.synced .sync-dot { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
     .sync-badge.synced { color: rgba(255,255,255,0.55); }
+    .sync-badge.sync-error .sync-dot { background: #b3402f; box-shadow: 0 0 6px rgba(179,64,47,0.55); }
+    .sync-badge.sync-error { color: rgba(255,255,255,0.55); }
 
     /* ── Topbar ── */
     .topbar { background: var(--navy); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; border-bottom: 1px solid rgba(255,255,255,0.06); z-index: 10; }
@@ -724,9 +726,8 @@
           </button>
           <button id="btn-enregistrer" class="btn-edit save hidden" onclick="enregistrerModifs()">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            Enregistrer
+            Terminer
           </button>
-          <button id="btn-annuler" class="btn-edit cancel hidden" onclick="annulerEdition()">Annuler</button>
         </div>
         <span class="save-ind" id="save-ind">✓</span>
         <a href="index.html" class="btn-retour">
@@ -944,9 +945,10 @@ function sauver(champ, valeur) {
   appendJournal(champ, ancienne, valeur);
   showSaved();
   majDerniereModif();
-  if (GRAPH_READY) {
+  if (window.GRAPH_READY) {
     var etatData = {};
     etatData[champ] = valeur;
+    etatData.type_entite = 'Groupe';
     if (currentGroupe) { etatData.nom_entite = currentGroupe.nom; etatData.pays = currentGroupe.pays; }
     graphUpdateEtat(currentId, etatData).catch(function(e) { console.warn('Graph:', e.message); });
     var ligne = { timestamp: new Date().toISOString(), auteur: currentUser, type_entite: 'Reseau',
@@ -1253,7 +1255,7 @@ function ajouterAnnee() {
   if (prochaine > max) { showToast('Limite d\'années atteinte (' + max + ')', true); return; }
   if (anneesActives.indexOf(prochaine) < 0) { anneesActives.push(prochaine); anneesActives.sort(); }
   var k = getKpi(currentId); k.annees = anneesActives; saveKpi(currentId, k);
-  if (GRAPH_READY) graphSaveKpi(currentId, k).catch(function(e){ console.warn('Graph KPI:', e.message); });
+  if (window.GRAPH_READY) graphSaveKpi(currentId, k).catch(function(e){ console.warn('Graph KPI:', e.message); });
   renderAnneesBar();
   renderKpiTable();
 }
@@ -1275,24 +1277,27 @@ function renderKpiTable() {
   tbody.innerHTML = kpiLignes.map(function(ligne, li) {
     var cells = anneesActives.map(function(y, ci) {
       var val = valeurs[li + '_' + y] || '';
-      return '<td><input class="kpi-input kpi-nav" type="text" value="' + val + '" placeholder="\u2014"'
+      return '<td><input class="kpi-input kpi-nav" type="text" value="' + esc(val) + '" placeholder="\u2014"'
         + ' data-row="' + li + '" data-col="' + ci + '"'
         + ' onchange="sauverKpi(' + li + ',' + y + ',this.value)"'
         + ' onkeydown="kpiNav(event)" /></td>';
     }).join('');
 
-    // CAGR
-    var vals = anneesActives.map(function(y) {
-      return parseFloat((valeurs[li + '_' + y] || '').replace(',', '.'));
-    }).filter(function(v) { return !isNaN(v) && v > 0; });
+    // CAGR \u2014 exposant bas\u00e9 sur l'\u00e9cart r\u00e9el d'ann\u00e9es, pas le nombre de valeurs
+    var pts = [];
+    anneesActives.forEach(function(y) {
+      var v = parseFloat((valeurs[li + '_' + y] || '').replace(',', '.'));
+      if (!isNaN(v) && v > 0) pts.push({ annee: y, val: v });
+    });
     var cagr = '\u2014';
-    if (vals.length >= 2) {
-      var ratio = vals[vals.length-1] / vals[0];
-      if (ratio > 0) cagr = ((Math.pow(ratio, 1/(vals.length-1)) - 1) * 100).toFixed(1) + '%';
+    if (pts.length >= 2) {
+      var first = pts[0], last = pts[pts.length - 1];
+      var nbAns = last.annee - first.annee;
+      if (nbAns > 0) cagr = ((Math.pow(last.val / first.val, 1 / nbAns) - 1) * 100).toFixed(1) + '%';
     }
 
     return '<tr>'
-      + '<td class="row-label"><input class="kpi-row-name" type="text" value="' + ligne + '"'
+      + '<td class="row-label"><input class="kpi-row-name" type="text" value="' + esc(ligne) + '"'
       + ' onchange="renommerLigne(' + li + ',this.value)" /></td>'
       + cells
       + '<td class="cagr">' + cagr + '</td>'
@@ -1318,7 +1323,7 @@ function sauverKpi(li, annee, valeur) {
   if (el) { el.textContent = '\u2713 Sauvegard\u00e9'; setTimeout(function() { el.textContent = ''; }, 1500); }
 
   // Sync Graph
-  if (GRAPH_READY) {
+  if (window.GRAPH_READY) {
     graphSaveKpi(currentId, k).catch(function(e) { console.warn('Graph KPI:', e.message); });
   }
 }
@@ -1327,20 +1332,33 @@ function renommerLigne(li, nom) {
   kpiLignes[li] = nom;
   var k = getKpi(currentId); k.lignes = kpiLignes; saveKpi(currentId, k);
   renderKpiTable();
-  if (GRAPH_READY) graphSaveKpi(currentId, k).catch(function(e) { console.warn('Graph KPI rename:', e.message); });
+  if (window.GRAPH_READY) graphSaveKpi(currentId, k).catch(function(e) { console.warn('Graph KPI rename:', e.message); });
 }
 
 function ajouterLigneKpi() {
   kpiLignes.push('Nouvel indicateur');
   var k = getKpi(currentId); k.lignes = kpiLignes; saveKpi(currentId, k);
   renderKpiTable();
+  if (window.GRAPH_READY) graphSaveKpi(currentId, k).catch(function(e) { console.warn('Graph KPI:', e.message); });
 }
 
 function supprimerLigne(li) {
   if (kpiLignes.length <= 1) return;
   kpiLignes.splice(li, 1);
-  var k = getKpi(currentId); k.lignes = kpiLignes; saveKpi(currentId, k);
+  var k = getKpi(currentId); k.lignes = kpiLignes;
+  // Réindexer les valeurs : les clés sont "index_année", tout ce qui suit la ligne supprimée décale
+  var nouv = {};
+  Object.keys(k.valeurs || {}).forEach(function(cle) {
+    var sep = cle.indexOf('_');
+    var idx = parseInt(cle.slice(0, sep), 10);
+    var reste = cle.slice(sep);
+    if (idx === li) return;                       // valeurs de la ligne supprimée
+    nouv[(idx > li ? idx - 1 : idx) + reste] = k.valeurs[cle];
+  });
+  k.valeurs = nouv;
+  saveKpi(currentId, k);
   renderKpiTable();
+  if (window.GRAPH_READY) graphSaveKpi(currentId, k).catch(function(e) { console.warn('Graph KPI:', e.message); });
 }
 
 function supprimerAnneeCol(annee) {
@@ -1348,7 +1366,7 @@ function supprimerAnneeCol(annee) {
   // Retirer aussi de TOUTES_ANNEES si c'est une année ajoutée manuellement
   TOUTES_ANNEES = TOUTES_ANNEES.filter(function(y) { return y !== annee; });
   var k = getKpi(currentId); k.annees = anneesActives; saveKpi(currentId, k);
-  if (GRAPH_READY) graphSaveKpi(currentId, k).catch(function(e){ console.warn('Graph KPI:', e.message); });
+  if (window.GRAPH_READY) graphSaveKpi(currentId, k).catch(function(e){ console.warn('Graph KPI:', e.message); });
   renderAnneesBar();
   renderKpiTable();
 }
@@ -1432,7 +1450,7 @@ function confirmerAction() {
   }
   saveActionsList(currentId, actions);
 
-  if (GRAPH_READY) {
+  if (window.GRAPH_READY) {
     graphSaveAction(currentId, action).catch(function(e) { console.warn('Graph action:', e.message); });
   }
 
@@ -1548,7 +1566,7 @@ function marquerRealise(idx) {
   renderActions();
   showSaved();
   // Sync Graph
-  if (typeof GRAPH_READY !== 'undefined' && GRAPH_READY) {
+  if (window.GRAPH_READY) {
     try { graphSaveAction(currentId, actions[idx]).catch(function(e){ console.warn('Graph alert:', e.message); }); }
     catch(e) {}
   }
@@ -1606,7 +1624,7 @@ function confirmerAlerte() {
   }
   saveActionsList(currentId, actions);
 
-  if (typeof GRAPH_READY !== 'undefined' && GRAPH_READY) {
+  if (window.GRAPH_READY) {
     try { graphSaveAction(currentId, action).catch(function(e){ console.warn('Graph alerte:', e.message); }); }
     catch(e) {}
   }
@@ -1638,6 +1656,12 @@ function formatDate(d) {
 var POPUP_CENTRE_IDX = null;
 var POPUP_CENTRE_KEY = null;
 
+// Clé stable d'un centre : slug de son nom (un réimport Excel qui change
+// l'ordre des lignes ne doit pas réattribuer les overrides au mauvais centre).
+function cleCentre(nom) {
+  return currentId + '__' + String(nom || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+}
+
 function getCentreOverride(key) {
   try {
     var all = JSON.parse(localStorage.getItem('lutecia_centres_override') || '{}');
@@ -1649,15 +1673,26 @@ function saveCentreOverride(key, data) {
     var all = JSON.parse(localStorage.getItem('lutecia_centres_override') || '{}');
     all[key] = data;
     localStorage.setItem('lutecia_centres_override', JSON.stringify(all));
-  } catch(e) {}
+  } catch(e) { showToast('⚠ Stockage plein — modification non sauvegardée', true); }
 }
 
 function ouvrirPopupCentre(idx) {
   if (!currentGroupe || !currentGroupe.centres || !currentGroupe.centres[idx]) return;
   var c = currentGroupe.centres[idx];
-  var key = currentId + '__' + idx;
+  var key = cleCentre(c.nom);
   POPUP_CENTRE_IDX = idx;
   POPUP_CENTRE_KEY = key;
+
+  // Migration : anciennes clés par position (id__0, id__1…) → clé par nom
+  try {
+    var all = JSON.parse(localStorage.getItem('lutecia_centres_override') || '{}');
+    var ancienne = currentId + '__' + idx;
+    if (!all[key] && all[ancienne]) {
+      all[key] = all[ancienne];
+      delete all[ancienne];
+      localStorage.setItem('lutecia_centres_override', JSON.stringify(all));
+    }
+  } catch(e) {}
 
   // Récupérer override + valeurs par défaut depuis screening
   var ov = getCentreOverride(key);
@@ -1720,10 +1755,12 @@ function confirmerPopupCentre() {
     localStorage.setItem('lutecia_journal', JSON.stringify(journal));
   } catch(e) {}
 
-  // Sync Graph si dispo
-  if (typeof GRAPH_READY !== 'undefined' && GRAPH_READY) {
-    try { graphAppendJournal(ligne).catch(function(e) { console.warn('Graph:', e.message); }); }
-    catch(e) {}
+  // Sync Graph si dispo : l'override centre part dans la feuille Etat
+  // (id_entite = clé du centre) + une ligne de journal
+  if (window.GRAPH_READY) {
+    var etatCentre = Object.assign({ type_entite: 'Centre', nom_entite: c.nom, pays: c.pays || '' }, data);
+    graphUpdateEtat(POPUP_CENTRE_KEY, etatCentre).catch(function(e) { console.warn('Graph centre:', e.message); });
+    graphAppendJournal(ligne).catch(function(e) { console.warn('Graph:', e.message); });
   }
 
   fermerPopupCentre();
@@ -1733,30 +1770,20 @@ function confirmerPopupCentre() {
 // ══════════════════════════════════════
 // MODE LECTURE / ÉDITION (Pack 4)
 // ══════════════════════════════════════
-var EDIT_BACKUP = null;
-
-function getSnapshotChamps() {
-  return {
-    label: (document.getElementById('i-label') || {}).value || ''
-  };
-}
-
+// La sauvegarde se fait au fil de l'eau via les onchange (sauver/sauverKpi).
+// « Terminer » referme simplement le mode édition — il n'y a pas d'Annuler,
+// car les modifications sont déjà persistées (localStorage + journal + Graph).
 function appliquerModeLecture() {
   document.body.classList.add('read-mode');
   document.body.classList.remove('edit-mode');
-  // Mettre les champs structurels en readonly
   document.querySelectorAll('.info-input, .info-textarea, .kpi-input, .kpi-row-name').forEach(function(el){
     el.setAttribute('readonly', 'readonly');
   });
-  // Boutons UI
   document.getElementById('btn-modifier').classList.remove('hidden');
   document.getElementById('btn-enregistrer').classList.add('hidden');
-  document.getElementById('btn-annuler').classList.add('hidden');
-  // edit-hint removed
 }
 
 function passerEnEdition() {
-  EDIT_BACKUP = getSnapshotChamps();
   document.body.classList.remove('read-mode');
   document.body.classList.add('edit-mode');
   document.querySelectorAll('.info-input, .info-textarea, .kpi-input, .kpi-row-name').forEach(function(el){
@@ -1764,35 +1791,11 @@ function passerEnEdition() {
   });
   document.getElementById('btn-modifier').classList.add('hidden');
   document.getElementById('btn-enregistrer').classList.remove('hidden');
-  document.getElementById('btn-annuler').classList.remove('hidden');
-  // edit-hint removed
 }
 
 function enregistrerModifs() {
-  // Les onchange ont déjà sauvegardé au fil de l'eau, donc on confirme juste
-  // Pour les champs qui n'auraient pas trigger onchange (modif sans blur), on force
-  var snap = getSnapshotChamps();
-  Object.keys(snap).forEach(function(k) {
-    var orig = (EDIT_BACKUP || {})[k] || '';
-    if (snap[k] !== orig) {
-      // Forcer le sauver pour ce champ
-      sauver(k, snap[k]);
-    }
-  });
   appliquerModeLecture();
   showSaved();
-}
-
-function annulerEdition() {
-  if (EDIT_BACKUP) {
-    var bk = EDIT_BACKUP;
-    if (document.getElementById('i-label')) document.getElementById('i-label').value = bk.label;
-    if (bk.statut !== undefined) {
-      majBadgeStatut(bk.statut);
-      majStatutPicker(bk.statut);
-    }
-  }
-  appliquerModeLecture();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1825,12 +1828,18 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('sidebar-avatar').textContent = currentUser[0].toUpperCase();
     document.getElementById('sidebar-name').textContent   = currentUser;
     if (!currentId) return;
-    // Actions depuis Graph
+    // Actions depuis Graph — union distant + local (rien n'est perdu si une
+    // action a été créée hors ligne sur ce poste)
     graphLoadActions(currentId).then(function(graphActions) {
-      if (graphActions && graphActions.length > 0) {
-        saveActionsList(currentId, graphActions);
-        renderActions();
-      }
+      if (!graphActions || !graphActions.length) return;
+      var locales = getActions(currentId);
+      var vues = {}, fusion = [];
+      graphActions.concat(locales).forEach(function(a) {
+        var cle = (a.createdAt || '') + '|' + (a.note || '');
+        if (!vues[cle]) { vues[cle] = true; fusion.push(a); }
+      });
+      saveActionsList(currentId, fusion);
+      renderActions();
     }).catch(function(e) { console.warn('graphLoadActions:', e.message); });
     // KPIs depuis Graph
     graphLoadKpi(currentId).then(function(graphKpi) {
@@ -1842,15 +1851,32 @@ document.addEventListener('DOMContentLoaded', function() {
         renderKpiTable();
       }
     }).catch(function(e) { console.warn('graphLoadKpi:', e.message); });
-    // Etat depuis Graph
+    // Etat depuis Graph — le plus récent (modifiedAt) gagne, dans les deux sens
     graphLoadEtat().then(function(etat) {
-      if (etat[currentId]) {
+      var distant = etat[currentId];
+      if (distant) {
         var local = loadOutput();
-        if (!local[currentId]) local[currentId] = {};
-        Object.assign(local[currentId], etat[currentId]);
-        saveOutput(local);
-        chargerFiche();
+        var verdict = graphCompareEtat(local[currentId], distant);
+        if (verdict === 'remote') {
+          local[currentId] = Object.assign({}, local[currentId] || {}, distant);
+          saveOutput(local);
+          chargerFiche();
+        } else if (verdict === 'local') {
+          // Modifs locales plus récentes (faites hors ligne) → repousser vers SharePoint
+          graphUpdateEtat(currentId, local[currentId]).catch(function(e) { console.warn('Graph push:', e.message); });
+        }
       }
+      // Overrides des centres de ce groupe (id_entite = "<groupe>__<slug centre>")
+      try {
+        var all = JSON.parse(localStorage.getItem('lutecia_centres_override') || '{}');
+        var prefixe = currentId + '__';
+        var change = false;
+        Object.keys(etat).forEach(function(id) {
+          if (id.indexOf(prefixe) !== 0) return;
+          if (graphCompareEtat(all[id], etat[id]) === 'remote') { all[id] = etat[id]; change = true; }
+        });
+        if (change) localStorage.setItem('lutecia_centres_override', JSON.stringify(all));
+      } catch(e) {}
     }).catch(function(e) { console.warn('graphLoadEtat:', e.message); });
   });
 });
@@ -1865,6 +1891,21 @@ document.getElementById('popup-centre').addEventListener('click', function(e) {
 document.getElementById('popup-alerte').addEventListener('click', function(e) {
   if (e.target === this) fermerPopupAlerte();
 });
+
+// Badge sync : reflète en direct les échecs / reprises d'écriture Graph
+window.addEventListener('graph-sync-error', function() {
+  var b = document.getElementById('sync-badge'), l = document.getElementById('sync-label');
+  if (b) { b.classList.remove('synced'); b.classList.add('sync-error'); b.title = 'Échec de synchronisation — données sauvegardées en local uniquement'; }
+  if (l) l.textContent = 'Sync échouée';
+});
+window.addEventListener('graph-sync-ok', function() {
+  var b = document.getElementById('sync-badge'), l = document.getElementById('sync-label');
+  if (b && b.classList.contains('sync-error')) {
+    b.classList.remove('sync-error'); b.classList.add('synced'); b.title = '';
+    if (l) l.textContent = 'SharePoint';
+  }
+});
+
 
 // ══════════════════════════════════════
 // DRAG & DROP / RESIZE DES CARTES

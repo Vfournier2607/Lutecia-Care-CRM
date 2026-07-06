@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════════════
 
 // Indicateur lisible par le code applicatif
-let GRAPH_READY = false;
+var GRAPH_READY = false;
 
 const Graph = (function() {
   const BASE = 'https://graph.microsoft.com/v1.0';
@@ -208,10 +208,33 @@ function graphGetUserName() {
   const u = Auth.getUser();
   return u ? u.name : '';
 }
+// Toute écriture Graph signale son résultat via un événement window :
+// les pages écoutent 'graph-sync-error' / 'graph-sync-ok' pour tenir le badge à jour.
+async function _graphWrite(fn) {
+  try {
+    const r = await fn();
+    try { window.dispatchEvent(new CustomEvent('graph-sync-ok')); } catch(_) {}
+    return r;
+  } catch(e) {
+    try { window.dispatchEvent(new CustomEvent('graph-sync-error', { detail: e.message })); } catch(_) {}
+    throw e;
+  }
+}
+
 async function graphLoadEtat()         { return Graph.loadEtat(); }
-async function graphUpdateEtat(id, d)  { return Graph.updateEtat(id, d); }
+async function graphUpdateEtat(id, d)  { return _graphWrite(() => Graph.updateEtat(id, d)); }
 async function graphLoadActions(id)    { return Graph.loadActions(id); }
-async function graphSaveAction(id, a)  { return Graph.saveAction(id, a); }
+async function graphSaveAction(id, a)  { return _graphWrite(() => Graph.saveAction(id, a)); }
 async function graphLoadKpi(id)        { return Graph.loadKpi(id); }
-async function graphSaveKpi(id, k)     { return Graph.saveKpi(id, k); }
-async function graphAppendJournal(l)   { return Graph.appendJournal(l); }
+async function graphSaveKpi(id, k)     { return _graphWrite(() => Graph.saveKpi(id, k)); }
+async function graphAppendJournal(l)   { return _graphWrite(() => Graph.appendJournal(l)); }
+
+// Compare un enregistrement Etat local et distant : le plus récent gagne.
+// Retourne 'remote' | 'local' | 'equal'.
+function graphCompareEtat(localRec, remoteRec) {
+  const locT = localRec && localRec.modifiedAt ? Date.parse(localRec.modifiedAt) || 0 : 0;
+  const remT = remoteRec && remoteRec.modifiedAt ? Date.parse(remoteRec.modifiedAt) || 0 : 0;
+  if (remT > locT) return 'remote';
+  if (locT > remT) return 'local';
+  return 'equal';
+}
