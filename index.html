@@ -454,7 +454,7 @@
 
     .cell-nom { font-weight: 600; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .cell-sub { font-size: 10px; font-weight: 400; color: var(--text-muted); }
-    .flag { font-size: 13px; vertical-align: -1px; }
+    img.flag { vertical-align: -1px; border-radius: 2px; }
     .cell-equip { font-size: 11px; color: var(--text); white-space: nowrap; }
     .cell-equip b { font-weight: 700; color: var(--navy); }
     .equip-off { color: var(--steel); }
@@ -827,13 +827,16 @@ function getScreeningData() {
 }
 
 function paysToFlag(pays) {
-  var flags = {
-    'italie': '🇮🇹', 'italy': '🇮🇹', 'france': '🇫🇷', 'allemagne': '🇩🇪', 'germany': '🇩🇪',
-    'espagne': '🇪🇸', 'spain': '🇪🇸', 'portugal': '🇵🇹', 'belgique': '🇧🇪', 'belgium': '🇧🇪',
-    'suisse': '🇨🇭', 'switzerland': '🇨🇭', 'uk': '🇬🇧', 'angleterre': '🇬🇧', 'pays-bas': '🇳🇱',
-    'netherlands': '🇳🇱', 'grece': '🇬🇷', 'grèce': '🇬🇷', 'greece': '🇬🇷', 'autriche': '🇦🇹', 'austria': '🇦🇹', 'pologne': '🇵🇱', 'poland': '🇵🇱'
+  var codes = {
+    'italie': 'it', 'italy': 'it', 'france': 'fr', 'allemagne': 'de', 'germany': 'de',
+    'espagne': 'es', 'spain': 'es', 'portugal': 'pt', 'belgique': 'be', 'belgium': 'be',
+    'suisse': 'ch', 'switzerland': 'ch', 'uk': 'gb', 'angleterre': 'gb', 'pays-bas': 'nl',
+    'netherlands': 'nl', 'grece': 'gr', 'gr\u00e8ce': 'gr', 'greece': 'gr', 'autriche': 'at',
+    'austria': 'at', 'pologne': 'pl', 'poland': 'pl'
   };
-  return flags[pays.toLowerCase()] || '🏳️';
+  var code = codes[String(pays || '').toLowerCase()];
+  if (!code) return '';
+  return '<img class="flag" src="https://flagcdn.com/20x15/' + code + '.png" width="16" height="12" alt="" loading="lazy" />';
 }
 
 function paysFromFilename(name) {

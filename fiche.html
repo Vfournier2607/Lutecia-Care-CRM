@@ -103,10 +103,10 @@
     .btn-annee { font-family: 'Inter', sans-serif; font-size: 10px; padding: 3px 9px; border-radius: 4px; border: 1px solid var(--steel-light); background: var(--white); color: var(--text-muted); cursor: pointer; transition: all .15s; user-select: none; }
     .btn-annee.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
     .kpi-table-wrap { overflow-x: auto; border-radius: 6px; border: 1px solid var(--steel-light); }
-    .kpi-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .kpi-table { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
     .kpi-table thead { background: var(--navy); }
     .kpi-table th { font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,0.75); padding: 8px 10px; text-align: right; white-space: nowrap; border-right: 1px solid rgba(255,255,255,0.08); }
-    .kpi-table th.row-label { text-align: left; color: rgba(255,255,255,0.6); min-width: 120px; }
+    .kpi-table th.row-label { text-align: left; color: rgba(255,255,255,0.6); width: 108px; }
     .kpi-table th .btn-del { color: rgba(255,255,255,0.4); font-size: 13px; vertical-align: middle; }
     .kpi-table th .btn-del:hover { color: rgba(255,255,255,0.9); }
     .kpi-table tbody tr { border-bottom: 1px solid var(--steel-light); }
@@ -114,11 +114,11 @@
     .kpi-table tbody tr:nth-child(even) { background: rgba(61,79,124,0.03); }
     .kpi-table td { padding: 7px 10px; text-align: right; color: var(--text); font-size: 11px; border-right: 1px solid var(--steel-light); }
     .kpi-table td.row-label { text-align: left; font-weight: 600; color: var(--navy); border-right: 2px solid var(--steel-light); }
-    .kpi-table td.cagr { font-weight: 700; color: var(--navy-light); background: rgba(61,79,124,0.06); min-width: 52px; }
-    .kpi-table td.del-col { width: 24px; padding: 3px 4px; border-right: none; }
-    .kpi-input { font-family: 'Inter', sans-serif; font-size: 11px; text-align: right; border: none; outline: none; background: transparent; width: 72px; color: var(--text); }
+    .kpi-table td.cagr { font-weight: 700; color: var(--navy-light); background: rgba(61,79,124,0.06); width: 46px; }
+    .kpi-table td.del-col { width: 22px; padding: 3px 4px; border-right: none; }
+    .kpi-input { font-family: 'Inter', sans-serif; font-size: 11px; text-align: right; border: none; outline: none; background: transparent; width: 100%; color: var(--text); }
     .kpi-input:focus { background: rgba(61,79,124,0.08); border-radius: 3px; }
-    .kpi-row-name { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; border: none; outline: none; background: transparent; width: 130px; color: var(--navy); }
+    .kpi-row-name { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; border: none; outline: none; background: transparent; width: 100%; color: var(--navy); }
     .kpi-row-name:focus { background: var(--off-white); border-radius: 3px; padding: 1px 4px; }
     .btn-del { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; padding: 0 3px; line-height: 1; }
     .btn-del:hover { color: var(--mauve); }
@@ -331,7 +331,7 @@
     .fiche-project-label:empty { display: none; }
     .fiche-structure-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: var(--navy); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .fiche-meta-line { font-size: 10px; color: var(--text-muted); }
-    .flag { font-size: 12px; vertical-align: -1px; }
+    img.flag { vertical-align: -1px; border-radius: 2px; }
     .fiche-tag { font-size: 9px; padding: 1px 7px; border-radius: 20px; border: 1px solid var(--steel-light); color: var(--text-muted); background: var(--off-white); }
     .fiche-topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     .spick-clear { font-family: 'Inter', sans-serif; font-size: 10px; padding: 3px 7px; border-radius: 20px; border: 1px solid var(--steel-light); background: transparent; color: var(--text-muted); cursor: pointer; transition: all .15s; }
@@ -349,10 +349,10 @@
     /* ══ Grille 3 colonnes ══ */
     .fiche-grid-3 {
       display: grid;
-      grid-template-columns: 300px 1fr 340px;
+      grid-template-columns: 280px 1fr 340px;
       grid-template-rows: 1fr auto;
       gap: 10px;
-      padding: 8px 16px 0;
+      padding: 6px 16px 0;
       align-items: stretch;
       flex: 1;
       min-height: 0;
@@ -363,13 +363,13 @@
     .fiche-col > .card { flex: 1; min-height: 0; }
     .fiche-col#fcol-3 > .card:first-child { flex: 0 0 auto; }
     .fiche-col#fcol-3 > .card:last-child { flex: 1; min-height: 0; }
-    .fiche-col#fcol-3 > .card:last-child .card-body { display: flex; flex-direction: column; }
-    .fiche-col#fcol-3 > .card:last-child .kpi-table-wrap { flex: 1; overflow: auto; min-height: 0; }
+    .fiche-col#fcol-2 > .card .card-body { display: flex; flex-direction: column; }
+    .fiche-col#fcol-2 .kpi-table-wrap { flex: 1; overflow: auto; min-height: 0; }
     .notes-body { overflow-y: hidden; }
     #centres-list { overflow-y: auto; max-height: 220px; }
     /* ══ Barre Alertes ══ */
     .fiche-full-row { grid-column: 1/-1; padding: 0 0 12px; }
-    .alertes-bar { background: var(--white); border: 1px solid var(--steel-light); border-radius: var(--r); box-shadow: var(--shadow); display: flex; align-items: stretch; gap: 0; overflow: hidden; min-height: 80px; }
+    .alertes-bar { background: var(--white); border: 1px solid var(--steel-light); border-radius: var(--r); box-shadow: var(--shadow); display: flex; align-items: stretch; gap: 0; overflow: hidden; min-height: 110px; }
     .alertes-bar-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-right: 1px solid var(--steel-light); flex-shrink: 0; justify-content: center; flex-direction: column; }
     .alertes-bar-title { font-family: 'Cormorant Garamond', serif; font-size: 14px; font-weight: 600; color: var(--navy); white-space: nowrap; }
     .alertes-bar-count { font-size: 10px; font-weight: 600; color: var(--danger); }
@@ -690,43 +690,8 @@
         </div>
       </div>
 
-      <!-- Col 2 : Notes & actions -->
+      <!-- Col 2 : KPIs financiers -->
       <div class="fiche-col" id="fcol-2">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Notes & actions</div>
-            <button class="btn-add-action" onclick="ouvrirPopup()">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              Ajouter
-            </button>
-          </div>
-          <div class="card-body notes-body" id="actions-list">
-            <div class="empty-actions">Aucune action enregistrée.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Col 3 : Équipement + KPIs -->
-      <div class="fiche-col" id="fcol-3">
-
-        <div class="card">
-          <div class="card-header"><div class="card-title">Équipement</div></div>
-          <div class="card-body">
-            <div class="machines">
-              <div class="machine-box">
-                <div class="machine-val" id="k-gamma">—</div>
-                <div class="machine-label">Gamma Caméras</div>
-              </div>
-              <div class="machine-box">
-                <div class="machine-val" id="k-pet">—</div>
-                <div class="machine-label">PET Scan</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class="card">
           <div class="card-header">
             <div class="card-title">KPIs financiers</div>
@@ -746,7 +711,44 @@
             </div>
           </div>
         </div>
+      </div>
 
+      <!-- Col 3 : Équipement + Notes & actions -->
+      <div class="fiche-col" id="fcol-3">
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Équipement</div></div>
+          <div class="card-body">
+            <div class="machines">
+              <div class="machine-box">
+                <div class="machine-val" id="k-gamma">—</div>
+                <div class="machine-label">Gamma Caméras</div>
+              </div>
+              <div class="machine-box">
+                <div class="machine-val" id="k-pet">—</div>
+                <div class="machine-label">PET Scan</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Notes & actions</div>
+            <button class="btn-add-action" onclick="ouvrirPopup()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Ajouter
+            </button>
+          </div>
+          <div class="card-body notes-body" id="actions-list">
+            <div class="empty-actions">Aucune action enregistrée.</div>
+          </div>
+        </div>
       </div>
       <!-- Barre Alertes -->
       <div class="fiche-full-row">
@@ -807,14 +809,16 @@ var kpiLignes     = KPI_DEFAUT.slice();
 // Helper: échapper le HTML pour éviter les XSS dans les gabarits innerHTML
 
 function paysToFlag(pays) {
-  var flags = {
-    'italie': '🇮🇹', 'italy': '🇮🇹', 'france': '🇫🇷', 'allemagne': '🇩🇪', 'germany': '🇩🇪',
-    'espagne': '🇪🇸', 'spain': '🇪🇸', 'portugal': '🇵🇹', 'belgique': '🇧🇪', 'belgium': '🇧🇪',
-    'suisse': '🇨🇭', 'switzerland': '🇨🇭', 'uk': '🇬🇧', 'angleterre': '🇬🇧', 'pays-bas': '🇳🇱',
-    'netherlands': '🇳🇱', 'grece': '🇬🇷', 'grèce': '🇬🇷', 'greece': '🇬🇷', 'autriche': '🇦🇹',
-    'austria': '🇦🇹', 'pologne': '🇵🇱', 'poland': '🇵🇱'
+  var codes = {
+    'italie': 'it', 'italy': 'it', 'france': 'fr', 'allemagne': 'de', 'germany': 'de',
+    'espagne': 'es', 'spain': 'es', 'portugal': 'pt', 'belgique': 'be', 'belgium': 'be',
+    'suisse': 'ch', 'switzerland': 'ch', 'uk': 'gb', 'angleterre': 'gb', 'pays-bas': 'nl',
+    'netherlands': 'nl', 'grece': 'gr', 'gr\u00e8ce': 'gr', 'greece': 'gr', 'autriche': 'at',
+    'austria': 'at', 'pologne': 'pl', 'poland': 'pl'
   };
-  return flags[String(pays || '').toLowerCase()] || '🏳️';
+  var code = codes[String(pays || '').toLowerCase()];
+  if (!code) return '';
+  return '<img class="flag" src="https://flagcdn.com/20x15/' + code + '.png" width="16" height="12" alt="" loading="lazy" />';
 }
 
 function esc(str) {
@@ -958,7 +962,7 @@ function chargerFiche() {
   // bc-nom hidden
   var metaEl = document.getElementById('topbar-meta');
   if (currentGroupe) {
-    metaEl.innerHTML = '<span class="flag">' + paysToFlag(currentGroupe.pays) + '</span> ' + esc(currentGroupe.pays) + ' — ' + esc(currentGroupe.mapping || '');
+    metaEl.innerHTML = paysToFlag(currentGroupe.pays) + ' ' + esc(currentGroupe.pays) + ' — ' + esc(currentGroupe.mapping || '');
   } else { metaEl.textContent = ''; }
 
   // Hero
@@ -982,7 +986,7 @@ function chargerFiche() {
   // Infos
   if (currentGroupe) {
     document.getElementById('i-pays').innerHTML     = currentGroupe.pays
-      ? '<span class="flag">' + paysToFlag(currentGroupe.pays) + '</span> ' + esc(currentGroupe.pays) : '—';
+      ? paysToFlag(currentGroupe.pays) + ' ' + esc(currentGroupe.pays) : '—';
     document.getElementById('i-reseau').textContent = currentGroupe.estReseau ? currentGroupe.nom : 'Ind\u00e9pendant';
     // i-tep/i-gamma/i-radio : text inputs, handled below via setInput
     // renderMachines() est appelé après setInput pour que les inputs soient remplis d'abord
