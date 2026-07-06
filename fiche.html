@@ -331,6 +331,7 @@
     .fiche-project-label:empty { display: none; }
     .fiche-structure-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: var(--navy); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .fiche-meta-line { font-size: 10px; color: var(--text-muted); }
+    .flag { font-size: 12px; vertical-align: -1px; }
     .fiche-tag { font-size: 9px; padding: 1px 7px; border-radius: 20px; border: 1px solid var(--steel-light); color: var(--text-muted); background: var(--off-white); }
     .fiche-topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     .spick-clear { font-family: 'Inter', sans-serif; font-size: 10px; padding: 3px 7px; border-radius: 20px; border: 1px solid var(--steel-light); background: transparent; color: var(--text-muted); cursor: pointer; transition: all .15s; }
@@ -805,6 +806,17 @@ var kpiLignes     = KPI_DEFAUT.slice();
 
 // Helper: échapper le HTML pour éviter les XSS dans les gabarits innerHTML
 
+function paysToFlag(pays) {
+  var flags = {
+    'italie': '🇮🇹', 'italy': '🇮🇹', 'france': '🇫🇷', 'allemagne': '🇩🇪', 'germany': '🇩🇪',
+    'espagne': '🇪🇸', 'spain': '🇪🇸', 'portugal': '🇵🇹', 'belgique': '🇧🇪', 'belgium': '🇧🇪',
+    'suisse': '🇨🇭', 'switzerland': '🇨🇭', 'uk': '🇬🇧', 'angleterre': '🇬🇧', 'pays-bas': '🇳🇱',
+    'netherlands': '🇳🇱', 'grece': '🇬🇷', 'grèce': '🇬🇷', 'greece': '🇬🇷', 'autriche': '🇦🇹',
+    'austria': '🇦🇹', 'pologne': '🇵🇱', 'poland': '🇵🇱'
+  };
+  return flags[String(pays || '').toLowerCase()] || '🏳️';
+}
+
 function esc(str) {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -944,7 +956,10 @@ function chargerFiche() {
   // Topbar + breadcrumb
   document.getElementById('topbar-nom').textContent = nom;
   // bc-nom hidden
-  document.getElementById('topbar-meta').textContent = currentGroupe ? currentGroupe.pays + ' — ' + currentGroupe.mapping : '';
+  var metaEl = document.getElementById('topbar-meta');
+  if (currentGroupe) {
+    metaEl.innerHTML = '<span class="flag">' + paysToFlag(currentGroupe.pays) + '</span> ' + esc(currentGroupe.pays) + ' — ' + esc(currentGroupe.mapping || '');
+  } else { metaEl.textContent = ''; }
 
   // Hero
   // hero-nom merged into topbar-nom
@@ -966,7 +981,8 @@ function chargerFiche() {
 
   // Infos
   if (currentGroupe) {
-    document.getElementById('i-pays').textContent   = currentGroupe.pays    || '—';
+    document.getElementById('i-pays').innerHTML     = currentGroupe.pays
+      ? '<span class="flag">' + paysToFlag(currentGroupe.pays) + '</span> ' + esc(currentGroupe.pays) : '—';
     document.getElementById('i-reseau').textContent = currentGroupe.estReseau ? currentGroupe.nom : 'Ind\u00e9pendant';
     // i-tep/i-gamma/i-radio : text inputs, handled below via setInput
     // renderMachines() est appelé après setInput pour que les inputs soient remplis d'abord

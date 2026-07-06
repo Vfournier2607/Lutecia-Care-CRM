@@ -454,6 +454,7 @@
 
     .cell-nom { font-weight: 600; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .cell-sub { font-size: 10px; font-weight: 400; color: var(--text-muted); }
+    .flag { font-size: 13px; vertical-align: -1px; }
     .cell-equip { font-size: 11px; color: var(--text); white-space: nowrap; }
     .cell-equip b { font-weight: 700; color: var(--navy); }
     .equip-off { color: var(--steel); }
@@ -768,7 +769,7 @@
       <table>
         <colgroup>
           <col />
-          <col style="width:90px" />
+          <col style="width:104px" />
           <col style="width:70px" />
           <col style="width:150px" />
           <col style="width:140px" />
@@ -830,7 +831,7 @@ function paysToFlag(pays) {
     'italie': '🇮🇹', 'italy': '🇮🇹', 'france': '🇫🇷', 'allemagne': '🇩🇪', 'germany': '🇩🇪',
     'espagne': '🇪🇸', 'spain': '🇪🇸', 'portugal': '🇵🇹', 'belgique': '🇧🇪', 'belgium': '🇧🇪',
     'suisse': '🇨🇭', 'switzerland': '🇨🇭', 'uk': '🇬🇧', 'angleterre': '🇬🇧', 'pays-bas': '🇳🇱',
-    'netherlands': '🇳🇱', 'autriche': '🇦🇹', 'austria': '🇦🇹', 'pologne': '🇵🇱', 'poland': '🇵🇱'
+    'netherlands': '🇳🇱', 'grece': '🇬🇷', 'grèce': '🇬🇷', 'greece': '🇬🇷', 'autriche': '🇦🇹', 'austria': '🇦🇹', 'pologne': '🇵🇱', 'poland': '🇵🇱'
   };
   return flags[pays.toLowerCase()] || '🏳️';
 }
@@ -1545,7 +1546,7 @@ function renderTable() {
       + '<td class="cell-nom">' + (isModifie(g, output) ? '<span class="dot-modifie" title="Structure modifiée"></span>' : '') + esc(g.nom)
         + (sousLigne.length ? '<br><span class="cell-sub">' + sousLigne.join(' · ') + '</span>' : '')
         + '</td>'
-      + '<td style="font-size:11px">' + esc(g.pays) + '</td>'
+      + '<td style="font-size:11px;white-space:nowrap"><span class="flag">' + paysToFlag(g.pays) + '</span> ' + esc(g.pays) + '</td>'
       + '<td style="text-align:center;font-weight:500">' + g.nb_centres + '</td>'
       + '<td class="cell-equip">' + equip.join(' <span class="equip-sep">·</span> ') + '</td>'
       + '<td onclick="event.stopPropagation()">'
