@@ -1701,6 +1701,24 @@ document.addEventListener('DOMContentLoaded', function() {
   renderSavedFilters();
   updateImportBadge();
 
+  // Screenings intégrés : au premier chargement (ou après montée de version),
+  // remplace les imports locaux par les données embarquées (data/screenings.json)
+  window.SEED_PROMISE = (function() {
+    if (localStorage.getItem('lutecia_seed_version') === SEED_VERSION) return Promise.resolve(false);
+    return fetch('data/screenings.json')
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(seed) {
+        if (!saveImports(seed)) return false;
+        try { localStorage.setItem('lutecia_seed_version', SEED_VERSION); } catch(e) {}
+        reloadData();
+        renderImportList();
+        updateImportBadge();
+        showToast('Screenings intégrés : ' + seed.map(function(i) { return i.pays; }).join(', '));
+        return true;
+      })
+      .catch(function(e) { console.warn('seed:', e.message); return false; });
+  })();
+
   // Délégation de clic sur le tableau (remplace onclick inline sur <tr>)
   document.getElementById('tbody').addEventListener('click', function(e) {
     var tr = e.target.closest('tr');
@@ -1752,25 +1770,37 @@ document.addEventListener('DOMContentLoaded', function() {
       if (lbl)   lbl.textContent = 'SharePoint';
       currentUser = graphGetUserName();
       majSidebar(currentUser);
-      // Screenings partagés : SharePoint fait foi s'il contient des données
-      // (imports ET suppressions se propagent à toute l'équipe) ; si l'onglet
-      // est vide, on y pousse les imports locaux (amorçage).
-      graphLoadScreenings().then(function(distants) {
-        var locaux = loadImports();
-        if (distants.length) {
-          if (JSON.stringify(distants) !== JSON.stringify(locaux)) {
-            saveImports(distants);
-            reloadData();
-            renderImportList();
-            updateImportBadge();
-            showToast('Deal flow synchronisé depuis SharePoint');
-          }
-        } else if (locaux.length) {
-          graphSaveScreenings(locaux)
-            .then(function() { showToast('Screenings locaux partagés avec l’équipe'); })
-            .catch(function(e) { console.warn('Graph screening:', e.message); });
+      // Screenings partagés — trois cas :
+      // 1. montée de version du seed : on pousse les nouvelles données vers
+      //    SharePoint (remplace les anciens screenings de toute l'équipe)
+      // 2. SharePoint a des données : il fait foi (imports/suppressions se propagent)
+      // 3. SharePoint vide : amorçage avec les imports locaux
+      (window.SEED_PROMISE || Promise.resolve(false)).then(function(seedApplique) {
+        var dejaPousse = localStorage.getItem('lutecia_seed_pushed') === SEED_VERSION;
+        if (seedApplique || !dejaPousse) {
+          var locaux = loadImports();
+          if (!locaux.length) return;
+          return graphSaveScreenings(locaux).then(function() {
+            try { localStorage.setItem('lutecia_seed_pushed', SEED_VERSION); } catch(e) {}
+            showToast('Screenings partagés avec l’équipe');
+          });
         }
-      }).catch(function(e) { console.warn('graphLoadScreenings:', e.message); });
+        return graphLoadScreenings().then(function(distants) {
+          var locaux = loadImports();
+          if (distants.length) {
+            if (JSON.stringify(distants) !== JSON.stringify(locaux)) {
+              saveImports(distants);
+              reloadData();
+              renderImportList();
+              updateImportBadge();
+              showToast('Deal flow synchronisé depuis SharePoint');
+            }
+          } else if (locaux.length) {
+            return graphSaveScreenings(locaux)
+              .then(function() { showToast('Screenings locaux partagés avec l’équipe'); });
+          }
+        });
+      }).catch(function(e) { console.warn('sync screenings:', e.message); });
       graphLoadEtat().then(function(etat) {
         // Merge par enregistrement : le plus récent (modifiedAt) gagne, dans les deux sens
         var local = loadOutput();

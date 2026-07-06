@@ -127,12 +127,6 @@
     .info-textarea { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text); border: 1px solid var(--steel-light); border-radius: var(--r); background: var(--off-white); width: 100%; padding: 8px; resize: vertical; min-height: 70px; outline: none; line-height: 1.5; margin-top: 4px; }
     .info-textarea:focus { border-color: var(--navy-light); }
 
-    /* ── Machines ── */
-    .machines { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-    .machine-box { background: var(--off-white); border-radius: var(--r); padding: 14px; text-align: center; border-left: 3px solid var(--navy-light); }
-    .machine-val { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600; color: var(--navy); line-height: 1; }
-    .machine-label { font-size: 9px; font-weight: 600; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
-
     /* ── Tableau KPI ── */
     .kpi-controls { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
     .btn-annee { font-family: 'Inter', sans-serif; font-size: 10px; padding: 3px 9px; border-radius: 4px; border: 1px solid var(--steel-light); background: var(--white); color: var(--text-muted); cursor: pointer; transition: all .15s; user-select: none; }
@@ -1165,13 +1159,13 @@ function renderMachines() {
   if (elG) elG.textContent = affGamma;
   if (elP) elP.textContent = affPet;
 
-  // Couleur des machine-box selon présence
-  var boxG = elG ? elG.closest('.machine-box') : null;
-  var boxP = elP ? elP.closest('.machine-box') : null;
+  // Absence d'équipement : boîte estompée (pas de bordure asymétrique)
   var hasGamma = gamma === 'Oui' || (affGamma !== '—' && affGamma !== '0' && affGamma !== 0);
   var hasPet   = tep   === 'Oui' || (affPet   !== '—' && affPet   !== '0' && affPet   !== 0);
-  if (boxG) boxG.style.borderLeftColor = hasGamma ? 'var(--navy-light)' : 'var(--steel-light)';
-  if (boxP) boxP.style.borderLeftColor = hasPet   ? 'var(--navy-light)' : 'var(--steel-light)';
+  var boxG = elG ? elG.closest('.machine-box') : null;
+  var boxP = elP ? elP.closest('.machine-box') : null;
+  if (boxG) boxG.style.opacity = hasGamma ? '1' : '0.5';
+  if (boxP) boxP.style.opacity = hasPet   ? '1' : '0.5';
 }
 
 // ══════════════════════════════════════

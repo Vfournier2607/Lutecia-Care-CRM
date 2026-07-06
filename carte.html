@@ -414,6 +414,23 @@ document.addEventListener('DOMContentLoaded', function() {
   populatePays();
   rendre(true);
 
+  // Screenings intégrés (même logique que la page Deal Flow)
+  if (localStorage.getItem('lutecia_seed_version') !== SEED_VERSION) {
+    fetch('data/screenings.json')
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(seed) {
+        try {
+          localStorage.setItem('lutecia_imports', JSON.stringify(seed));
+          localStorage.setItem('lutecia_seed_version', SEED_VERSION);
+        } catch(e) { return; }
+        chargerCentres();
+        populatePays();
+        rendre(true);
+        lancerGeocodage();
+      })
+      .catch(function(e) { console.warn('seed:', e.message); });
+  }
+
   // Mode local : pas d'auth
   var isLocal = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
   if (isLocal) {

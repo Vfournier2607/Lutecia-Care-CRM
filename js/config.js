@@ -52,6 +52,11 @@ const ACTIONS_HEADERS = ['id_entite', 'type', 'date', 'note', 'auteur', 'created
 
 const GEO_HEADERS = ['cle', 'lat', 'lng'];
 
+// Screenings intégrés à l'application (data/screenings.json).
+// Incrémenter la version pour remplacer les données chez tous les utilisateurs
+// (local + SharePoint) lors de l'ajout d'un pays ou d'une mise à jour.
+const SEED_VERSION = '2026-07-06-v1';
+
 const DEBUG = {
   enabled:      false,
   logGraphCalls: false
