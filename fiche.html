@@ -1074,8 +1074,13 @@ function chargerFiche() {
 var miniMap = null;
 var miniMapPins = [];
 
+var _miniSeedFait = false;
 function renderMiniMap() {
   if (typeof L === 'undefined' || !currentGroupe || !currentGroupe.centres) return;
+  if (!_miniSeedFait) {
+    _miniSeedFait = true;
+    Geo.chargerSeed().then(function() { renderMiniMap(); });
+  }
   var section = document.getElementById('minimap-section');
   var geo = Geo.connues();
   var points = [];

@@ -457,6 +457,12 @@ document.addEventListener('DOMContentLoaded', function() {
   populatePays();
   rendre(true);
 
+  // Coordonnées pré-calculées : carte pleine immédiatement
+  Geo.chargerSeed().then(function() {
+    chargerCentres();
+    rendre(true);
+  });
+
   // Screenings intégrés (même logique que la page Deal Flow)
   if (localStorage.getItem('lutecia_seed_version') !== SEED_VERSION) {
     fetch('data/screenings.json')

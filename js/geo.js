@@ -62,6 +62,26 @@ var Geo = (function() {
   // Récupère les coordonnées connues (cache local). Renvoie {cle: {lat,lng}}
   function connues() { return _load(); }
 
+  // Coordonnées pré-calculées livrées avec l'app (niveau ville).
+  // Fusionnées dans le cache local (sans écraser un géocodage précis existant).
+  var _seedPromise = null;
+  function chargerSeed() {
+    if (_seedPromise) return _seedPromise;
+    _seedPromise = fetch('data/geo.json')
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(seed) {
+        var cache = _load();
+        var nouveau = false;
+        Object.keys(seed).forEach(function(k) {
+          if (!cache[k] || cache[k].lat === null) { cache[k] = seed[k]; nouveau = true; }
+        });
+        if (nouveau) _save(cache);
+        return cache;
+      })
+      .catch(function(e) { console.warn('geo seed:', e.message); return _load(); });
+    return _seedPromise;
+  }
+
   // Géocode progressivement une liste de centres (1/s), avec callback de progression.
   // onProgress(fait, total) — onDone(cache)
   async function geocoder(centres, onProgress, onDone) {
@@ -114,5 +134,5 @@ var Geo = (function() {
     return cache;
   }
 
-  return { cle: cle, connues: connues, geocoder: geocoder, pousserVersGraph: pousserVersGraph, chargerDepuisGraph: chargerDepuisGraph };
+  return { cle: cle, connues: connues, chargerSeed: chargerSeed, geocoder: geocoder, pousserVersGraph: pousserVersGraph, chargerDepuisGraph: chargerDepuisGraph };
 })();
