@@ -94,9 +94,9 @@
 
     /* ── Cards ── */
     .card { background: var(--white); border: 1px solid var(--steel-light); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
-    .card-header { padding: 8px 14px; border-bottom: 1px solid var(--off-white); display: flex; align-items: center; justify-content: space-between; background: var(--white); flex: 0 0 auto; }
+    .card-header { padding: 9px 16px; border-bottom: 1px solid var(--off-white); display: flex; align-items: center; justify-content: space-between; background: var(--white); flex: 0 0 auto; }
     .card-title { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--navy); letter-spacing: 0.01em; }
-    .card-body { padding: 10px 14px; flex: 1; overflow-y: hidden; min-height: 0; }
+    .card-body { padding: 12px 16px; flex: 1; overflow-y: hidden; min-height: 0; }
 
     /* ── Tableau KPI ── */
     .kpi-controls { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
@@ -392,16 +392,16 @@
 
     /* ══ Machines compactes ══ */
     .machines { display: flex; flex-direction: column; gap: 6px; }
-    .machine-box { background: var(--off-white); border-radius: var(--r); padding: 7px 10px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--steel-light); }
-    .machine-val { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--navy); line-height: 1; flex-shrink: 0; min-width: 28px; }
+    .machine-box { background: var(--off-white); border-radius: var(--r); padding: 8px 12px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--steel-light); min-height: 44px; }
+    .machine-val { font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 700; color: var(--navy); line-height: 1; flex-shrink: 0; min-width: 26px; text-align: center; }
     .machine-label { font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
 
     /* ══ Info rows inline ══ */
-    .info-row { display: flex; align-items: baseline; gap: 8px; padding: 3px 0; border-bottom: 1px solid var(--steel-light); }
+    .info-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--off-white); min-height: 26px; }
     .info-row:last-child { border-bottom: none; }
-    .info-label { font-size: 8px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; width: 88px; }
-    .info-value { font-size: 11px; color: var(--text); flex: 1; }
-    .info-input { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--text); border: none; outline: none; background: transparent; width: 100%; flex: 1; }
+    .info-label { flex: 0 0 92px; font-size: 8px; font-weight: 600; letter-spacing: .10em; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .info-value { flex: 1; min-width: 0; font-size: 12px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .info-input { flex: 1; min-width: 0; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text); border: none; outline: none; background: transparent; width: 100%; padding: 0; text-overflow: ellipsis; }
     .info-input:hover, .info-input:focus { background: var(--off-white); border-radius: 2px; padding: 1px 4px; margin: -1px -4px; }
     .info-textarea { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--text); border: 1px solid var(--steel-light); border-radius: var(--r); background: var(--off-white); width: 100%; padding: 5px 7px; resize: vertical; min-height: 55px; outline: none; line-height: 1.5; }
     .info-textarea:focus { border-color: var(--navy-light); }
@@ -691,7 +691,7 @@
               <div class="info-label" style="margin-bottom:5px;">Centres du réseau</div>
               <div id="centres-list"></div>
             </div>
-            <div id="minimap-section" class="hidden" style="margin-top:12px;">
+            <div id="minimap-section" class="hidden" style="margin-top:14px;">
               <div class="info-label" style="margin-bottom:5px;">Localisation</div>
               <div id="minimap"></div>
             </div>
@@ -1277,7 +1277,7 @@ function renderKpiTable() {
   // En-tête
   var thHtml = '<tr><th class="row-label">Indicateur</th>';
   anneesActives.forEach(function(y) { thHtml += '<th>' + y + '<button class="btn-del" onclick="supprimerAnneeCol(' + y + ')" title="Supprimer l\'ann\u00e9e">\u00d7</button></th>'; });
-  thHtml += '<th>CAGR</th><th></th></tr>';
+  thHtml += '<th>CAGR</th><th style="width:22px"></th></tr>';
   thead.innerHTML = thHtml;
 
   // Corps
@@ -1814,12 +1814,16 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Authentification MSAL — identité tirée du compte Microsoft
+  document.getElementById('sidebar-avatar').textContent = '·';
+  document.getElementById('sidebar-name').textContent   = 'Connexion…';
   graphConnect().then(function(ok) {
     var badge = document.getElementById('sync-badge');
     var lbl   = document.getElementById('sync-label');
     if (!ok) {
       console.warn('[auth] Graph indisponible, mode données locales.');
       if (badge) badge.title = 'Non connecté au SharePoint';
+      document.getElementById('sidebar-avatar').textContent = '?';
+      document.getElementById('sidebar-name').textContent   = 'Hors ligne';
       return;
     }
     if (badge) { badge.classList.add('synced'); }
