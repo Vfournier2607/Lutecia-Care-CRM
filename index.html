@@ -546,35 +546,34 @@
     @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 
 
-    /* ── Intro façon Abenex : les lettres convergent puis se cristallisent
-       en fondu dans le VRAI logo (PNG officiel) — 1x/session ── */
-    .intro { position: fixed; inset: 0; z-index: 9999; background: linear-gradient(135deg, #111827 0%, #1a2340 55%, #0d1526 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity .7s ease; }
-    .intro.out { opacity: 0; pointer-events: none; }
+    /* ── Intro façon Abenex : lettres dispersées dès la 1re frame, glissé
+       simultané long, cristallisation dans le logo officiel, sortie rideau ── */
+    .intro { position: fixed; inset: 0; z-index: 9999; background: linear-gradient(135deg, #111827 0%, #1a2340 55%, #0d1526 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+    .intro.out { transform: translateY(-100%); transition: transform .9s cubic-bezier(0.77, 0, 0.18, 1); }
     .intro-stack { position: relative; display: flex; align-items: center; justify-content: center; }
-    /* Couche 1 : les lettres (flux texte normal, deux lignes calées à gauche comme le logo) */
     .intro-words { display: flex; flex-direction: column; align-items: flex-start; }
     .intro-word { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; color: #fff; line-height: 1.04; white-space: nowrap; }
-    .intro-word + .intro-word { margin-left: 0.72em; } /* "Care" décalé comme sur le logo */
-    .intro-l { display: inline-block; opacity: 0; will-change: transform, opacity; }
-    .go .intro-l { animation: introLettre 1.05s cubic-bezier(0.19, 1, 0.22, 1) forwards; animation-delay: var(--d); }
-    @keyframes introLettre {
-      0%   { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1.3); filter: blur(7px); }
-      55%  { opacity: 1; filter: blur(0); }
-      100% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); filter: blur(0); }
+    .intro-word + .intro-word { margin-left: 0.72em; }
+    /* Lettres : visibles dès le départ, déjà dispersées — aucun pop d'opacité */
+    .intro-l { display: inline-block; opacity: 0.9; transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--rot)); will-change: transform; }
+    .go .intro-l { animation: introGlisse 2.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: var(--d); }
+    @keyframes introGlisse {
+      to { opacity: 1; transform: translate3d(0, 0, 0) rotate(0); }
     }
-    /* Cristallisation : les lettres fondent, le vrai logo prend leur place */
-    .go .intro-words { animation: introWordsOut .55s ease 1.85s forwards; }
-    @keyframes introWordsOut { to { opacity: 0; filter: blur(5px); } }
-    .intro-png { position: absolute; inset: 0; margin: auto; opacity: 0; filter: blur(5px); transform: scale(1.02); }
-    .go .intro-png { animation: introPngIn .65s cubic-bezier(0.22, 1, 0.36, 1) 1.95s forwards; }
-    @keyframes introPngIn { to { opacity: 1; filter: blur(0); transform: scale(1); } }
+    /* Cristallisation : le wordmark laisse place au logo officiel */
+    .go .intro-words { animation: introWordsOut .6s ease 2.5s forwards; }
+    @keyframes introWordsOut { to { opacity: 0; } }
+    .intro-png { position: absolute; inset: 0; margin: auto; opacity: 0; transform: scale(1.015); }
+    .go .intro-png { animation: introPngIn .7s cubic-bezier(0.22, 1, 0.36, 1) 2.55s forwards; }
+    @keyframes introPngIn { to { opacity: 1; transform: scale(1); } }
     .intro-sub { margin-top: 42px; font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--steel); opacity: 0; }
-    .go .intro-sub { animation: introSub .7s ease 2.3s forwards; }
+    .go .intro-sub { animation: introSub .8s ease 3s forwards; }
     @keyframes introSub { to { opacity: 1; } }
     @media (prefers-reduced-motion: reduce) {
-      .intro-l, .intro-sub { animation: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
+      .intro-l { transform: none; opacity: 0; }
+      .intro-sub { animation: none !important; opacity: 1 !important; }
       .go .intro-words { animation: none !important; opacity: 0 !important; }
-      .go .intro-png { animation: none !important; opacity: 1 !important; filter: none !important; transform: none !important; }
+      .go .intro-png { animation: none !important; opacity: 1 !important; transform: none !important; }
     }
 
     /* ── Responsive ── */
@@ -1743,12 +1742,13 @@ function ouvrirFiche(id) {
       var l = document.createElement('span');
       l.className = 'intro-l';
       l.textContent = ch;
-      // Chaque lettre part d'une direction différente (déterministe)
+      // Chaque lettre part d'une direction différente (déterministe),
+      // dispersion contenue pour un glissé élégant, délais quasi nuls
       var angle = (compteur * 137.5) % 360;
-      l.style.setProperty('--dx', Math.round(Math.cos(angle * Math.PI / 180) * 46 + (compteur % 3 - 1) * 26) + 'vw');
-      l.style.setProperty('--dy', Math.round(Math.sin(angle * Math.PI / 180) * 42) + 'vh');
-      l.style.setProperty('--rot', ((compteur * 53) % 44 - 22) + 'deg');
-      l.style.setProperty('--d', (compteur * 0.055) + 's');
+      l.style.setProperty('--dx', Math.round(Math.cos(angle * Math.PI / 180) * 34 + (compteur % 3 - 1) * 16) + 'vw');
+      l.style.setProperty('--dy', Math.round(Math.sin(angle * Math.PI / 180) * 32) + 'vh');
+      l.style.setProperty('--rot', ((compteur * 53) % 26 - 13) + 'deg');
+      l.style.setProperty('--d', (compteur * 0.018) + 's');
       d.appendChild(l);
       compteur++;
     });
@@ -1782,8 +1782,8 @@ function ouvrirFiche(id) {
   Promise.all([policePrete, pngPret]).then(function() {
     requestAnimationFrame(function() {
       overlay.classList.add('go');
-      // Lettres (~1,9 s) + cristallisation dans le logo (~0,7 s)
-      setTimeout(resoudreMin, 2800);
+      // Vol des lettres 2,3 s + cristallisation 0,7 s + temps de pose 1,2 s
+      setTimeout(resoudreMin, 4200);
     });
   });
 
@@ -1793,7 +1793,7 @@ function ouvrirFiche(id) {
     fermee = true;
     minAtteint.then(function() {
       overlay.classList.add('out');
-      setTimeout(function() { overlay.remove(); }, 750);
+      setTimeout(function() { overlay.remove(); }, 950);
     });
   };
   window.INTRO_MIN = minAtteint;
