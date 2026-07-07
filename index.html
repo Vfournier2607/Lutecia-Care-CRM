@@ -546,56 +546,22 @@
     @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 
 
-    /* ── Intro : glissé lent des lettres (Abenex) → acquisition scintigraphique
-       du logo (balayage type gamma-caméra) → pose → sortie rideau ── */
+    /* ── Préloader (best practices studios) : logo officiel révélé en douceur,
+       ligne de progression fine, sortie rideau — court, sobre, infaillible ── */
     .intro { position: fixed; inset: 0; z-index: 9999; background: linear-gradient(135deg, #111827 0%, #1a2340 55%, #0d1526 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
-    .intro.out { transform: translateY(-100%); transition: transform 1.1s cubic-bezier(0.77, 0, 0.18, 1); }
-
-    /* Ondes concentriques très discrètes (rayonnement) */
-    .intro-onde { position: absolute; left: 50%; top: 50%; width: 46vmin; height: 46vmin; margin: -23vmin 0 0 -23vmin; border: 1px solid rgba(160, 80, 112, 0.35); border-radius: 50%; opacity: 0; }
-    .go .intro-onde { animation: onde 5.2s cubic-bezier(0.2, 0.6, 0.4, 1) infinite; animation-delay: var(--od); }
-    @keyframes onde {
-      0%   { opacity: 0; transform: scale(0.25); }
-      18%  { opacity: 0.5; }
-      100% { opacity: 0; transform: scale(2.3); }
-    }
-
-    .intro-stack { position: relative; display: flex; align-items: center; justify-content: center; }
-    .intro-words { display: flex; flex-direction: column; align-items: flex-start; }
-    .intro-word { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; color: #fff; line-height: 1.04; white-space: nowrap; }
-    .intro-word + .intro-word { margin-left: 0.72em; }
-    /* Lettres visibles dès la 1re frame, glissé LENT et simultané */
-    .intro-l { display: inline-block; opacity: 0.85; transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--rot)); will-change: transform; }
-    .go .intro-l { animation: introGlisse 3.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: var(--d); }
-    @keyframes introGlisse { to { opacity: 1; transform: translate3d(0, 0, 0) rotate(0); } }
-
-    /* Acquisition : la ligne de balayage descend, le logo officiel se révèle
-       derrière elle pendant que le wordmark de travail s'efface */
-    .go .intro-words { animation: introWordsOut 1.5s ease 3.6s forwards; }
-    @keyframes introWordsOut { to { opacity: 0; } }
-    .intro-png { position: absolute; inset: 0; margin: auto; opacity: 0; clip-path: inset(0 0 100% 0); }
-    .go .intro-png { animation: acquisition 1.6s linear 3.6s forwards; }
-    @keyframes acquisition {
-      0%   { opacity: 1; clip-path: inset(0 0 100% 0); }
-      100% { opacity: 1; clip-path: inset(0 0 0 0); }
-    }
-    .intro-scan { position: absolute; left: -12%; right: -12%; top: -6%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.85), transparent); box-shadow: 0 0 14px rgba(255,255,255,0.45); opacity: 0; }
-    .go .intro-scan { animation: scan 1.6s linear 3.6s forwards; }
-    @keyframes scan {
-      0%   { opacity: 1; top: -6%; }
-      96%  { opacity: 1; }
-      100% { opacity: 0; top: 106%; }
-    }
-
-    .intro-sub { margin-top: 42px; font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--steel); opacity: 0; }
-    .go .intro-sub { animation: introSub 1s ease 5.4s forwards; }
+    .intro.out { transform: translateY(-100%); transition: transform .9s cubic-bezier(0.77, 0, 0.18, 1); }
+    .intro-png { width: clamp(220px, 30vw, 360px); height: auto; opacity: 0; transform: translateY(14px) scale(1.02); }
+    .go .intro-png { animation: introReveal 1.3s cubic-bezier(0.22, 1, 0.36, 1) .15s forwards; }
+    @keyframes introReveal { to { opacity: 1; transform: translateY(0) scale(1); } }
+    /* Ligne de progression : se remplit pendant le chargement réel */
+    .intro-bar { margin-top: 46px; width: clamp(150px, 18vw, 220px); height: 1px; background: rgba(255,255,255,0.14); overflow: hidden; opacity: 0; }
+    .go .intro-bar { animation: introSub .5s ease .5s forwards; }
+    .intro-bar span { display: block; height: 100%; width: 100%; background: rgba(255,255,255,0.85); transform: translateX(-100%); transition: transform .5s ease; }
+    .intro-sub { margin-top: 18px; font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--steel); opacity: 0; }
+    .go .intro-sub { animation: introSub .8s ease .9s forwards; }
     @keyframes introSub { to { opacity: 1; } }
     @media (prefers-reduced-motion: reduce) {
-      .intro-l { transform: none; opacity: 0; }
-      .intro-onde, .intro-scan { display: none; }
-      .intro-sub { animation: none !important; opacity: 1 !important; }
-      .go .intro-words { animation: none !important; opacity: 0 !important; }
-      .go .intro-png { animation: none !important; opacity: 1 !important; clip-path: none !important; }
+      .intro-png, .intro-bar, .intro-sub { animation: none !important; opacity: 1 !important; transform: none !important; }
     }
 
     /* ── Responsive ── */
@@ -1731,11 +1697,7 @@ function ouvrirFiche(id) {
 // INITIALISATION
 // ══════════════════════════════════════════
 
-// ── Intro : les lettres convergent pour former le logo (façon Abenex) ──
-// Les lettres sont posées en flux texte NORMAL : leurs positions finales
-// sont calculées par le navigateur (aucune mesure manuelle → rien à casser).
-// On n'anime que le transfert depuis une position dispersée vers l'identité,
-// et on ne démarre qu'une fois la police chargée (sinon layout faux).
+// ── Préloader : logo officiel + progression réelle, sortie rideau ──
 (function() {
   try {
     if (sessionStorage.getItem('lutecia_intro_vue')) return;
@@ -1744,81 +1706,29 @@ function ouvrirFiche(id) {
 
   var overlay = document.createElement('div');
   overlay.className = 'intro';
-
-  // Taille du logo final (PNG officiel) ; les lettres sont dimensionnées
-  // pour s'en approcher, la cristallisation en fondu absorbe l'écart.
-  var W = Math.round(Math.min(380, Math.max(240, window.innerWidth * 0.30)));
-  var fontPx = Math.round(W * 0.245);
-
-  var stack = document.createElement('div');
-  stack.className = 'intro-stack';
-  var words = document.createElement('div');
-  words.className = 'intro-words';
-  words.style.fontSize = fontPx + 'px';
-
-  var compteur = 0;
-  function motDiv(txt) {
-    var d = document.createElement('div');
-    d.className = 'intro-word';
-    txt.split('').forEach(function(ch) {
-      var l = document.createElement('span');
-      l.className = 'intro-l';
-      l.textContent = ch;
-      // Chaque lettre part d'une direction différente (déterministe),
-      // dispersion contenue pour un glissé élégant, délais quasi nuls
-      var angle = (compteur * 137.5) % 360;
-      l.style.setProperty('--dx', Math.round(Math.cos(angle * Math.PI / 180) * 34 + (compteur % 3 - 1) * 16) + 'vw');
-      l.style.setProperty('--dy', Math.round(Math.sin(angle * Math.PI / 180) * 32) + 'vh');
-      l.style.setProperty('--rot', ((compteur * 53) % 26 - 13) + 'deg');
-      l.style.setProperty('--d', (compteur * 0.045) + 's');
-      d.appendChild(l);
-      compteur++;
-    });
-    return d;
-  }
-  words.appendChild(motDiv('Lutecia'));
-  words.appendChild(motDiv('Care'));
-  stack.appendChild(words);
-
-  // Le VRAI logo (asset officiel), révélé par le balayage d'acquisition
-  var png = document.createElement('img');
-  png.className = 'intro-png';
-  png.src = 'lc_ligne_hires_white.png';
-  png.alt = 'Lutecia Care';
-  png.style.width = W + 'px';
-  stack.appendChild(png);
-
-  // Ligne de balayage (gamma-caméra)
-  var scan = document.createElement('div');
-  scan.className = 'intro-scan';
-  stack.appendChild(scan);
-
-  // Ondes concentriques (rayonnement discret)
-  for (var o = 0; o < 3; o++) {
-    var onde = document.createElement('div');
-    onde.className = 'intro-onde';
-    onde.style.setProperty('--od', (o * 1.7) + 's');
-    overlay.appendChild(onde);
-  }
-
-  overlay.appendChild(stack);
-  var sub = document.createElement('div');
-  sub.className = 'intro-sub';
-  sub.textContent = 'Deal Flow Europe';
-  overlay.appendChild(sub);
+  overlay.innerHTML =
+    '<img class="intro-png" src="lc_ligne_hires_white.png" alt="Lutecia Care" />'
+    + '<div class="intro-bar"><span id="intro-fill"></span></div>'
+    + '<div class="intro-sub">Deal Flow Europe</div>';
   document.body.appendChild(overlay);
 
-  // Démarrage APRÈS chargement de la police ET du PNG (aucun élément manquant)
-  var resoudreMin, minAtteint = new Promise(function(r) { resoudreMin = r; });
-  var policePrete = (document.fonts && document.fonts.ready)
-    ? Promise.race([document.fonts.ready, new Promise(function(r){ setTimeout(r, 1200); })])
-    : Promise.resolve();
+  // Progression : avance régulièrement jusqu'à 88 %, saute à 100 % quand
+  // la connexion aboutit (pattern standard des préloaders)
+  var fill = overlay.querySelector('#intro-fill');
+  var progression = 0;
+  var tick = setInterval(function() {
+    progression = Math.min(88, progression + (progression < 60 ? 9 : 3));
+    if (fill) fill.style.transform = 'translateX(' + (progression - 100) + '%)';
+  }, 200);
+
+  var png = overlay.querySelector('.intro-png');
   var pngPret = (png.decode ? png.decode().catch(function(){}) : Promise.resolve());
-  Promise.all([policePrete, pngPret]).then(function() {
+  var resoudreMin, minAtteint = new Promise(function(r) { resoudreMin = r; });
+  pngPret.then(function() {
     requestAnimationFrame(function() {
       overlay.classList.add('go');
-      // Glissé 3,4 s + acquisition scintigraphique 1,6 s + temps de pose 1,8 s
-      setTimeout(resoudreMin, 6800);
+      // Révélation du logo + un temps de lecture
+      setTimeout(resoudreMin, 2400);
     });
   });
 
@@ -1826,14 +1736,18 @@ function ouvrirFiche(id) {
   window.introFin = function() {
     if (fermee) return;
     fermee = true;
+    clearInterval(tick);
+    if (fill) fill.style.transform = 'translateX(0)'; // 100 %
     minAtteint.then(function() {
-      overlay.classList.add('out');
-      setTimeout(function() { overlay.remove(); }, 1150);
+      setTimeout(function() {
+        overlay.classList.add('out');
+        setTimeout(function() { overlay.remove(); }, 950);
+      }, 350); // laisser lire le 100 %
     });
   };
   window.INTRO_MIN = minAtteint;
-  // Garde-fou : jamais plus de 25 s (popup MSAL longue, réseau mort…)
-  setTimeout(function() { window.introFin(); }, 25000);
+  // Garde-fou : jamais plus de 20 s
+  setTimeout(function() { window.introFin(); }, 20000);
 })();
 
 document.addEventListener('DOMContentLoaded', function() {
