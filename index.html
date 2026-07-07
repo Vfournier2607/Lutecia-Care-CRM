@@ -546,29 +546,36 @@
     @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 
 
-    /* ── Intro : lettres qui convergent pour former le logo (façon Abenex, 1x/session) ── */
+    /* ── Intro façon Abenex : les lettres convergent puis se cristallisent
+       en fondu dans le VRAI logo (PNG officiel) — 1x/session ── */
     .intro { position: fixed; inset: 0; z-index: 9999; background: linear-gradient(135deg, #111827 0%, #1a2340 55%, #0d1526 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity .7s ease; }
     .intro.out { opacity: 0; pointer-events: none; }
-    .intro-logo { position: relative; display: flex; flex-direction: column; align-items: center; }
-    .intro-word { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; color: #fff; line-height: 1.02; white-space: nowrap; font-size: clamp(44px, 8vw, 96px); }
+    .intro-stack { position: relative; display: flex; align-items: center; justify-content: center; }
+    /* Couche 1 : les lettres (flux texte normal, deux lignes calées à gauche comme le logo) */
+    .intro-words { display: flex; flex-direction: column; align-items: flex-start; }
+    .intro-word { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; color: #fff; line-height: 1.04; white-space: nowrap; }
+    .intro-word + .intro-word { margin-left: 0.72em; } /* "Care" décalé comme sur le logo */
     .intro-l { display: inline-block; opacity: 0; will-change: transform, opacity; }
-    /* Les lettres ne s'animent qu'une fois la police prête (JS ajoute .go) */
-    .intro-logo.go .intro-l { animation: introLettre .95s cubic-bezier(0.19, 1, 0.22, 1) forwards; animation-delay: var(--d); }
+    .go .intro-l { animation: introLettre 1.05s cubic-bezier(0.19, 1, 0.22, 1) forwards; animation-delay: var(--d); }
     @keyframes introLettre {
-      0%   { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1.35); filter: blur(6px); }
+      0%   { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1.3); filter: blur(7px); }
       55%  { opacity: 1; filter: blur(0); }
       100% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); filter: blur(0); }
     }
-    /* Cadre du logo, tracé une fois les lettres assemblées */
-    .intro-frame { position: absolute; inset: -16% -9%; pointer-events: none; overflow: visible; width: 118%; height: 132%; left: -9%; top: -16%; }
-    .intro-frame line { stroke: rgba(255,255,255,0.55); stroke-width: 1.2; stroke-dasharray: 1; stroke-dashoffset: 1; }
-    .intro-logo.go .intro-frame line { animation: traceCadre .5s cubic-bezier(0.4, 0, 0.2, 1) forwards; animation-delay: var(--fd); }
-    @keyframes traceCadre { to { stroke-dashoffset: 0; } }
+    /* Cristallisation : les lettres fondent, le vrai logo prend leur place */
+    .go .intro-words { animation: introWordsOut .55s ease 1.85s forwards; }
+    @keyframes introWordsOut { to { opacity: 0; filter: blur(5px); } }
+    .intro-png { position: absolute; inset: 0; margin: auto; opacity: 0; filter: blur(5px); transform: scale(1.02); }
+    .go .intro-png { animation: introPngIn .65s cubic-bezier(0.22, 1, 0.36, 1) 1.95s forwards; }
+    @keyframes introPngIn { to { opacity: 1; filter: blur(0); transform: scale(1); } }
     .intro-sub { margin-top: 42px; font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--steel); opacity: 0; }
-    .intro-logo.go .intro-sub { animation: introSub .7s ease forwards, introBreathe 2.6s ease-in-out infinite; animation-delay: 1.7s, 2.4s; }
+    .go .intro-sub { animation: introSub .7s ease 2.3s forwards; }
     @keyframes introSub { to { opacity: 1; } }
-    @keyframes introBreathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    @media (prefers-reduced-motion: reduce) { .intro-l, .intro-sub { animation: none !important; opacity: 1 !important; transform: none !important; filter: none !important; } .intro-frame line { animation: none !important; stroke-dashoffset: 0 !important; } }
+    @media (prefers-reduced-motion: reduce) {
+      .intro-l, .intro-sub { animation: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
+      .go .intro-words { animation: none !important; opacity: 0 !important; }
+      .go .intro-png { animation: none !important; opacity: 1 !important; filter: none !important; transform: none !important; }
+    }
 
     /* ── Responsive ── */
     @media (max-width: 1200px) {
@@ -1716,17 +1723,17 @@ function ouvrirFiche(id) {
 
   var overlay = document.createElement('div');
   overlay.className = 'intro';
-  var logo = document.createElement('div');
-  logo.className = 'intro-logo';
 
-  // Cadre ouvert du logo (repère brand), tracé après l'assemblage des lettres
-  var svg = '<svg class="intro-frame" viewBox="0 0 120 100" preserveAspectRatio="none" fill="none">'
-    + [ ['4','4','4','96',1.8], ['4','4','30','4',1.9], ['4','96','48','96',2.0],
-        ['116','12','116','92',2.1], ['70','12','116','12',2.2] ]
-      .map(function(l) {
-        return '<line x1="' + l[0] + '" y1="' + l[1] + '" x2="' + l[2] + '" y2="' + l[3] + '" pathLength="1" style="--fd:' + l[4] + 's"/>';
-      }).join('')
-    + '</svg>';
+  // Taille du logo final (PNG officiel) ; les lettres sont dimensionnées
+  // pour s'en approcher, la cristallisation en fondu absorbe l'écart.
+  var W = Math.round(Math.min(380, Math.max(240, window.innerWidth * 0.30)));
+  var fontPx = Math.round(W * 0.245);
+
+  var stack = document.createElement('div');
+  stack.className = 'intro-stack';
+  var words = document.createElement('div');
+  words.className = 'intro-words';
+  words.style.fontSize = fontPx + 'px';
 
   var compteur = 0;
   function motDiv(txt) {
@@ -1735,38 +1742,47 @@ function ouvrirFiche(id) {
     txt.split('').forEach(function(ch) {
       var l = document.createElement('span');
       l.className = 'intro-l';
-      l.textContent = ch === ' ' ? '\\u00a0' : ch;
+      l.textContent = ch;
       // Chaque lettre part d'une direction différente (déterministe)
       var angle = (compteur * 137.5) % 360;
       l.style.setProperty('--dx', Math.round(Math.cos(angle * Math.PI / 180) * 46 + (compteur % 3 - 1) * 26) + 'vw');
       l.style.setProperty('--dy', Math.round(Math.sin(angle * Math.PI / 180) * 42) + 'vh');
       l.style.setProperty('--rot', ((compteur * 53) % 44 - 22) + 'deg');
-      l.style.setProperty('--d', (compteur * 0.05) + 's');
+      l.style.setProperty('--d', (compteur * 0.055) + 's');
       d.appendChild(l);
       compteur++;
     });
     return d;
   }
-  logo.appendChild(motDiv('Lutecia'));
-  logo.appendChild(motDiv('Care'));
-  logo.insertAdjacentHTML('beforeend', svg);
+  words.appendChild(motDiv('Lutecia'));
+  words.appendChild(motDiv('Care'));
+  stack.appendChild(words);
+
+  // Le VRAI logo (asset officiel), révélé quand les lettres se cristallisent
+  var png = document.createElement('img');
+  png.className = 'intro-png';
+  png.src = 'lc_ligne_hires_white.png';
+  png.alt = 'Lutecia Care';
+  png.style.width = W + 'px';
+  stack.appendChild(png);
+
+  overlay.appendChild(stack);
   var sub = document.createElement('div');
   sub.className = 'intro-sub';
   sub.textContent = 'Deal Flow Europe';
-  logo.appendChild(sub);
-  overlay.appendChild(logo);
+  overlay.appendChild(sub);
   document.body.appendChild(overlay);
 
-  // Démarrage APRÈS chargement de la police (layout des lettres correct)
+  // Démarrage APRÈS chargement de la police ET du PNG (aucun élément manquant)
   var resoudreMin, minAtteint = new Promise(function(r) { resoudreMin = r; });
   var policePrete = (document.fonts && document.fonts.ready)
-    ? Promise.race([document.fonts.ready, new Promise(function(r){ setTimeout(r, 1500); })])
+    ? Promise.race([document.fonts.ready, new Promise(function(r){ setTimeout(r, 1200); })])
     : Promise.resolve();
-  policePrete.then(function() {
-    // requestAnimationFrame : garantit que le layout final est posé avant d'animer
+  var pngPret = (png.decode ? png.decode().catch(function(){}) : Promise.resolve());
+  Promise.all([policePrete, pngPret]).then(function() {
     requestAnimationFrame(function() {
-      logo.classList.add('go');
-      // Fin de l'assemblage lettres + cadre ≈ 2,8 s
+      overlay.classList.add('go');
+      // Lettres (~1,9 s) + cristallisation dans le logo (~0,7 s)
       setTimeout(resoudreMin, 2800);
     });
   });
