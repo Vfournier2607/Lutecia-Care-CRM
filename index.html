@@ -1722,8 +1722,10 @@ function ouvrirFiche(id) {
   overlay.appendChild(mot);
   overlay.appendChild(sub);
   document.body.appendChild(overlay);
-  setTimeout(function() { overlay.classList.add('out'); }, 1900);
-  setTimeout(function() { overlay.remove(); }, 2600);
+  window.INTRO_FINIE = new Promise(function(resolve) {
+    setTimeout(function() { overlay.classList.add('out'); }, 1900);
+    setTimeout(function() { overlay.remove(); resolve(); }, 2600);
+  });
 })();
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1801,7 +1803,9 @@ document.addEventListener('DOMContentLoaded', function() {
     renderTable();
     renderStats();
   } else {
-    graphConnect().then(function(ok) {
+    (window.INTRO_FINIE || Promise.resolve()).then(function() {
+      return graphConnect();
+    }).then(function(ok) {
       var overlay = document.getElementById('loading-overlay');
       if (overlay) overlay.style.display = 'none';
       if (!ok) {
