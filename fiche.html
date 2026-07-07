@@ -332,6 +332,8 @@
     .fiche-structure-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: var(--navy); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .fiche-meta-line { font-size: 10px; color: var(--text-muted); }
     img.flag { vertical-align: -1px; border-radius: 2px; }
+    .lien-go { flex-shrink: 0; font-size: 12px; font-weight: 700; color: var(--mauve); text-decoration: none; padding: 0 4px; border-radius: 3px; }
+    .lien-go:hover { background: var(--off-white); }
     .fiche-tag { font-size: 9px; padding: 1px 7px; border-radius: 20px; border: 1px solid var(--steel-light); color: var(--text-muted); background: var(--off-white); }
     .fiche-topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     .spick-clear { font-family: 'Inter', sans-serif; font-size: 10px; padding: 3px 7px; border-radius: 20px; border: 1px solid var(--steel-light); background: transparent; color: var(--text-muted); cursor: pointer; transition: all .15s; }
@@ -369,7 +371,7 @@
     #centres-list { overflow-y: auto; max-height: 220px; }
     /* ══ Barre Alertes ══ */
     .fiche-full-row { grid-column: 1/-1; padding: 0 0 12px; }
-    .alertes-bar { background: var(--white); border: 1px solid var(--steel-light); border-radius: var(--r); box-shadow: var(--shadow); display: flex; align-items: stretch; gap: 0; overflow: hidden; min-height: 110px; }
+    .alertes-bar { background: var(--white); border: 1px solid var(--steel-light); border-radius: var(--r); box-shadow: var(--shadow); display: flex; align-items: stretch; gap: 0; overflow: hidden; min-height: 150px; }
     .alertes-bar-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-right: 1px solid var(--steel-light); flex-shrink: 0; justify-content: center; flex-direction: column; }
     .alertes-bar-title { font-family: 'Cormorant Garamond', serif; font-size: 14px; font-weight: 600; color: var(--navy); white-space: nowrap; }
     .alertes-bar-count { font-size: 10px; font-weight: 600; color: var(--danger); }
@@ -672,7 +674,7 @@
             <div class="info-row"><div class="info-label">Radiothérap.</div><input class="info-input" id="i-radio" placeholder="—" onchange="sauver('radiotherapie', this.value); renderMachines()" /></div>
             <div class="info-row"><div class="info-label">Nb TEP</div><input class="info-input" id="i-nb-tep" type="number" min="0" placeholder="—" onchange="sauver('nb_tep', this.value); renderMachines()" /></div>
             <div class="info-row"><div class="info-label">Nb Gamma</div><input class="info-input" id="i-nb-gamma" type="number" min="0" placeholder="—" onchange="sauver('nb_gamma', this.value); renderMachines()" /></div>
-            <div class="info-row"><div class="info-label">Lien</div><input class="info-input" id="i-lien" placeholder="https://…" onchange="sauver('lien', this.value)" /></div>
+            <div class="info-row"><div class="info-label">Lien</div><input class="info-input" id="i-lien" placeholder="https://…" onchange="sauver('lien', this.value)" /><a id="i-lien-go" class="lien-go" href="#" target="_blank" rel="noopener" title="Ouvrir le site" style="display:none">↗</a></div>
             <div class="info-row"><div class="info-label">Notes DB</div><input class="info-input" id="i-notes-db" placeholder="—" onchange="sauver('notes_db', this.value)" /></div>
             <div class="info-row">
               <div class="info-label">Label</div>
@@ -957,17 +959,16 @@ function chargerFiche() {
   var rec = getRecord(currentId);
   var nom = currentGroupe ? currentGroupe.nom : (rec.nom || currentId);
 
-  // Topbar + breadcrumb
-  document.getElementById('topbar-nom').textContent = nom;
-  // bc-nom hidden
+  // Topbar : si un nom de code (label) existe, il devient le titre —
+  // le nom réel passe en retrait dans la ligne meta
+  var titre = rec.label ? '\ud83d\udd12 ' + rec.label : nom;
+  document.getElementById('topbar-nom').textContent = titre;
   var metaEl = document.getElementById('topbar-meta');
   if (currentGroupe) {
-    metaEl.innerHTML = paysToFlag(currentGroupe.pays) + ' ' + esc(currentGroupe.pays) + ' — ' + esc(currentGroupe.mapping || '');
-  } else { metaEl.textContent = ''; }
-
-  // Hero
-  // hero-nom merged into topbar-nom
-  if (rec.label) document.getElementById('hero-label').textContent = rec.label;
+    metaEl.innerHTML = (rec.label ? esc(nom) + ' · ' : '')
+      + paysToFlag(currentGroupe.pays) + ' ' + esc(currentGroupe.pays) + ' — ' + esc(currentGroupe.mapping || '');
+  } else { metaEl.textContent = rec.label ? esc(nom) : ''; }
+  document.getElementById('hero-label').textContent = '';
 
   var tags = document.getElementById('hero-tags');
   if (currentGroupe) {
@@ -1011,6 +1012,7 @@ function chargerFiche() {
     setInput('i-nb-tep',   val('nb_tep',         'nb_tep') !== '' ? val('nb_tep','nb_tep') : (currentGroupe.nb_tep || ''));
     setInput('i-nb-gamma', val('nb_gamma',       'nb_gamma') !== '' ? val('nb_gamma','nb_gamma') : (currentGroupe.nb_gamma || ''));
     setInput('i-lien',     val('lien',           'contact'));
+    majLienGo();
     setInput('i-notes-db', val('notes_db',       'notes'));
 
     // Centres du réseau
@@ -1087,7 +1089,7 @@ function renderMiniMap() {
   if (section) section.classList.remove('hidden');
 
   if (!miniMap) {
-    miniMap = L.map('minimap', { zoomControl: false, attributionControl: false, scrollWheelZoom: false });
+    miniMap = L.map('minimap', { zoomControl: true, attributionControl: false, scrollWheelZoom: true });
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(miniMap);
   }
   miniMapPins.forEach(function(p) { miniMap.removeLayer(p); });
@@ -1108,6 +1110,21 @@ function renderMiniMap() {
   // Le conteneur vient d'être affiché : recalculer la taille
   setTimeout(function() { miniMap.invalidateSize(); }, 60);
 }
+
+// Rend le champ Lien cliquable (icône ↗) dès qu'une URL est saisie
+function majLienGo() {
+  var inp = document.getElementById('i-lien');
+  var go  = document.getElementById('i-lien-go');
+  if (!inp || !go) return;
+  var url = (inp.value || '').trim();
+  if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+  go.href = url || '#';
+  go.style.display = url ? '' : 'none';
+}
+document.addEventListener('DOMContentLoaded', function() {
+  var inp = document.getElementById('i-lien');
+  if (inp) inp.addEventListener('input', majLienGo);
+});
 
 function renderMachines() {
   var nbGamma = document.getElementById('i-nb-gamma') ? (document.getElementById('i-nb-gamma').value || '') : '';

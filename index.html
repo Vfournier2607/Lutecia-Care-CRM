@@ -204,7 +204,7 @@
     ══════════════════════════════════════ */
     .stats {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 8px;
       margin-bottom: 10px;
     }
@@ -233,6 +233,7 @@
     }
 
     .stat-sub { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+    .stat-unit { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--text-muted); }
     .stat.alert .stat-value { color: var(--mauve); }
 
     /* ══════════════════════════════════════
@@ -514,13 +515,15 @@
        EMPTY STATE
     ══════════════════════════════════════ */
     .empty {
-      padding: 64px 40px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+      padding: 56px 24px; margin: 8px;
+      border: 1px dashed var(--steel-light); border-radius: var(--r-lg); background: var(--white);
       text-align: center;
-      color: var(--text-muted);
     }
-    .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: .4; }
-    .empty-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
-    .empty-sub { font-size: 11px; color: var(--text-muted); }
+    .empty-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--navy); }
+    .empty-sub { font-size: 11px; color: var(--text-muted); max-width: 360px; line-height: 1.6; }
+    .empty-cta { margin-top: 8px; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; padding: 7px 18px; border-radius: var(--r); border: 1px solid var(--steel); background: transparent; color: var(--navy); cursor: pointer; transition: all .2s; }
+    .empty-cta:hover { border-color: var(--navy); background: var(--off-white); }
 
     /* ══════════════════════════════════════
        UTILS
@@ -541,6 +544,21 @@
     }
     .toast.toast-warn { background: var(--mauve); }
     @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+
+    /* ── Intro (lettres convergentes, 1x par session) ── */
+    .intro { position: fixed; inset: 0; z-index: 9999; background: linear-gradient(135deg, #111827 0%, #1a2340 55%, #0d1526 100%); display: flex; align-items: center; justify-content: center; transition: opacity .6s ease; }
+    .intro.out { opacity: 0; pointer-events: none; }
+    .intro-word { font-family: 'Cormorant Garamond', serif; font-size: clamp(40px, 7vw, 84px); font-weight: 300; color: var(--white); display: flex; }
+    .intro-word .sp { width: 0.35em; }
+    .intro-l { display: inline-block; opacity: 0; animation: introLettre .9s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    @keyframes introLettre {
+      from { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1.4); filter: blur(4px); }
+      to   { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); filter: blur(0); }
+    }
+    .intro-sub { position: absolute; margin-top: 120px; font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--steel); opacity: 0; animation: introSub .6s ease 1s forwards; }
+    @keyframes introSub { to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .intro { display: none; } }
 
     /* ── Responsive ── */
     @media (max-width: 1200px) {
@@ -651,6 +669,16 @@
           <span class="filter-label">Type</span>
           <select class="filter-select" id="f-type" onchange="renderTable();updateFilterBadge()">
             <option value="">Tous</option>
+          </select>
+        </div>
+
+        <!-- Structure -->
+        <div class="filter-group">
+          <span class="filter-label">Structure</span>
+          <select class="filter-select" id="f-structure" onchange="renderTable();updateFilterBadge()">
+            <option value="">Toutes</option>
+            <option value="groupes">Groupes (&gt; 1 centre)</option>
+            <option value="independants">Indépendants (1 centre)</option>
           </select>
         </div>
 
@@ -790,9 +818,10 @@
         <tbody id="tbody"></tbody>
       </table>
       <div id="empty" class="empty hidden">
-        <div class="empty-icon" id="empty-icon">◎</div>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--steel)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <div class="empty-title" id="empty-title">Aucun résultat</div>
         <div class="empty-sub" id="empty-sub">Aucune structure ne correspond à vos filtres.</div>
+        <button class="empty-cta" id="empty-cta" onclick="resetFiltres()">Réinitialiser les filtres</button>
       </div>
     </div>
 
@@ -1026,6 +1055,17 @@ function clearAllImports() {
   updateImportBadge();
 }
 
+// Harmonise les types : "Pure Player"/"pure players"/"Diagnostics" → une seule forme.
+// Clé = minuscules sans 's' final ; la première forme rencontrée (capitalisée) fait foi.
+var TYPE_CANON = {};
+function normaliserType(t) {
+  t = String(t || '').trim();
+  if (!t) return 'Autre';
+  var cle = t.toLowerCase().replace(/s$/, '').replace(/\s+/g, ' ');
+  if (!TYPE_CANON[cle]) TYPE_CANON[cle] = cle.charAt(0).toUpperCase() + cle.slice(1);
+  return TYPE_CANON[cle];
+}
+
 function reloadData() {
   var SCREENING_DATA = getScreeningData();
   // rebuild GROUPES
@@ -1040,7 +1080,7 @@ function reloadData() {
     if (!map[key]) {
       map[key] = {
         id: key, nom: c.reseau === 'Oui' && c.nom_reseau ? c.nom_reseau : c.nom,
-        mapping: c.mapping, pays: c.pays, nb_centres: 0,
+        mapping: normaliserType(c.mapping), pays: c.pays, nb_centres: 0,
         tep: 'N/D', gamma_cam: 'N/D', radiotherapie: 'N/D',
         nb_tep: 0, nb_gamma: 0,
         estReseau: c.reseau === 'Oui' && !!c.nom_reseau, centres: []
@@ -1225,11 +1265,16 @@ function populateFiltres() {
 
   function fill(id, vals) {
     var sel = document.getElementById(id);
+    var courante = sel.value;
+    // Purge (les rechargements successifs dupliquaient les options) en gardant "Tous"
+    while (sel.options.length > 1) sel.remove(1);
     vals.forEach(function(v) {
       var o = document.createElement('option');
       o.value = v; o.textContent = v;
       sel.appendChild(o);
     });
+    // Restaurer la sélection si elle existe toujours, sinon réinitialiser
+    sel.value = vals.indexOf(courante) >= 0 ? courante : '';
   }
   fill('f-pays', pays);
   fill('f-type', types);
@@ -1254,6 +1299,7 @@ function getFiltered() {
   var gamma  = document.getElementById('f-gamma').value;
   var radio  = document.getElementById('f-radio').value;
   var statut = document.getElementById('f-statut').value;
+  var structure = (document.getElementById('f-structure') || {}).value || '';
   var modOnly = document.getElementById('f-modifies') && document.getElementById('f-modifies').checked;
   var output = loadOutput();
 
@@ -1261,6 +1307,8 @@ function getFiltered() {
     if (search && !g.nom.toLowerCase().includes(search)) return false;
     if (pays   && g.pays    !== pays)   return false;
     if (type   && g.mapping !== type)   return false;
+    if (structure === 'groupes'      && g.nb_centres <= 1) return false;
+    if (structure === 'independants' && g.nb_centres > 1)  return false;
     if (tep    && g.tep     !== tep)    return false;
     if (gamma  && g.gamma_cam !== gamma) return false;
     if (radio  && g.radiotherapie !== radio) return false;
@@ -1274,7 +1322,7 @@ function getFiltered() {
 }
 
 function resetFiltres() {
-  ['f-search','f-pays','f-type','f-tep','f-gamma','f-radio','f-statut'].forEach(function(id) {
+  ['f-search','f-pays','f-type','f-tep','f-gamma','f-radio','f-statut','f-structure'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -1466,28 +1514,37 @@ function getSorted(arr) {
 // ══════════════════════════════════════════
 
 function renderStats() {
+  // KPIs calculés sur la sélection filtrée : ils évoluent avec les filtres
   var filtered = getFiltered();
   var output   = loadOutput();
-  var enProcess = GROUPES.filter(function(g) {
+  var nbCentres = 0, nbTep = 0, nbGamma = 0, enProcess = 0;
+  var idsFiltres = {};
+  filtered.forEach(function(g) {
+    idsFiltres[g.id] = true;
+    nbCentres += g.nb_centres || 0;
+    nbTep     += g.nb_tep     || 0;
+    nbGamma   += g.nb_gamma   || 0;
     var r = output[g.id] || {};
-    return r.statut || r.label;
-  }).length;
-  // Compter le total d'alertes actives (toutes structures confondues)
+    if (r.statut || r.label) enProcess++;
+  });
   var alertesActives = 0;
   try {
     var allActions = JSON.parse(localStorage.getItem('lutecia_actions') || '{}');
     Object.keys(allActions).forEach(function(id) {
+      if (!idsFiltres[id]) return;
       (allActions[id] || []).forEach(function(a) {
         if (a.echeance && !a.realise) alertesActives++;
       });
     });
   } catch(e) {}
+  var filtreActif = filtered.length !== GROUPES.length;
 
   document.getElementById('stats').innerHTML = [
-    { label: 'Structures', value: GROUPES.length, sub: 'r\u00e9seaux + ind\u00e9pendants' },
-    { label: 'Affich\u00e9es', value: filtered.length, sub: 'apr\u00e8s filtres' },
+    { label: 'Structures', value: filtered.length, sub: filtreActif ? 'sur ' + GROUPES.length + ' au total' : 'réseaux + indépendants' },
+    { label: 'Centres', value: nbCentres, sub: 'sites individuels' },
+    { label: 'Équipement', value: nbTep + ' <span class="stat-unit">TEP</span> · ' + nbGamma + ' <span class="stat-unit">GC</span>', sub: 'parc machines' },
     { label: 'En process', value: enProcess, sub: 'avec label ou statut' },
-    { label: 'Alertes actives', value: alertesActives, sub: 'relances en cours', alert: alertesActives > 0 }
+    { label: 'Alertes', value: alertesActives, sub: 'relances en cours', alert: alertesActives > 0 }
   ].map(function(s) {
     return '<div class="stat' + (s.alert ? ' alert' : '') + '">'
       + '<div class="stat-label">' + s.label + '</div>'
@@ -1518,11 +1575,12 @@ function renderTable() {
     tbody.innerHTML = '';
     empty.classList.remove('hidden');
     var noImport = !loadImports().length;
-    document.getElementById('empty-icon').textContent  = noImport ? '📂' : '◎';
     document.getElementById('empty-title').textContent = noImport ? 'Aucune donnée importée' : 'Aucun résultat';
     document.getElementById('empty-sub').textContent   = noImport
       ? 'Importez un fichier Excel (onglet Importer) pour commencer.'
       : 'Aucune structure ne correspond à vos filtres.';
+    var cta = document.getElementById('empty-cta');
+    if (cta) cta.style.display = noImport ? 'none' : '';
     renderStats();
     return;
   }
@@ -1538,15 +1596,17 @@ function renderTable() {
       : '';
 
     var sousLigne = [];
+    if (label) sousLigne.push(esc(g.nom));   // nom réel en retrait quand un nom de code existe
     if (g.mapping && g.mapping !== 'Autre') sousLigne.push(esc(g.mapping));
     if (!g.estReseau) sousLigne.push('Indépendant');
+    var nomAffiche = label ? '\ud83d\udd12 ' + esc(label) : esc(g.nom);
     var equip = [];
     equip.push(g.nb_tep   > 0 ? '<b>' + g.nb_tep   + '</b> TEP' : '<span class="equip-off">0 TEP</span>');
     equip.push(g.nb_gamma > 0 ? '<b>' + g.nb_gamma + '</b> GC'  : '<span class="equip-off">0 GC</span>');
     if (g.radiotherapie === 'Oui') equip.push('<span class="equip-rt" title="Radiothérapie">RT</span>');
 
     return '<tr data-id="' + esc(g.id) + '">'
-      + '<td class="cell-nom">' + (isModifie(g, output) ? '<span class="dot-modifie" title="Structure modifiée"></span>' : '') + esc(g.nom)
+      + '<td class="cell-nom">' + (isModifie(g, output) ? '<span class="dot-modifie" title="Structure modifiée"></span>' : '') + nomAffiche
         + (sousLigne.length ? '<br><span class="cell-sub">' + sousLigne.join(' · ') + '</span>' : '')
         + '</td>'
       + '<td style="font-size:11px;white-space:nowrap"><span class="flag">' + paysToFlag(g.pays) + '</span> ' + esc(g.pays) + '</td>'
@@ -1632,6 +1692,40 @@ function ouvrirFiche(id) {
 // ══════════════════════════════════════════
 // INITIALISATION
 // ══════════════════════════════════════════
+
+// ── Intro animée (1x par session) ──
+(function() {
+  try {
+    if (sessionStorage.getItem('lutecia_intro_vue')) return;
+    sessionStorage.setItem('lutecia_intro_vue', '1');
+  } catch(e) { return; }
+  var overlay = document.createElement('div');
+  overlay.className = 'intro';
+  var mot = document.createElement('div');
+  mot.className = 'intro-word';
+  'Lutecia Care'.split('').forEach(function(ch, i) {
+    if (ch === ' ') { var sp = document.createElement('span'); sp.className = 'sp'; mot.appendChild(sp); return; }
+    var l = document.createElement('span');
+    l.className = 'intro-l';
+    l.textContent = ch;
+    // chaque lettre arrive d'une direction différente (déterministe, pas de Math.random pour rester stable)
+    var angle = (i * 137) % 360;
+    l.style.setProperty('--dx', Math.round(Math.cos(angle * Math.PI / 180) * 60 + (i % 3 - 1) * 40) + 'vh');
+    l.style.setProperty('--dy', Math.round(Math.sin(angle * Math.PI / 180) * 50) + 'vh');
+    l.style.setProperty('--rot', ((i * 47) % 40 - 20) + 'deg');
+    l.style.animationDelay = (i * 0.055) + 's';
+    mot.appendChild(l);
+  });
+  var sub = document.createElement('div');
+  sub.className = 'intro-sub';
+  sub.textContent = 'Deal Flow Europe';
+  overlay.appendChild(mot);
+  overlay.appendChild(sub);
+  document.body.appendChild(overlay);
+  setTimeout(function() { overlay.classList.add('out'); }, 1900);
+  setTimeout(function() { overlay.remove(); }, 2600);
+})();
+
 document.addEventListener('DOMContentLoaded', function() {
   // Copier le vrai logo dans l'overlay de chargement
   (function() {

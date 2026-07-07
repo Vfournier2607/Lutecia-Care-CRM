@@ -125,6 +125,8 @@
     .pop-statut { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600; padding: 2px 9px; border-radius: 10px; color: #fff; margin-bottom: 8px; }
     .pop-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; padding: 6px 14px; background: var(--navy); color: #fff !important; border-radius: var(--r); text-decoration: none; margin-top: 6px; transition: background .15s; }
     .pop-btn:hover { background: var(--navy-mid); }
+    .pop-btn-site { background: transparent; color: var(--mauve) !important; border: 1px solid var(--steel-light); }
+    .pop-btn-site:hover { background: var(--off-white); }
 
     @media (max-width: 900px) {
       .layout { grid-template-columns: 0 1fr; }
@@ -329,7 +331,8 @@ function popupHtml(e) {
     + (c.type ? '<div class="pop-row"><span class="lbl">Type</span><span>' + esc(c.type) + '</span></div>' : '')
     + (equip.length ? '<div class="pop-row"><span class="lbl">Équipement</span><span>' + esc(equip.join(' · ')) + '</span></div>' : '')
     + (c.adresse ? '<div class="pop-row"><span class="lbl">Adresse</span><span>' + esc(c.adresse) + '</span></div>' : '')
-    + '<a class="pop-btn" href="fiche.html?id=' + encodeURIComponent(e.groupeId) + '">Ouvrir la fiche →</a>';
+    + '<a class="pop-btn" href="fiche.html?id=' + encodeURIComponent(e.groupeId) + '">Ouvrir la fiche →</a>'
+    + (c.contact ? ' <a class="pop-btn pop-btn-site" href="' + esc(/^https?:\/\//i.test(c.contact) ? c.contact : 'https://' + c.contact) + '" target="_blank" rel="noopener">Site ↗</a>' : '');
 }
 
 function rendre(fit) {
