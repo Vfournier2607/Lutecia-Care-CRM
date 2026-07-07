@@ -546,21 +546,21 @@
     @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 
 
-    /* ── Intro : lettres convergentes → tracé du logo → scintillations (1x/session) ── */
-    .intro { position: fixed; inset: 0; z-index: 9999; background: linear-gradient(135deg, #111827 0%, #1a2340 55%, #0d1526 100%); display: flex; align-items: center; justify-content: center; transition: opacity .7s ease; }
+    /* ── Intro : révélation du logo, maintenue jusqu'à la connexion (1x/session) ── */
+    .intro { position: fixed; inset: 0; z-index: 9999; background: linear-gradient(135deg, #111827 0%, #1a2340 55%, #0d1526 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity .7s ease; }
     .intro.out { opacity: 0; pointer-events: none; }
-    .intro-logo { position: relative; }
-    .intro-svg { display: block; overflow: visible; }
-    .intro-svg line { stroke: #fff; stroke-width: 1.4; stroke-dasharray: 100; stroke-dashoffset: 100; animation: traceLigne .55s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-    @keyframes traceLigne { to { stroke-dashoffset: 0; } }
-    .intro-svg text.intro-l { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 22px; fill: #fff; opacity: 0; transform-box: fill-box; transform-origin: center; animation: introLettre .85s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-    @keyframes introLettre {
-      from { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1.5); filter: blur(5px); }
-      to   { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); filter: blur(0); }
-    }
-    .intro-sub { position: absolute; left: 50%; transform: translateX(-50%); bottom: -46px; font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--steel); opacity: 0; animation: introSub .6s ease 2.1s forwards; white-space: nowrap; }
+    .intro-logo { position: relative; display: flex; align-items: center; justify-content: center; }
+    /* Halo doux qui respire derrière le logo (repère médecine nucléaire, discret) */
+    .intro-logo::before { content: ''; position: absolute; width: 130%; height: 220%; left: -15%; top: -60%; background: radial-gradient(ellipse at center, rgba(122,53,85,0.28) 0%, rgba(122,53,85,0) 65%); opacity: 0; animation: introHalo 1s ease .3s forwards, introBreathe 3s ease-in-out 1.3s infinite; }
+    .intro-logo img { position: relative; width: clamp(220px, 34vw, 400px); height: auto; opacity: 0; transform: scale(1.06); filter: blur(6px); animation: introReveal 1.1s cubic-bezier(0.22, 1, 0.36, 1) .2s forwards; }
+    .intro-line { position: absolute; left: 50%; bottom: -14px; width: clamp(220px, 34vw, 400px); height: 1px; background: rgba(255,255,255,0.35); transform: translateX(-50%) scaleX(0); transform-origin: center; animation: introLine .8s cubic-bezier(0.4, 0, 0.2, 1) 1s forwards; }
+    .intro-sub { margin-top: 34px; font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--steel); opacity: 0; animation: introSub .6s ease 1.5s forwards, introBreathe 2.4s ease-in-out 2.1s infinite; white-space: nowrap; }
+    @keyframes introReveal { to { opacity: 1; transform: scale(1); filter: blur(0); } }
+    @keyframes introHalo { to { opacity: 1; } }
+    @keyframes introLine { to { transform: translateX(-50%) scaleX(1); } }
     @keyframes introSub { to { opacity: 1; } }
-    @media (prefers-reduced-motion: reduce) { .intro { display: none; } }
+    @keyframes introBreathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+    @media (prefers-reduced-motion: reduce) { .intro-logo img, .intro-line, .intro-sub, .intro-logo::before { animation: none; opacity: 1; transform: none; filter: none; } }
 
     /* ── Responsive ── */
     @media (max-width: 1200px) {
@@ -1695,7 +1695,9 @@ function ouvrirFiche(id) {
 // INITIALISATION
 // ══════════════════════════════════════════
 
-// ── Intro : lettres → cadre du logo → scintillations tant que la connexion charge ──
+// ── Intro : révélation du logo, maintenue jusqu'à la fin de la connexion ──
+// Utilise le PNG du logo (même asset que la sidebar) : rendu identique
+// partout, aucune mesure de police à l'exécution → rien à casser.
 (function() {
   try {
     if (sessionStorage.getItem('lutecia_intro_vue')) return;
@@ -1704,69 +1706,24 @@ function ouvrirFiche(id) {
 
   var overlay = document.createElement('div');
   overlay.className = 'intro';
-  var logo = document.createElement('div');
-  logo.className = 'intro-logo';
-
-  // Tout le logo vit dans UN SVG (repère 160×72 du logo brand) :
-  // lettres et cadre partagent le même système de coordonnées,
-  // l'alignement est identique quel que soit le zoom / l'échelle Windows.
-  var W = Math.min(440, window.innerWidth * 0.7);
-  logo.style.width = W + 'px';
-
-  var policePrete = (document.fonts && document.fonts.load)
-    ? Promise.race([
-        document.fonts.load('400 22px "Cormorant Garamond"'),
-        new Promise(function(r) { setTimeout(r, 1500); })
-      ])
-    : Promise.resolve();
-
-  policePrete.then(function() {
-    var lignes = [['2','2','2','70'], ['2','2','38','2'], ['2','70','58','70'], ['58','14','155','14'], ['155','14','155','58']]
-      .map(function(l, i) {
-        return '<line x1="' + l[0] + '" y1="' + l[1] + '" x2="' + l[2] + '" y2="' + l[3] + '" pathLength="100" style="animation-delay:' + (1.25 + i * 0.16) + 's"/>';
-      }).join('');
-
-    // Position de chaque lettre mesurée avec la vraie police (canvas)
-    var mesure = document.createElement('canvas').getContext('2d');
-    mesure.font = '400 22px "Cormorant Garamond", Georgia, serif';
-    var compteur = 0;
-    function lettresSvg(txt, baseline) {
-      var x = 14, out = '';
-      txt.split('').forEach(function(ch) {
-        var angle = (compteur * 137) % 360;
-        var dx = Math.round(Math.cos(angle * Math.PI / 180) * 90 + (compteur % 3 - 1) * 50);
-        var dy = Math.round(Math.sin(angle * Math.PI / 180) * 70);
-        out += '<text x="' + x.toFixed(2) + '" y="' + baseline + '" class="intro-l" style="--dx:' + dx + 'px;--dy:' + dy + 'px;--rot:' + ((compteur * 47) % 40 - 20) + 'deg;animation-delay:' + (compteur * 0.06) + 's">' + ch + '</text>';
-        x += mesure.measureText(ch).width;
-        compteur++;
-      });
-      return out;
-    }
-    logo.insertAdjacentHTML('afterbegin',
-      '<svg class="intro-svg" width="' + W + '" height="' + (W * 72 / 160) + '" viewBox="0 0 160 72" fill="none">'
-      + lignes + lettresSvg('Lutecia', 41) + lettresSvg('Care', 64) + '</svg>');
-    demarrerMin();
-  });
-
-  var sub = document.createElement('div');
-  sub.className = 'intro-sub';
-  sub.textContent = 'Deal Flow Europe';
-  logo.appendChild(sub);
-  overlay.appendChild(logo);
+  overlay.innerHTML =
+    '<div class="intro-logo">'
+    + '<img src="lc_ligne_hires_white.png" alt="Lutecia Care" />'
+    + '<span class="intro-line"></span>'
+    + '</div>'
+    + '<div class="intro-sub">Deal Flow Europe</div>';
   document.body.appendChild(overlay);
 
-  // Durée minimale = logo entièrement formé (chrono lancé au vrai départ
-  // de l'animation) ; l'intro reste ensuite jusqu'à la fin de la connexion.
-  var resoudreMin;
-  var minAtteint = new Promise(function(r) { resoudreMin = r; });
-  function demarrerMin() { setTimeout(resoudreMin, 2600); }
+  // Durée minimale : le temps que la révélation se joue (~2 s).
+  // L'intro reste ensuite affichée tant que la connexion n'a pas abouti.
+  var minAtteint = new Promise(function(r) { setTimeout(r, 2000); });
   var fermee = false;
   window.introFin = function() {
     if (fermee) return;
     fermee = true;
     minAtteint.then(function() {
       overlay.classList.add('out');
-      setTimeout(function() { overlay.remove(); }, 800);
+      setTimeout(function() { overlay.remove(); }, 750);
     });
   };
   window.INTRO_MIN = minAtteint;
