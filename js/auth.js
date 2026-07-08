@@ -6,6 +6,15 @@
 const Auth = (function() {
   let _msal    = null;
   let _account = null;
+  let _token   = null;   // jeton en cache : une seule popup par session
+  let _tokenExp = 0;
+
+  function _memoriser(result) {
+    if (result && result.accessToken) {
+      _token = result.accessToken;
+      _tokenExp = result.expiresOn ? result.expiresOn.getTime() : (Date.now() + 30 * 60000);
+    }
+  }
 
   async function init() {
     if (_msal) return;
@@ -39,22 +48,27 @@ const Auth = (function() {
     await init();
     if (_account) {
       try {
-        await _msal.acquireTokenSilent({ scopes: GRAPH_SCOPES, account: _account });
+        _memoriser(await _msal.acquireTokenSilent({ scopes: GRAPH_SCOPES, account: _account }));
         return _account;
       } catch (_) { /* token expiré → popup */ }
     }
     const result = await _msal.loginPopup({ scopes: GRAPH_SCOPES, prompt: 'select_account', popupWindowAttributes: _popupCentree() });
+    _memoriser(result);
     _account = result.account;
     return _account;
   }
 
   async function getToken() {
     if (!_account) throw new Error('Non authentifié — appeler login() d\'abord.');
+    // Jeton du login encore valide : pas de nouvel appel (et surtout pas de 2e popup)
+    if (_token && Date.now() < _tokenExp - 60000) return _token;
     try {
       const r = await _msal.acquireTokenSilent({ scopes: GRAPH_SCOPES, account: _account });
+      _memoriser(r);
       return r.accessToken;
     } catch (_) {
       const r = await _msal.acquireTokenPopup({ scopes: GRAPH_SCOPES, popupWindowAttributes: _popupCentree() });
+      _memoriser(r);
       _account = r.account;
       return r.accessToken;
     }
