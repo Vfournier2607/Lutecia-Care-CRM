@@ -546,22 +546,47 @@
     @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 
 
-    /* ── Préloader (best practices studios) : logo officiel révélé en douceur,
-       ligne de progression fine, sortie rideau — court, sobre, infaillible ── */
-    .intro { position: fixed; inset: 0; z-index: 9999; background: linear-gradient(135deg, #111827 0%, #1a2340 55%, #0d1526 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
-    .intro.out { transform: translateY(-100%); transition: transform .9s cubic-bezier(0.77, 0, 0.18, 1); }
-    .intro-png { width: clamp(220px, 30vw, 360px); height: auto; opacity: 0; transform: translateY(14px) scale(1.02); }
-    .go .intro-png { animation: introReveal 1.3s cubic-bezier(0.22, 1, 0.36, 1) .15s forwards; }
-    @keyframes introReveal { to { opacity: 1; transform: translateY(0) scale(1); } }
-    /* Ligne de progression : se remplit pendant le chargement réel */
-    .intro-bar { margin-top: 46px; width: clamp(150px, 18vw, 220px); height: 1px; background: rgba(255,255,255,0.14); overflow: hidden; opacity: 0; }
-    .go .intro-bar { animation: introSub .5s ease .5s forwards; }
-    .intro-bar span { display: block; height: 100%; width: 100%; background: rgba(255,255,255,0.85); transform: translateX(-100%); transition: transform .5s ease; }
-    .intro-sub { margin-top: 18px; font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--steel); opacity: 0; }
-    .go .intro-sub { animation: introSub .8s ease .9s forwards; }
-    @keyframes introSub { to { opacity: 1; } }
+    /* ── Écran de chargement Lutecia Care ──
+       Lettres révélées par masque (Cormorant 300, brand guide) · cadre du logo
+       tracé par une tête lumineuse qui sème des étincelles (ADN médecine
+       nucléaire) · compteur serif suivant le chargement réel · sortie rideau. */
+    .intro { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; overflow: hidden;
+      background:
+        radial-gradient(ellipse 80% 60% at 70% 40%, #253058 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 20% 70%, #0d1526 0%, transparent 55%),
+        linear-gradient(135deg, #111827 0%, #1a2340 50%, #0d1526 100%); }
+    .intro.out { transform: translateY(-100%); transition: transform 1s cubic-bezier(0.77, 0, 0.18, 1); }
+    .intro.out .intro-stack { transform: translateY(-36px); transition: transform 1s cubic-bezier(0.77, 0, 0.18, 1); }
+
+    .intro-stack { position: relative; }
+    .intro-words { display: flex; flex-direction: column; align-items: flex-start; }
+    /* Révélation par masque : chaque lettre monte depuis sa ligne */
+    .intro-word { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 300; letter-spacing: -0.01em; color: #fff; line-height: 1.08; white-space: nowrap; overflow: hidden; }
+    .intro-word + .intro-word { margin-left: 0.72em; }
+    .intro-l { display: inline-block; transform: translateY(115%); }
+    .go .intro-l { animation: lettreMonte 1s cubic-bezier(0.22, 1, 0.36, 1) forwards; animation-delay: var(--d); }
+    @keyframes lettreMonte { to { transform: translateY(0); } }
+
+    /* Cadre du logo : traits fins tracés (la tête lumineuse est dans le SVG, en SMIL) */
+    .intro-frame { position: absolute; width: 124%; height: 148%; left: -12%; top: -24%; pointer-events: none; overflow: visible; }
+    .intro-frame line.trace { stroke: rgba(255,255,255,0.7); stroke-width: 1.3; stroke-dasharray: 1; stroke-dashoffset: 1; }
+    .go .intro-frame line.trace { animation: traceLigne var(--td) linear forwards; animation-delay: var(--ts); }
+    @keyframes traceLigne { to { stroke-dashoffset: 0; } }
+
+    /* Compteur — grand chiffre serif léger, bas gauche */
+    .intro-compteur { position: absolute; left: 40px; bottom: 26px; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 300; font-size: clamp(56px, 8vw, 104px); line-height: 1; color: rgba(255,255,255,0.85); font-variant-numeric: tabular-nums; opacity: 0; }
+    .go .intro-compteur { animation: fadeDoux 1s ease .4s forwards; }
+    .intro-compteur .pc { font-size: 0.36em; color: var(--steel); margin-left: 4px; }
+    /* Sous-titre — bas droite, micro-label Inter (brand guide) */
+    .intro-sub { position: absolute; right: 40px; bottom: 46px; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.35em; text-transform: uppercase; color: var(--steel); opacity: 0; }
+    .go .intro-sub { animation: fadeDoux 1s ease .8s forwards; }
+    @keyframes fadeDoux { to { opacity: 1; } }
+
     @media (prefers-reduced-motion: reduce) {
-      .intro-png, .intro-bar, .intro-sub { animation: none !important; opacity: 1 !important; transform: none !important; }
+      .intro-l { transform: none !important; animation: none !important; }
+      .intro-frame line.trace { animation: none !important; stroke-dashoffset: 0 !important; }
+      .intro-frame circle, .intro-frame .etincelle { display: none; }
+      .intro-compteur, .intro-sub { animation: none !important; opacity: 1 !important; }
     }
 
     /* ── Responsive ── */
@@ -1697,57 +1722,122 @@ function ouvrirFiche(id) {
 // INITIALISATION
 // ══════════════════════════════════════════
 
-// ── Préloader : logo officiel + progression réelle, sortie rideau ──
+// ── Écran de chargement : lettres masquées + cadre tracé avec étincelles
+//    + compteur — joue à CHAQUE chargement, couvre toute la connexion ──
 (function() {
-  try {
-    if (sessionStorage.getItem('lutecia_intro_vue')) return;
-    sessionStorage.setItem('lutecia_intro_vue', '1');
-  } catch(e) { return; }
-
   var overlay = document.createElement('div');
   overlay.className = 'intro';
-  overlay.innerHTML =
-    '<img class="intro-png" src="lc_ligne_hires_white.png" alt="Lutecia Care" />'
-    + '<div class="intro-bar"><span id="intro-fill"></span></div>'
-    + '<div class="intro-sub">Deal Flow Europe</div>';
-  document.body.appendChild(overlay);
 
-  // Progression : avance régulièrement jusqu'à 88 %, saute à 100 % quand
-  // la connexion aboutit (pattern standard des préloaders)
-  var fill = overlay.querySelector('#intro-fill');
-  var progression = 0;
-  var tick = setInterval(function() {
-    progression = Math.min(88, progression + (progression < 60 ? 9 : 3));
-    if (fill) fill.style.transform = 'translateX(' + (progression - 100) + '%)';
-  }, 200);
+  var stack = document.createElement('div');
+  stack.className = 'intro-stack';
+  var words = document.createElement('div');
+  words.className = 'intro-words';
+  var fontPx = Math.round(Math.min(96, Math.max(46, window.innerWidth * 0.062)));
+  words.style.fontSize = fontPx + 'px';
 
-  var png = overlay.querySelector('.intro-png');
-  var pngPret = (png.decode ? png.decode().catch(function(){}) : Promise.resolve());
-  var resoudreMin, minAtteint = new Promise(function(r) { resoudreMin = r; });
-  pngPret.then(function() {
-    requestAnimationFrame(function() {
-      overlay.classList.add('go');
-      // Révélation du logo + un temps de lecture
-      setTimeout(resoudreMin, 2400);
+  // Lettres en flux texte normal, révélées par masque (rien à mesurer)
+  var compteurL = 0;
+  ['Lutecia', 'Care'].forEach(function(mot) {
+    var d = document.createElement('div');
+    d.className = 'intro-word';
+    mot.split('').forEach(function(ch) {
+      var l = document.createElement('span');
+      l.className = 'intro-l';
+      l.textContent = ch;
+      l.style.setProperty('--d', (0.15 + compteurL * 0.06) + 's');
+      d.appendChild(l);
+      compteurL++;
+    });
+    words.appendChild(d);
+  });
+  stack.appendChild(words);
+
+  // Cadre ouvert du logo : 5 traits tracés en séquence, chacun avec une tête
+  // lumineuse (SMIL) qui sème 2 étincelles sur son passage — ADN médecine nucléaire
+  var lignes = [
+    // x1, y1, x2, y2, début (s), durée (s)
+    [6, 6, 6, 94, 1.35, 0.55],
+    [6, 6, 34, 6, 1.9, 0.35],
+    [6, 94, 52, 94, 2.25, 0.4],
+    [70, 16, 118, 16, 2.65, 0.4],
+    [118, 16, 118, 88, 3.05, 0.5]
+  ];
+  var svgParts = ['<svg class="intro-frame" viewBox="0 0 124 100" preserveAspectRatio="none" fill="none">'];
+  lignes.forEach(function(L, i) {
+    svgParts.push('<line class="trace" x1="' + L[0] + '" y1="' + L[1] + '" x2="' + L[2] + '" y2="' + L[3]
+      + '" pathLength="1" style="--ts:' + L[4] + 's;--td:' + L[5] + 's"/>');
+    // Tête lumineuse voyageant le long du trait (SMIL, déterministe)
+    svgParts.push('<circle r="1.6" fill="#fff" opacity="0">'
+      + '<animate attributeName="cx" from="' + L[0] + '" to="' + L[2] + '" begin="' + L[4] + 's" dur="' + L[5] + 's" fill="freeze"/>'
+      + '<animate attributeName="cy" from="' + L[1] + '" to="' + L[3] + '" begin="' + L[4] + 's" dur="' + L[5] + 's" fill="freeze"/>'
+      + '<animate attributeName="opacity" values="0;0.95;0.95;0" keyTimes="0;0.1;0.85;1" begin="' + L[4] + 's" dur="' + (L[5] + 0.15) + 's" fill="freeze"/>'
+      + '</circle>');
+    // 2 étincelles semées à 35 % et 75 % du trait : petit éclat qui scintille puis meurt
+    [0.35, 0.75].forEach(function(t, k) {
+      var ex = L[0] + (L[2] - L[0]) * t, ey = L[1] + (L[3] - L[1]) * t;
+      var naissance = (L[4] + L[5] * t).toFixed(2);
+      svgParts.push('<circle class="etincelle" cx="' + ex.toFixed(1) + '" cy="' + ey.toFixed(1) + '" r="' + (k ? 0.7 : 0.9) + '" fill="#a05070" opacity="0">'
+        + '<animate attributeName="opacity" values="0;1;0.2;0.8;0" keyTimes="0;0.15;0.45;0.7;1" begin="' + naissance + 's" dur="1.6s" fill="freeze"/>'
+        + '</circle>');
     });
   });
+  svgParts.push('</svg>');
+  stack.insertAdjacentHTML('beforeend', svgParts.join(''));
+  overlay.appendChild(stack);
+
+  // Compteur (bas gauche) + sous-titre (bas droite)
+  var compteur = document.createElement('div');
+  compteur.className = 'intro-compteur';
+  compteur.innerHTML = '<span id="intro-nombre">00</span><span class="pc">%</span>';
+  overlay.appendChild(compteur);
+  var sub = document.createElement('div');
+  sub.className = 'intro-sub';
+  sub.textContent = 'Deal Flow Europe';
+  overlay.appendChild(sub);
+  document.body.appendChild(overlay);
+
+  // Progression : régulière jusqu'à 90, ralentit vers 99 tant que la
+  // connexion n'a pas abouti, saute à 100 à l'aboutissement
+  var nombre = compteur.querySelector('#intro-nombre');
+  var progression = 0;
+  var tick = setInterval(function() {
+    var pas = progression < 60 ? 4 : progression < 90 ? 1.6 : 0.15;
+    progression = Math.min(99, progression + pas);
+    if (nombre) nombre.textContent = String(Math.floor(progression)).padStart(2, '0');
+  }, 150);
+
+  var policePrete = (document.fonts && document.fonts.ready)
+    ? Promise.race([document.fonts.ready, new Promise(function(r) { setTimeout(r, 1200); })])
+    : Promise.resolve();
+  var resoudreMin, minAtteint = new Promise(function(r) { resoudreMin = r; });
+  policePrete.then(function() {
+    requestAnimationFrame(function() {
+      overlay.classList.add('go');
+      // lettres (~1,3 s) + tracé du cadre (~2,2 s) + respiration
+      setTimeout(resoudreMin, 4000);
+    });
+  });
+
+  // La connexion démarre pendant l'écran (c'est lui l'écran de chargement) ;
+  // léger différé pour que la popup n'interrompe pas la montée des lettres
+  window.INTRO_PRET = new Promise(function(r) { setTimeout(r, 1300); });
 
   var fermee = false;
   window.introFin = function() {
     if (fermee) return;
     fermee = true;
     clearInterval(tick);
-    if (fill) fill.style.transform = 'translateX(0)'; // 100 %
+    if (nombre) nombre.textContent = '100';
     minAtteint.then(function() {
       setTimeout(function() {
         overlay.classList.add('out');
-        setTimeout(function() { overlay.remove(); }, 950);
-      }, 350); // laisser lire le 100 %
+        setTimeout(function() { overlay.remove(); }, 1050);
+      }, 450); // lire le 100
     });
   };
   window.INTRO_MIN = minAtteint;
-  // Garde-fou : jamais plus de 20 s
-  setTimeout(function() { window.introFin(); }, 20000);
+  // Garde-fou : jamais plus de 30 s
+  setTimeout(function() { window.introFin(); }, 30000);
 })();
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1826,10 +1916,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderTable();
     renderStats();
   } else {
-    (window.INTRO_MIN || Promise.resolve()).then(function() {
-      // Respiration : le logo reste seul 2 s avant que la popup Microsoft arrive
-      return window.INTRO_MIN ? new Promise(function(r) { setTimeout(r, 2000); }) : null;
-    }).then(function() {
+    (window.INTRO_PRET || Promise.resolve()).then(function() {
       return graphConnect();
     }).then(function(ok) {
       if (window.introFin) window.introFin();
