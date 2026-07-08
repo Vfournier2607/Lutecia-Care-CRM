@@ -25,6 +25,14 @@ const Auth = (function() {
     if (accounts.length > 0) _account = accounts[0];
   }
 
+  // Popup MSAL centrée sur l'écran (par défaut elle s'ouvre n'importe où)
+  function _popupCentree() {
+    const width = 480, height = 640;
+    const left = Math.max(0, Math.round(window.screenX + (window.outerWidth - width) / 2));
+    const top  = Math.max(0, Math.round(window.screenY + (window.outerHeight - height) / 2));
+    return { popupSize: { width: width, height: height }, popupPosition: { top: top, left: left } };
+  }
+
   // Connexion : silent en priorité, popup en fallback.
   // Toujours retourner l'account Microsoft réel — jamais un nom saisi manuellement.
   async function login() {
@@ -35,7 +43,7 @@ const Auth = (function() {
         return _account;
       } catch (_) { /* token expiré → popup */ }
     }
-    const result = await _msal.loginPopup({ scopes: GRAPH_SCOPES, prompt: 'select_account' });
+    const result = await _msal.loginPopup({ scopes: GRAPH_SCOPES, prompt: 'select_account', popupWindowAttributes: _popupCentree() });
     _account = result.account;
     return _account;
   }
@@ -46,7 +54,7 @@ const Auth = (function() {
       const r = await _msal.acquireTokenSilent({ scopes: GRAPH_SCOPES, account: _account });
       return r.accessToken;
     } catch (_) {
-      const r = await _msal.acquireTokenPopup({ scopes: GRAPH_SCOPES });
+      const r = await _msal.acquireTokenPopup({ scopes: GRAPH_SCOPES, popupWindowAttributes: _popupCentree() });
       _account = r.account;
       return r.accessToken;
     }
