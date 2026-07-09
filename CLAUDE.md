@@ -120,7 +120,9 @@ Avant toute tâche, la classer :
 tester fonctionnellement en navigateur, pousser.
 
 **Créative / ambiguë** (design, animation, UX, layout, architecture) →
-JAMAIS directement en production. Obligatoire :
+JAMAIS directement en production. **La direction créative vient de Vincent,
+systématiquement** : Claude propose des options et exécute — il ne décide
+jamais seul d'un choix esthétique. Obligatoire :
 1. **Assessment** : 3-5 lignes sur les approches possibles + trade-offs.
 2. **Validation** du concept par Vincent AVANT d'écrire le code final.
 3. **Prototype isolé** pour le visuel (page demo-*.html, hors site) —
