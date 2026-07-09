@@ -112,6 +112,31 @@ Si une solution est inutilement complexe → proposer une meilleure alternative.
 
 ---
 
+# Protocole de travail (leçon apprise — animation du loader, juillet 2026)
+
+Avant toute tâche, la classer :
+
+**Mécanique** (bug, colonne, sync, refactor ciblé) → exécuter directement,
+tester fonctionnellement en navigateur, pousser.
+
+**Créative / ambiguë** (design, animation, UX, layout, architecture) →
+JAMAIS directement en production. Obligatoire :
+1. **Assessment** : 3-5 lignes sur les approches possibles + trade-offs.
+2. **Validation** du concept par Vincent AVANT d'écrire le code final.
+3. **Prototype isolé** pour le visuel (page demo-*.html, hors site) —
+   c'est le rendu sur SON poste (Windows) qui juge, pas les captures de test.
+4. Intégration de la variante choisie, telle quelle.
+
+Règles transverses :
+- Le logo / les assets de marque : toujours les fichiers officiels,
+  jamais de reconstruction typographique.
+- Double check avant chaque push : `node scripts/check-js.js` + test
+  Playwright des 3 pages (rendu, saisie, zéro erreur console).
+- Un problème signalé par Vincent = d'abord REPRODUIRE (ou demander une
+  capture / le symptôme exact), ensuite corriger. Jamais corriger à l'aveugle.
+
+---
+
 # Communication (Token Efficiency Mode)
 
 Réponses courtes. Pas de discours inutile, pédagogie non demandée, répétitions, résumés artificiels.
