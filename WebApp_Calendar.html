@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Calendrier — Lutecia Care</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1a2340;--navy-dark:#111827;--navy-mid:#253058;--navy-light:#3d4f7c;
+  --mauve:#7a3555;--mauve-light:#a05070;
+  --steel:#8a9bb5;--steel-light:#c5cfe0;
+  --off-white:#f5f3f0;--white:#ffffff;
+  --text-dark:#1a2340;--text-body:#3d4f6a;--text-muted:#6b7a94;
+  --success:#2e7d5b;--success-bg:rgba(46,125,91,0.10);
+  --warning:#b5852f;--warning-bg:rgba(181,133,47,0.12);
+  --danger:#b3402f;--danger-bg:rgba(179,64,47,0.10);
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Jost',system-ui,sans-serif;
+  --radius:4px;--radius-lg:8px;--radius-full:9999px;
+  --transition:0.25s cubic-bezier(0.4,0,0.2,1);
+  --shadow-sm:0 2px 8px rgba(26,35,64,0.08);
+  --shadow-md:0 8px 32px rgba(26,35,64,0.14);
+  --shadow-lg:0 20px 60px rgba(26,35,64,0.18);
+  /* Category colours — Lutecia Care palette */
+  --cat-mn:#1a2340;
+  --cat-thera:#7a3555;
+  --cat-onco:#2d4f8a;
+  --cat-radio:#5c2d47;
+  --cat-medtech:#3d608c;
+  --cat-formation:#9a4a6e;
+  --cat-healthcare:#3a5f7a;
+  --cat-imagerie:#253058;
+  --cat-autre:#7a6890;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--sans);color:var(--text-dark);background:var(--off-white);-webkit-font-smoothing:antialiased;min-height:100vh}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:400;line-height:1.15;color:var(--navy)}
+h1 em,h2 em{font-style:italic;color:var(--mauve)}
+a{color:var(--mauve);text-decoration:none;cursor:pointer}
+ul{list-style:none}
+input,select,textarea,button{font-family:var(--sans)}
+
+/* ── Layout ── */
+.app-nav{background:var(--navy);height:80px;display:flex;align-items:center;padding:0 2rem;gap:2rem;position:sticky;top:0;z-index:200}
+.nav-logo{display:flex;align-items:center}
+.nav-logo img{height:56px;width:auto}
+.nav-tabs{display:flex;gap:0.25rem;margin-left:auto}
+.nav-tab{font-size:0.8rem;font-weight:500;color:rgba(255,255,255,0.65);padding:0.4rem 0.9rem;border-radius:var(--radius);transition:var(--transition);cursor:pointer;border:1px solid transparent}
+.nav-tab:hover{color:#fff}
+.nav-tab.active{color:#fff;background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.2)}
+
+.main{max-width:1100px;margin:0 auto;padding:2rem 2rem 4rem}
+
+.view{display:none}
+.view.active{display:block}
+
+/* ── Alerts ── */
+.alert-banner{background:rgba(181,133,47,0.12);border:1px solid rgba(181,133,47,0.3);border-left:3px solid var(--warning);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1.5rem}
+.alert-banner h4{font-family:var(--sans);font-size:0.8rem;font-weight:700;color:var(--warning);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.5rem}
+.alert-items{display:flex;flex-direction:column;gap:0.3rem}
+.alert-item{font-size:0.83rem;color:var(--text-body);display:flex;align-items:center;gap:0.5rem}
+.alert-item::before{content:'⚠';font-size:0.75rem;color:var(--warning)}
+
+/* ── Page header ── */
+.page-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1.5rem}
+.page-title{font-size:clamp(1.6rem,3vw,2.2rem)}
+.page-actions{display:flex;gap:0.75rem;align-items:center}
+
+/* ── Filters ── */
+.filter-row{display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center}
+.filter-select{font-size:0.82rem;padding:0.45rem 0.75rem;border:1px solid var(--steel-light);border-radius:var(--radius);background:var(--white);color:var(--navy);cursor:pointer;transition:var(--transition);outline:none;min-width:160px}
+.filter-select:focus{border-color:var(--mauve);box-shadow:0 0 0 3px rgba(122,53,85,0.1)}
+.filter-reset{font-size:0.72rem;color:var(--text-muted);cursor:pointer;border:none;background:none;padding:0.35rem 0.5rem;border-radius:var(--radius);transition:var(--transition)}
+.filter-reset:hover{color:var(--navy);background:var(--off-white)}
+
+/* ── Sources tab ── */
+.sources-tier{margin-bottom:2.5rem}
+.sources-tier-title{font-family:var(--sans);font-size:0.7rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);padding-bottom:0.5rem;margin-bottom:1rem;border-bottom:1px solid var(--steel-light);display:flex;align-items:center;gap:0.5rem}
+.sources-tier-badge{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--navy);color:#fff;font-size:0.65rem;font-weight:700}
+.sources-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0.75rem}
+.source-card{background:var(--white);border:1px solid var(--steel-light);border-radius:var(--radius-lg);padding:0.9rem 1rem;transition:var(--transition)}
+.source-card:hover{box-shadow:var(--shadow-sm);border-color:var(--steel)}
+.source-card a{color:var(--navy);font-family:var(--serif);font-size:1rem;display:block;margin-bottom:0.2rem}
+.source-card a:hover{color:var(--mauve)}
+.source-card-meta{font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem}
+.source-tag{display:inline-flex;font-size:0.62rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:0.12rem 0.45rem;border-radius:2px;color:#fff;margin-right:0.25rem;vertical-align:middle}
+
+/* ── Month group ── */
+.month-group{margin-bottom:2rem}
+.month-label{font-family:var(--sans);font-size:0.7rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);padding-bottom:0.5rem;margin-bottom:0.75rem;border-bottom:1px solid var(--steel-light)}
+.event-list{display:flex;flex-direction:column;gap:0.5rem}
+
+/* ── Event card ── */
+.event-card{background:var(--white);border:1px solid var(--steel-light);border-radius:var(--radius-lg);padding:0.9rem 1rem;display:grid;grid-template-columns:4px 1fr auto;gap:0 0.75rem;align-items:center;transition:var(--transition)}
+.event-card:hover{box-shadow:var(--shadow-sm);border-color:var(--steel)}
+.event-bar{width:4px;border-radius:var(--radius-full);align-self:stretch;min-height:36px;flex-shrink:0}
+.event-body{min-width:0}
+.event-title{font-family:var(--serif);font-size:1.05rem;font-weight:600;color:var(--navy);margin-bottom:0.2rem;line-height:1.2}
+.event-meta{display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center}
+.event-dates{font-size:0.78rem;color:var(--text-muted)}
+.event-location{font-size:0.78rem;color:var(--text-muted)}
+.cat-badge{font-size:0.62rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.15rem 0.5rem;border-radius:2px;color:#fff;white-space:nowrap;margin-left:auto}
+.event-actions{display:flex;gap:0.4rem;flex-shrink:0}
+.icon-btn{width:28px;height:28px;border-radius:var(--radius);border:1px solid var(--steel-light);background:transparent;color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition);font-size:0.8rem}
+.icon-btn:hover{background:var(--off-white);color:var(--navy);border-color:var(--steel)}
+.icon-btn.danger:hover{background:var(--danger-bg);color:var(--danger);border-color:var(--danger)}
+
+/* ── Multi-select ── */
+.event-checkbox{width:18px;height:18px;flex-shrink:0;accent-color:var(--mauve);cursor:pointer}
+.event-card.selected{background:rgba(122,53,85,0.07);border-color:rgba(122,53,85,0.4)}
+.event-card[onclick]{cursor:pointer}
+.bulk-bar{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:var(--radius-lg);padding:0.65rem 1.25rem;display:flex;align-items:center;gap:0.75rem;box-shadow:var(--shadow-lg);z-index:300;animation:toast-in 0.2s ease;white-space:nowrap}
+.bulk-bar.hidden{display:none}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;padding:0.65rem 1.4rem;font-size:0.85rem;font-weight:500;letter-spacing:0.03em;border-radius:var(--radius);border:1px solid transparent;cursor:pointer;transition:var(--transition);white-space:nowrap}
+.btn--dark{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn--dark:hover{background:var(--navy-mid)}
+.btn--light{background:var(--white);color:var(--navy);border-color:var(--steel-light)}
+.btn--light:hover{background:var(--off-white)}
+.btn--outline{background:transparent;color:var(--navy);border-color:var(--steel)}
+.btn--outline:hover{border-color:var(--navy)}
+.btn-sm{padding:0.45rem 1rem;font-size:0.78rem}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(26,35,64,0.45);backdrop-filter:blur(3px);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--white);border:1px solid var(--steel-light);border-radius:var(--radius-lg);width:100%;max-width:520px;box-shadow:var(--shadow-lg);overflow:hidden;max-height:90vh;overflow-y:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid var(--steel-light);position:sticky;top:0;background:var(--white)}
+.modal-head h3{font-size:1.4rem}
+.modal-x{width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);border-radius:var(--radius);cursor:pointer;font-size:1rem;border:none;background:none}
+.modal-x:hover{background:var(--off-white);color:var(--navy)}
+.modal-body{padding:1.5rem}
+.modal-foot{display:flex;justify-content:flex-end;gap:0.75rem;padding:1rem 1.5rem;border-top:1px solid var(--steel-light)}
+
+/* ── Form ── */
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.35rem}
+.field .input{width:100%;padding:0.6rem 0.8rem;background:var(--white);border:1px solid var(--steel-light);border-radius:var(--radius);color:var(--navy);font-size:0.9rem;transition:border-color var(--transition),box-shadow var(--transition);outline:none}
+.field .input:focus{border-color:var(--mauve);box-shadow:0 0 0 3px rgba(122,53,85,0.1)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+.field-help{font-size:0.74rem;color:var(--text-muted);margin-top:0.3rem}
+
+/* ── Recurring tab ── */
+.recur-grid{display:flex;flex-direction:column;gap:0.75rem}
+.recur-card{background:var(--white);border:1px solid var(--steel-light);border-radius:var(--radius-lg);padding:1rem 1.25rem;display:flex;align-items:center;gap:1rem;transition:var(--transition)}
+.recur-card:hover{box-shadow:var(--shadow-sm)}
+.recur-month-badge{width:52px;height:52px;border-radius:var(--radius-lg);background:var(--navy);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--serif)}
+.recur-month-badge .month{font-size:0.65rem;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;opacity:0.7}
+.recur-month-badge .num{font-size:1.4rem;font-weight:600;line-height:1}
+.recur-body{flex:1;min-width:0}
+.recur-name{font-family:var(--serif);font-size:1rem;color:var(--navy);margin-bottom:0.2rem}
+.recur-detail{font-size:0.78rem;color:var(--text-muted)}
+.recur-status{display:flex;align-items:center;gap:0.4rem;font-size:0.72rem;font-weight:600;padding:0.2rem 0.6rem;border-radius:var(--radius-full)}
+.recur-ok{background:var(--success-bg);color:var(--success)}
+.recur-warn{background:var(--warning-bg);color:var(--warning)}
+
+/* ── Scraper review modal ── */
+.scraper-event{display:flex;align-items:flex-start;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--steel-light)}
+.scraper-event:last-child{border-bottom:none}
+.scraper-event input[type=checkbox]{margin-top:0.2rem;accent-color:var(--mauve);width:16px;height:16px;flex-shrink:0;cursor:pointer}
+.scraper-event-body{flex:1;min-width:0}
+.scraper-event-title{font-family:var(--serif);font-size:0.95rem;color:var(--navy);margin-bottom:0.15rem}
+.scraper-event-meta{font-size:0.76rem;color:var(--text-muted);display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center}
+.scraper-duplicate{font-size:0.68rem;font-weight:700;letter-spacing:0.06em;color:var(--warning);background:var(--warning-bg);padding:0.1rem 0.4rem;border-radius:2px}
+.scraper-count{font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem}
+.scraper-actions{display:flex;gap:0.5rem;align-items:center;margin-bottom:1rem}
+
+
+/* ── Empty state ── */
+.empty{text-align:center;padding:3rem 1rem;color:var(--text-muted)}
+.empty svg{width:40px;height:40px;color:var(--steel);margin:0 auto 0.75rem}
+.empty p{font-size:0.9rem}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:1000;display:flex;flex-direction:column;gap:0.5rem;pointer-events:none}
+.toast{background:var(--navy);color:#fff;font-size:0.83rem;padding:0.65rem 1rem;border-radius:var(--radius);box-shadow:var(--shadow-md);animation:toast-in 0.2s ease;max-width:300px}
+@keyframes toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="app-nav">
+  <div class="nav-logo">
+    <img src="lc_ligne_hires_white.png" alt="Lutecia Care">
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('calendar')">📅 Calendrier</div>
+    <div class="nav-tab" onclick="switchTab('recurring')">🔁 Récurrents</div>
+    <div class="nav-tab" onclick="switchTab('sources')">🔍 Sources</div>
+  </div>
+</nav>
+
+<div class="main">
+
+  <!-- ═══ FILTRE PARTAGÉ (tous onglets) ═══ -->
+  <div class="filter-row" id="filter-bar">
+    <span id="country-flag-preview" style="line-height:1;vertical-align:middle;margin-right:2px;font-size:0;display:inline-flex;align-items:center"></span><select class="filter-select" id="filter-country" onchange="applyFilters()">
+      <option value="">🌍 Tous les pays</option>
+    </select>
+    <select class="filter-select" id="filter-category" onchange="applyFilters()">
+      <option value="">Toutes les spécialités</option>
+    </select>
+    <label id="filter-unconfirmed-wrap" style="display:none;align-items:center;gap:0.4rem;font-size:0.83rem;color:var(--text-body);cursor:pointer;white-space:nowrap">
+      <input type="checkbox" id="recur-filter-unconfirmed" onchange="filterRecurUnconfirmed=this.checked;renderRecurring()" style="cursor:pointer">
+      À confirmer seulement
+    </label>
+    <button class="filter-reset" id="filter-reset-btn" onclick="resetFilters()" style="display:none">✕ Réinitialiser</button>
+  </div>
+
+  <!-- ═══ TAB 1: CALENDRIER ═══ -->
+  <div id="view-calendar" class="view active">
+    <div id="alert-zone"></div>
+    <div class="page-header">
+      <h2 class="page-title">Calendrier <em>MedNuc</em></h2>
+      <div class="page-actions">
+        <button class="btn btn--outline" id="select-btn" onclick="toggleSelectMode()">☑ Sélectionner</button>
+        <button class="btn btn--dark" onclick="openModal()">+ Ajouter un événement</button>
+      </div>
+    </div>
+    <div id="event-list-container"></div>
+  </div>
+
+  <!-- ═══ TAB 2: RÉCURRENTS ═══ -->
+  <div id="view-recurring" class="view">
+    <div class="page-header">
+      <h2 class="page-title">Événements <em>récurrents</em></h2>
+      <div class="page-actions">
+        <button class="btn btn--dark" onclick="openModalRecur()">+ Ajouter récurrent</button>
+      </div>
+    </div>
+    <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1.5rem">Calendrier théorique annuel. Une alerte apparaît sur la page principale 4 mois avant la date attendue si l'événement n'a pas encore été confirmé.</p>
+    <div id="recur-list-container"></div>
+  </div>
+
+  <!-- ═══ TAB 3: SOURCES ═══ -->
+  <div id="view-sources" class="view">
+    <div class="page-header">
+      <h2 class="page-title">Sources <em>de veille</em></h2>
+    </div>
+    <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:2rem">Sites surveillés par le scraper, organisés en 3 couches. Couche 1 = agrégateurs d'événements. Couche 2 = médias spécialisés par spécialité. Couche 3 = sources primaires des sociétés savantes.</p>
+    <div id="sources-container"></div>
+  </div>
+
+</div>
+
+<!-- ═══ BULK ACTION BAR ═══ -->
+<div class="bulk-bar hidden" id="bulk-bar">
+  <span id="bulk-count" style="font-size:0.82rem">0 sélectionné(s)</span>
+  <button class="btn btn--light btn-sm" onclick="bulkExportICS()">📅 Exporter vers Outlook</button>
+  <button style="background:none;border:1px solid rgba(255,255,255,0.3);color:#fff;padding:0.4rem 0.8rem;border-radius:var(--radius);font-size:0.78rem;cursor:pointer" onclick="toggleSelectMode()">✕ Annuler</button>
+</div>
+
+<!-- ═══ MODAL: AJOUTER ÉVÉNEMENT ═══ -->
+<div class="modal-overlay hidden" id="modal-event">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Nouvel événement</h3>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Nom de l'événement *</label>
+        <input class="input" type="text" id="f-title" placeholder="ex: EANM 2027"/>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Date début *</label>
+          <input class="input" type="date" id="f-start"/>
+        </div>
+        <div class="field">
+          <label>Date fin</label>
+          <input class="input" type="date" id="f-end"/>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Ville</label>
+          <input class="input" type="text" id="f-city" placeholder="ex: Vienne"/>
+        </div>
+        <div class="field">
+          <label>Pays</label>
+          <input class="input" type="text" id="f-country" placeholder="ex: Autriche"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Catégorie</label>
+        <select class="input" id="f-category">
+          <option value="medecine-nucleaire">Médecine Nucléaire</option>
+          <option value="theranostique">Théranostique</option>
+          <option value="oncologie">Oncologie</option>
+          <option value="radiotherapie">Radiothérapie</option>
+          <option value="medtech">Medtech</option>
+          <option value="formation">Formation</option>
+          <option value="healthcare">Healthcare</option>
+          <option value="imagerie">Imagerie</option>
+          <option value="cardiologie">Cardiologie</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea class="input" id="f-notes" rows="2" placeholder="Infos pratiques, lien, notes…"></textarea>
+      </div>
+      <div class="field">
+        <label>Participants LC</label>
+        <input class="input" type="text" id="f-participants" placeholder="ex: Dr. Martin, équipe commerciale…"/>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn--outline" onclick="closeModal()">Annuler</button>
+      <button class="btn btn--dark" onclick="saveEvent()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: AJOUTER RÉCURRENT ═══ -->
+<div class="modal-overlay hidden" id="modal-recur">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Nouvel événement récurrent</h3>
+      <button class="modal-x" onclick="closeModalRecur()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Nom *</label>
+        <input class="input" type="text" id="rf-name" placeholder="ex: JFMN"/>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Mois habituel *</label>
+          <select class="input" id="rf-month">
+            <option value="1">Janvier</option><option value="2">Février</option>
+            <option value="3">Mars</option><option value="4">Avril</option>
+            <option value="5">Mai</option><option value="6">Juin</option>
+            <option value="7">Juillet</option><option value="8">Août</option>
+            <option value="9">Septembre</option><option value="10">Octobre</option>
+            <option value="11">Novembre</option><option value="12">Décembre</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Catégorie</label>
+          <select class="input" id="rf-category">
+            <option value="medecine-nucleaire">Médecine Nucléaire</option>
+            <option value="theranostique">Théranostique</option>
+            <option value="oncologie">Oncologie</option>
+            <option value="radiotherapie">Radiothérapie</option>
+            <option value="medtech">Medtech</option>
+            <option value="formation">Formation</option>
+            <option value="healthcare">Healthcare</option>
+            <option value="imagerie">Imagerie</option>
+            <option value="cardiologie">Cardiologie</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Pays habituel</label>
+          <input class="input" type="text" id="rf-country" placeholder="ex: France"/>
+        </div>
+        <div class="field">
+          <label>Ville habituelle</label>
+          <input class="input" type="text" id="rf-city" placeholder="ex: Paris"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea class="input" id="rf-notes" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn--outline" onclick="closeModalRecur()">Annuler</button>
+      <button class="btn btn--dark" onclick="saveRecur()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: SCRAPER REVIEW ═══ -->
+<div class="modal-overlay hidden" id="modal-scraper">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-head">
+      <h3 id="scraper-modal-title">Événements trouvés</h3>
+      <button class="modal-x" onclick="closeScraperModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding-bottom:0">
+      <div id="scraper-status" class="scraper-count"></div>
+      <div class="scraper-actions">
+        <button class="btn btn--outline btn-sm" onclick="selectAllScraper(true)">Tout sélectionner</button>
+        <button class="btn btn--outline btn-sm" onclick="selectAllScraper(false)">Tout désélectionner</button>
+        <span style="font-size:0.76rem;color:var(--text-muted);margin-left:auto" id="scraper-selection-count"></span>
+      </div>
+      <div id="scraper-event-list" style="max-height:400px;overflow-y:auto;padding-bottom:0.5rem"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn--outline" onclick="closeScraperModal()">Annuler</button>
+      <button class="btn btn--dark" onclick="importScraperSelection()" id="scraper-import-btn">Importer la sélection</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Multi-select state ──
+let selectMode = false;
+let selectedIds = new Set();
+let pendingDeleteRecur = null;
+
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+
+const CAT_COLORS = {
+  'medecine-nucleaire': '#1a2340',  // navy profond (primaire)
+  'theranostique':      '#7a3555',  // mauve (secondaire)
+  'oncologie':          '#2d4f8a',  // bleu royal
+  'radiotherapie':      '#5c2d47',  // prune foncé
+  'medtech':            '#3d608c',  // bleu acier
+  'formation':          '#9a4a6e',  // mauve rosé
+  'healthcare':         '#3a5f7a',  // ardoise bleue
+  'imagerie':           '#253058',  // navy sombre
+  'autre':              '#7a6890',  // mauve grisé
+};
+
+// Couleurs plus saturées pour les badges mois des récurrents
+const CAT_BADGE_COLORS = {
+  'medecine-nucleaire': '#1a2340',  // navy (couleur brand)
+  'theranostique':      '#7a3555',  // mauve (couleur brand)
+  'oncologie':          '#1d4ed8',  // bleu vif
+  'radiotherapie':      '#be123c',  // rouge cramoisi
+  'medtech':            '#0369a1',  // bleu ciel
+  'formation':          '#6d28d9',  // violet
+  'healthcare':         '#0f766e',  // sarcelle
+  'imagerie':           '#4338ca',  // indigo
+  'cardiologie':        '#0891b2',  // cyan
+  'autre':              '#6b7280',  // gris neutre
+};
+
+const CAT_LABELS = {
+  'medecine-nucleaire': 'Méd. Nucléaire',
+  'theranostique':      'Théranostique',
+  'oncologie':          'Oncologie',
+  'radiotherapie':      'Radiothérapie',
+  'medtech':            'Medtech',
+  'formation':          'Formation',
+  'healthcare':         'Healthcare',
+  'imagerie':           'Imagerie',
+  'cardiologie':        'Cardiologie',
+  'autre':              'Autre',
+};
+
+const MONTHS_FR = ['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const MONTHS_SHORT = ['','jan.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+
+const COUNTRY_FLAGS = {
+  'France':'fr','Italie':'it','Pologne':'pl','Suède':'se',
+  'Allemagne':'de','Espagne':'es','Roumanie':'ro','Pays-Bas':'nl',
+  'États-Unis':'us','Autriche':'at','UAE':'ae','Égypte':'eg',
+  'Belgique':'be','Royaume-Uni':'gb','Suisse':'ch','Portugal':'pt',
+  'Grèce':'gr','Danemark':'dk','Finlande':'fi','Norvège':'no',
+  'Japon':'jp','Chine':'cn','Australie':'au','Canada':'ca',
+  'Brésil':'br','Israël':'il','Turquie':'tr','Inde':'in',
+  'Corée du Sud':'kr','Singapour':'sg','Mexique':'mx',
+};
+function flagImg(country) {
+  const code = COUNTRY_FLAGS[country];
+  if (!code) return '';
+  return '<img src="https://flagcdn.com/16x12/' + code + '.png" style="vertical-align:middle;margin-right:3px;border-radius:1px" alt="' + country + '">';
+}
+
+const DEFAULT_EVENTS = [
+  // MAI 2026
+  {id:'e01',title:'Journées de la Baule',startDate:'2026-05-29',endDate:'2026-05-30',city:'La Baule',country:'France',category:'medecine-nucleaire',notes:'Qualité / sécurité en médecine nucléaire.'},
+  {id:'e02',title:'XVII Congrès National AIMN',startDate:'2026-05-21',endDate:'2026-05-24',city:'Bari',country:'Italie',category:'medecine-nucleaire',notes:'Congrès national AIMN.'},
+  {id:'e03',title:'XIX Zjazd Naukowy PTMN',startDate:'2026-05-21',endDate:'2026-05-23',city:'Łódź',country:'Pologne',category:'medecine-nucleaire',notes:'Congrès national polonais.'},
+  {id:'e04',title:'ESTRO 2026',startDate:'2026-05-15',endDate:'2026-05-19',city:'Stockholm',country:'Suède',category:'radiotherapie',notes:''},
+  {id:'e05',title:'The MedTech Forum',startDate:'2026-05-11',endDate:'2026-05-13',city:'Stockholm',country:'Suède',category:'medtech',notes:'Grand rendez-vous medtech européen.'},
+  // JUIN 2026
+  {id:'e06',title:'ACORAMEN — Radioprotection patients MN',startDate:'2026-06-02',endDate:'2026-06-03',city:'Montrouge',country:'France',category:'formation',notes:'acoramen.net'},
+  {id:'e07',title:'ACORAMEN — Imagerie SPECT-CT/PET-CT prothèses',startDate:'2026-06-11',endDate:'2026-06-12',city:'Montrouge',country:'France',category:'formation',notes:'acoramen.net'},
+  {id:'e08',title:'DEGRO 2026',startDate:'2026-06-25',endDate:'2026-06-27',city:'Leipzig',country:'Allemagne',category:'radiotherapie',notes:'degro.org'},
+  {id:'e09',title:'XXIII Congrès National SEOR',startDate:'2026-06-03',endDate:'2026-06-05',city:'Alicante',country:'Espagne',category:'radiotherapie',notes:'seor.es'},
+  {id:'e10',title:'ART + 8th Romanian Congress of Nuclear Medicine',startDate:'2026-06-11',endDate:'2026-06-13',city:'Bucarest',country:'Roumanie',category:'medecine-nucleaire',notes:'medcongresses.eventsair.com'},
+  {id:'e11',title:'HLTH Europe',startDate:'2026-06-15',endDate:'2026-06-18',city:'Amsterdam',country:'Pays-Bas',category:'healthcare',notes:'Innovation santé / digital health.'},
+  {id:'e12',title:'BIO International Convention',startDate:'2026-06-22',endDate:'2026-06-25',city:'San Diego',country:'États-Unis',category:'healthcare',notes:'Partnering biotech mondial.'},
+  // JUILLET 2026
+  {id:'e13',title:'Convegno Nazionale AIOM Giovani Oncologi',startDate:'2026-07-10',endDate:'2026-07-11',city:'Florence',country:'Italie',category:'oncologie',notes:'AIOM.'},
+  {id:'e14',title:'BGN Jahrestagung',startDate:'2026-07-10',endDate:'2026-07-11',city:'Garmisch-Partenkirchen',country:'Allemagne',category:'medecine-nucleaire',notes:'nuklearmedizin.de'},
+  {id:'e15',title:'ADLM 2026',startDate:'2026-07-26',endDate:'2026-07-30',city:'Anaheim',country:'États-Unis',category:'healthcare',notes:'Diagnostics, labo, translational medicine.'},
+  // AOÛT 2026
+  {id:'e16',title:'DGN Summer School',startDate:'2026-08-27',endDate:'2026-08-29',city:'Berlin',country:'Allemagne',category:'medecine-nucleaire',notes:'nuklearmedizin.de'},
+  {id:'e17',title:'BBGN Jahrestagung',startDate:'2026-08-28',endDate:'2026-08-29',city:'Berlin',country:'Allemagne',category:'medecine-nucleaire',notes:'nuklearmedizin.de'},
+  // SEPTEMBRE 2026
+  {id:'e18',title:'Cours SEMNIM superviseurs/opérateurs',startDate:'2026-09-08',endDate:'2026-09-08',city:'Barcelona',country:'Espagne',category:'formation',notes:'Hospital Clínic Barcelona. semnim.es'},
+  {id:'e19',title:'PAIRS 2026',startDate:'2026-09-29',endDate:'2026-10-02',city:'Dubai',country:'UAE',category:'imagerie',notes:'Dubai World Trade Centre. Imagerie interventionnelle.'},
+  // OCTOBRE 2026
+  {id:'e20',title:'Congrès RIV',startDate:'2026-10-01',endDate:'2026-10-02',city:'Nantes',country:'France',category:'medecine-nucleaire',notes:'cnp-mn.fr'},
+  {id:'e21',title:'EANM 2026',startDate:'2026-10-17',endDate:'2026-10-21',city:'Vienne',country:'Autriche',category:'medecine-nucleaire',notes:'eanm26.eanm.org — ⚠ Chevauche avec ESMO 23-27 oct.'},
+  {id:'e22',title:'ESMO Congress 2026',startDate:'2026-10-23',endDate:'2026-10-27',city:'Madrid',country:'Espagne',category:'oncologie',notes:'esmo.org'},
+  {id:'e23',title:'Nucleo-cardio',startDate:'2026-10-08',endDate:'2026-10-09',city:'Stuttgart',country:'Allemagne',category:'medecine-nucleaire',notes:'nuklearmedizin.de'},
+  {id:'e24',title:'MTR Kongress',startDate:'2026-10-09',endDate:'2026-10-10',city:'Berlin',country:'Allemagne',category:'medecine-nucleaire',notes:''},
+  {id:'e25',title:'The MedTech Conference',startDate:'2026-10-18',endDate:'2026-10-21',city:'Boston',country:'États-Unis',category:'medtech',notes:'Orienté business et réseau.'},
+  // NOVEMBRE 2026
+  {id:'e26',title:'ACORAMEN — Évaluation TEP en oncologie',startDate:'2026-11-06',endDate:'2026-11-07',city:'Montrouge',country:'France',category:'formation',notes:'acoramen.net'},
+  {id:'e27',title:'ACORAMEN — RIV Prostate 177Lu-PSMA',startDate:'2026-11-13',endDate:'2026-11-14',city:'Montrouge',country:'France',category:'formation',notes:'acoramen.net'},
+  {id:'e28',title:'ACORAMEN — Dosimétrie Y90',startDate:'2026-11-17',endDate:'2026-11-18',city:'Montrouge',country:'France',category:'formation',notes:'acoramen.net'},
+  {id:'e29',title:'XXVIII Congrès National AIOM',startDate:'2026-11-13',endDate:'2026-11-15',city:'Rome',country:'Italie',category:'oncologie',notes:'AIOM.'},
+  {id:'e30',title:'jDEGRO',startDate:'2026-11-06',endDate:'2026-11-07',city:'Marburg',country:'Allemagne',category:'radiotherapie',notes:'degro.org'},
+  {id:'e31',title:'SWDGN',startDate:'2026-11-13',endDate:'2026-11-14',city:'Karlsruhe',country:'Allemagne',category:'medecine-nucleaire',notes:''},
+  {id:'e32',title:'BBGN Jahrestagung Nov.',startDate:'2026-11-27',endDate:'2026-11-28',city:'Berlin',country:'Allemagne',category:'medecine-nucleaire',notes:''},
+  {id:'e33',title:'MEDICA',startDate:'2026-11-16',endDate:'2026-11-19',city:'Düsseldorf',country:'Allemagne',category:'medtech',notes:'Salon médical / healthcare majeur. medica-tradefair.com'},
+  {id:'e34',title:'BIO-Europe',startDate:'2026-11-09',endDate:'2026-11-11',city:'Cologne',country:'Allemagne',category:'healthcare',notes:'Partnering biopharma.'},
+  {id:'e35',title:'HLTH USA',startDate:'2026-11-15',endDate:'2026-11-18',city:'Las Vegas',country:'États-Unis',category:'healthcare',notes:'Health innovation / digital health.'},
+  {id:'e36',title:'RSNA',startDate:'2026-11-29',endDate:'2026-12-03',city:'Chicago',country:'États-Unis',category:'imagerie',notes:'Imagerie médicale mondiale.'},
+  // JUILLET 2026 (suite)
+  {id:'e42',title:'ASCO Annual Meeting 2026',startDate:'2026-06-05',endDate:'2026-06-09',city:'Chicago',country:'États-Unis',category:'oncologie',notes:'American Society of Clinical Oncology — plus grand congrès oncologie mondial. asco.org'},
+  {id:'e43',title:'SNMMI Annual Meeting 2026',startDate:'2026-05-30',endDate:'2026-06-02',city:'Los Angeles',country:'États-Unis',category:'medecine-nucleaire',notes:'Society of Nuclear Medicine and Molecular Imaging. snmmi.org'},
+  {id:'e44',title:'ASNC 2026',startDate:'2026-09-10',endDate:'2026-09-13',city:'San Diego',country:'États-Unis',category:'medecine-nucleaire',notes:'American Society of Nuclear Cardiology. asnc.org'},
+  {id:'e45',title:'CIRSE 2026',startDate:'2026-09-19',endDate:'2026-09-22',city:'Lisbonne',country:'Portugal',category:'imagerie',notes:'Cardiovascular and Interventional Radiological Society of Europe. cirse.org'},
+  {id:'e46',title:'ASTRO Annual Meeting 2026',startDate:'2026-10-25',endDate:'2026-10-28',city:'Houston',country:'États-Unis',category:'radiotherapie',notes:'American Society for Radiation Oncology. astro.org'},
+  {id:'e47',title:'DGN Jahrestagung 2026',startDate:'2026-04-22',endDate:'2026-04-26',city:'Leipzig',country:'Allemagne',category:'medecine-nucleaire',notes:'Congrès annuel de la Deutsche Gesellschaft für Nuklearmedizin. nuklearmedizin.de — à confirmer'},
+  {id:'e48',title:'AACR Annual Meeting 2026',startDate:'2026-04-25',endDate:'2026-04-29',city:'Los Angeles',country:'États-Unis',category:'oncologie',notes:'American Association for Cancer Research. aacr.org'},
+  {id:'e49',title:'ESGAR 2026',startDate:'2026-06-17',endDate:'2026-06-20',city:'Vienne',country:'Autriche',category:'imagerie',notes:'European Society of Gastrointestinal and Abdominal Radiology. esgar.org'},
+  {id:'e50',title:'EACR Congress 2026',startDate:'2026-06-24',endDate:'2026-06-27',city:'Barcelone',country:'Espagne',category:'oncologie',notes:'European Association for Cancer Research. eacr.org'},
+  // JANVIER 2027
+  {id:'e37',title:'Hivernales 2027',startDate:'2027-01-24',endDate:'2027-01-27',city:'France',country:'France',category:'medecine-nucleaire',notes:'cnp-mn.fr'},
+  {id:'e38',title:'WHX Dubai 2027',startDate:'2027-01-25',endDate:'2027-01-28',city:'Dubai',country:'UAE',category:'healthcare',notes:'Très gros salon santé du Moyen-Orient. worldhealthexpo.com'},
+  // MARS 2027
+  {id:'e39',title:'JFMN 2027',startDate:'2027-03-17',endDate:'2027-03-19',city:'France',country:'France',category:'medecine-nucleaire',notes:'Journées Françaises de Médecine Nucléaire. cnp-mn.fr'},
+  {id:'e40',title:'ECR 2027',startDate:'2027-03-03',endDate:'2027-03-07',city:'Vienne',country:'Autriche',category:'imagerie',notes:'European Congress of Radiology.'},
+  {id:'e41',title:'HBI 2027',startDate:'2027-03-15',endDate:'2027-03-17',city:'Paris',country:'France',category:'healthcare',notes:'Healthcare investing conference, très orienté C-suite et investisseurs.'},
+
+  // JUIN 2026 (suite)
+  {id:'e53',title:'Journées SMNO 2026',startDate:'2026-06-18',endDate:'2026-06-20',city:'Sauzon',country:'France',category:'medecine-nucleaire',notes:'Société de Médecine Nucléaire de l·Ouest. cnp-mn.fr'},
+  // SEPTEMBRE 2026
+  {id:'e51',title:'54. Jahrestagung BDN',startDate:'2026-09-18',endDate:'2026-09-19',city:'Berlin',country:'Allemagne',category:'medecine-nucleaire',notes:'Berufsverband Deutscher Nuklearmediziner. nuklearmedizin.de'},
+  // NOVEMBRE 2026
+  {id:'e52',title:'SNMMI Theranostics Conference 2026',startDate:'2026-11-04',endDate:'2026-11-08',city:'Bethesda',country:'États-Unis',category:'theranostique',notes:'Society of Nuclear Medicine and Molecular Imaging — conference dédiée théranostique. snmmi.org'},
+  // DÉCEMBRE 2026
+  {id:'e54',title:'ACOMEN — Réunion Scientifique Neurologie Nucléaire',startDate:'2026-12-04',endDate:'2026-12-04',city:'France',country:'France',category:'medecine-nucleaire',notes:'Journée scientifique ACOMEN. cnp-mn.fr'},
+  // FÉVRIER 2027
+  {id:'e55',title:'SNMMI Mid-Winter Meeting 2027',startDate:'2027-02-04',endDate:'2027-02-06',city:'San Francisco',country:'États-Unis',category:'medecine-nucleaire',notes:'SNMMI annual mid-winter meeting. snmmi.org'},
+  {id:'e56',title:'19. Deutsche Kardiodiagnostik-Tage',startDate:'2027-02-04',endDate:'2027-02-06',city:'Leipzig',country:'Allemagne',category:'cardiologie',notes:'Nucléarcardiologie et imagerie cardiaque. nuklearmedizin.de'},
+  // AVRIL 2027
+  {id:'e57',title:'Drei-Länder-Tagung DGN/ÖGN/SGNM 2027',startDate:'2027-04-07',endDate:'2027-04-10',city:'Leipzig',country:'Allemagne',category:'medecine-nucleaire',notes:'Congrès trilatral MN allemand/autrichien/suisse — remplace DGN Jahrestagung. nuklearmedizin.de'},
+  // MAI 2027
+  {id:'e58',title:'ESTRO 2027',startDate:'2027-05-21',endDate:'2027-05-25',city:'Milan',country:'Italie',category:'radiotherapie',notes:'European Society for Radiotherapy and Oncology. estro.org'},
+  // NOVEMBRE 2027
+  {id:'e59',title:'RSNA 2027',startDate:'2027-11-14',endDate:'2027-11-18',city:'Chicago',country:'États-Unis',category:'imagerie',notes:'Radiological Society of North America. rsna.org'},
+  // SÉMINAIRE ESPRIMED
+  {id:'e60',title:'Séminaire Esprimed 2026',startDate:'2026-09-15',endDate:'2026-09-17',city:'Variable',country:'France',category:'formation',notes:'Séminaire de formation en médecine nucléaire. esprimed.fr'},
+  {id:'e61',title:'JFR 2026 — Journées Françaises de Radiologie',startDate:'2026-10-09',endDate:'2026-10-12',city:'Paris',country:'France',category:'imagerie',notes:'Congrès annuel de la Société Française de Radiologie. jfr.radiologie.fr'},
+  {id:'e62',title:'SEMNIM 2026 — Congreso Nacional',startDate:'2026-11-05',endDate:'2026-11-07',city:'Bilbao',country:'Espagne',category:'medecine-nucleaire',notes:'Congrès national de la Société Espagnole de Médecine Nucléaire et Imagerie Moléculaire. semnim.es'},
+  {id:'e63',title:'BNMS Annual Meeting 2026',startDate:'2026-05-12',endDate:'2026-05-14',city:'Birmingham',country:'Royaume-Uni',category:'medecine-nucleaire',notes:'British Nuclear Medicine Society Annual Meeting. bnms.org.uk'},
+  {id:'e64',title:'SPNM — Congresso Nacional 2026',startDate:'2026-06-18',endDate:'2026-06-20',city:'Lisbonne',country:'Portugal',category:'medecine-nucleaire',notes:'Congrès annuel Sociedade Portuguesa de Medicina Nuclear. spnm.pt'},
+  {id:'e65',title:'HNMS Annual Congress 2026',startDate:'2026-11-20',endDate:'2026-11-22',city:'Athènes',country:'Grèce',category:'medecine-nucleaire',notes:'Congrès annuel Hellenic Nuclear Medicine Society. hnms.gr'},
+  {id:'e66',title:'OEGN Jahrestagung 2026',startDate:'2026-09-24',endDate:'2026-09-26',city:'Salzbourg',country:'Autriche',category:'medecine-nucleaire',notes:'Österreichische Gesellschaft für Nuklearmedizin. oegn.at'},
+];
+
+const DEFAULT_RECURRING = [
+  {id:'r01',name:'JFMN — Journées Françaises de Médecine Nucléaire',typicalMonth:3,country:'France',city:'Paris',category:'medecine-nucleaire',notes:'Congrès français annuel majeur. cnp-mn.fr'},
+  {id:'r02',name:'Hivernales',typicalMonth:1,country:'France',city:'France',category:'medecine-nucleaire',notes:'cnp-mn.fr'},
+  {id:'r03',name:'Congrès RIV',typicalMonth:10,country:'France',city:'Variable',category:'medecine-nucleaire',notes:'Radiologie Interventionnelle Vasculaire. cnp-mn.fr'},
+  {id:'r04',name:'EANM Annual Congress',typicalMonth:10,country:'Variable',city:'Variable',category:'medecine-nucleaire',notes:'Congrès annuel EANM, référence européenne en médecine nucléaire. eanm.org'},
+  {id:'r05',name:'Journées de la Baule',typicalMonth:5,country:'France',city:'La Baule',category:'medecine-nucleaire',notes:'Qualité / sécurité. Fin mai.'},
+  {id:'r06',name:'Congrès National AIMN',typicalMonth:5,country:'Italie',city:'Variable',category:'medecine-nucleaire',notes:'Congrès annuel AIMN, médecine nucléaire italienne.'},
+  {id:'r07',name:'DGN Jahrestagung',typicalMonth:4,country:'Allemagne',city:'Variable',category:'medecine-nucleaire',notes:'Congrès annuel DGN, médecine nucléaire allemande.'},
+  {id:'r08',name:'RSNA',typicalMonth:11,country:'États-Unis',city:'Chicago',category:'imagerie',notes:'Radiological Society of North America. Imagerie mondiale.'},
+  {id:'r09',name:'MEDICA',typicalMonth:11,country:'Allemagne',city:'Düsseldorf',category:'medtech',notes:'Salon médical / healthcare international.'},
+  {id:'r10',name:'ESMO Congress',typicalMonth:9,country:'Variable',city:'Variable',category:'oncologie',notes:'European Society for Medical Oncology. esmo.org'},
+  {id:'r11',name:'PAIRS Congress',typicalMonth:9,country:'UAE',city:'Dubai',category:'imagerie',notes:'Imagerie interventionnelle. Bi-annuel ou annuel.'},
+  {id:'r13',name:'SNMMI Theranostics Conference',typicalMonth:11,country:'États-Unis',city:'Bethesda',category:'theranostique',notes:'Conférence dédiée théranostique SNMMI. snmmi.org'},
+  {id:'r14',name:'ESTRO Annual Congress',typicalMonth:5,country:'Variable',city:'Variable',category:'radiotherapie',notes:'European Society for Radiotherapy and Oncology. estro.org'},
+  {id:'r12',name:'WHX Dubai',typicalMonth:1,country:'UAE',city:'Dubai',category:'healthcare',notes:'World Health Expo, Moyen-Orient. worldhealthexpo.com'},
+  {id:'r15',name:'SNMMI Annual Meeting',typicalMonth:6,country:'États-Unis',city:'Variable',category:'medecine-nucleaire',notes:'Congrès annuel SNMMI — médecine nucléaire US. snmmi.org'},
+  {id:'r16',name:'ASCO Annual Meeting',typicalMonth:6,country:'États-Unis',city:'Chicago',category:'oncologie',notes:'Plus grand congrès oncologie mondial. asco.org'},
+  {id:'r17',name:'ECR — European Congress of Radiology',typicalMonth:3,country:'Autriche',city:'Vienne',category:'imagerie',notes:'Congrès annuel imagerie médicale européen. myesr.org'},
+  {id:'r18',name:'ASTRO Annual Meeting',typicalMonth:10,country:'États-Unis',city:'Variable',category:'radiotherapie',notes:'American Society for Radiation Oncology. astro.org'},
+  {id:'r19',name:'ASNC Annual Scientific Sessions',typicalMonth:9,country:'États-Unis',city:'Variable',category:'medecine-nucleaire',notes:'American Society of Nuclear Cardiology. asnc.org'},
+  {id:'r20',name:'CIRSE Annual Meeting',typicalMonth:9,country:'Variable',city:'Variable',category:'imagerie',notes:'Cardiovascular and Interventional Radiological Society of Europe. cirse.org'},
+  {id:'r21',name:'AACR Annual Meeting',typicalMonth:4,country:'États-Unis',city:'Variable',category:'oncologie',notes:'American Association for Cancer Research. aacr.org'},
+  {id:'r22',name:'DEGRO Jahrestagung',typicalMonth:6,country:'Allemagne',city:'Variable',category:'radiotherapie',notes:'Deutsche Gesellschaft für Radioonkologie. degro.org'},
+  {id:'r23',name:'HLTH Europe',typicalMonth:6,country:'Variable',city:'Variable',category:'healthcare',notes:'Innovation santé / digital health Europe. hlth.com'},
+  {id:'r24',name:'HLTH USA',typicalMonth:11,country:'États-Unis',city:'Las Vegas',category:'healthcare',notes:'Health innovation / digital health US. hlth.com'},
+  {id:'r25',name:'BIO International Convention',typicalMonth:6,country:'États-Unis',city:'Variable',category:'healthcare',notes:'Partnering biotech mondial. bio.org'},
+  {id:'r26',name:'BIO-Europe',typicalMonth:11,country:'Allemagne',city:'Variable',category:'healthcare',notes:'Partnering biopharma européen. bioeurope.com'},
+  {id:'r27',name:'Congrès National SEOR',typicalMonth:6,country:'Espagne',city:'Variable',category:'radiotherapie',notes:'Sociedad Española de Oncología Radioterápica. seor.es'},
+  {id:'r28',name:'Congrès National AIOM',typicalMonth:11,country:'Italie',city:'Rome',category:'oncologie',notes:'Associazione Italiana di Oncologia Medica. aiom.it'},
+  {id:'r29',name:'Zjazd Naukowy PTMN',typicalMonth:5,country:'Pologne',city:'Variable',category:'medecine-nucleaire',notes:'Congrès annuel de médecine nucléaire polonais.'},
+  {id:'r30',name:'ADLM Annual Meeting',typicalMonth:7,country:'États-Unis',city:'Variable',category:'healthcare',notes:'Association for Diagnostics & Laboratory Medicine. aacc.org'},
+  {id:'r31',name:'The MedTech Forum',typicalMonth:5,country:'Variable',city:'Variable',category:'medtech',notes:'Grand rendez-vous medtech européen.'},
+  {id:'r32',name:'The MedTech Conference',typicalMonth:10,country:'États-Unis',city:'Variable',category:'medtech',notes:'Orienté business et réseau. themedtechconference.com'},
+  {id:'r33',name:'SNMMI Mid-Winter Meeting',typicalMonth:2,country:'États-Unis',city:'Variable',category:'medecine-nucleaire',notes:'Réunion mid-winter SNMMI. snmmi.org'},
+  {id:'r34',name:'Journées SMNO',typicalMonth:6,country:'France',city:'Variable',category:'medecine-nucleaire',notes:'Société de Médecine Nucléaire de l’Ouest. cnp-mn.fr'},
+  {id:'r35',name:'ESGAR Annual Meeting',typicalMonth:6,country:'Variable',city:'Variable',category:'imagerie',notes:'European Society of Gastrointestinal and Abdominal Radiology. esgar.org'},
+  {id:'r36',name:'Nucleo-cardio Kongress',typicalMonth:10,country:'Allemagne',city:'Stuttgart',category:'medecine-nucleaire',notes:'Nuklearkardiologie et imagerie cardiaque. nuklearmedizin.de'},
+  {id:'r37',name:'EACR Congress',typicalMonth:6,country:'Variable',city:'Variable',category:'oncologie',notes:'European Association for Cancer Research. eacr.org'},
+  {id:'r38',name:'ACOMEN — Neurologie Nucléaire',typicalMonth:12,country:'France',city:'Variable',category:'medecine-nucleaire',notes:'Journée scientifique ACOMEN. cnp-mn.fr'},
+  {id:'r39',name:'Kardiodiagnostik-Tage',typicalMonth:2,country:'Allemagne',city:'Leipzig',category:'medecine-nucleaire',notes:'Nucléarcardiologie et imagerie cardiaque. nuklearmedizin.de'},
+  {id:'r40',name:'ART — Romanian Congress of Nuclear Medicine',typicalMonth:6,country:'Roumanie',city:'Variable',category:'medecine-nucleaire',notes:'Congrès national roumain de médecine nucléaire.'},
+  {id:'r41',name:'BGN Jahrestagung',typicalMonth:7,country:'Allemagne',city:'Variable',category:'medecine-nucleaire',notes:'Berufsverband Deutscher Nuklearmediziner. nuklearmedizin.de'},
+  {id:'r42',name:'BBGN Jahrestagung (été)',typicalMonth:8,country:'Allemagne',city:'Variable',category:'medecine-nucleaire',notes:'Bayerischer Berufsverband der Nuklearmediziner. nuklearmedizin.de'},
+  {id:'r43',name:'BBGN Jahrestagung (automne)',typicalMonth:11,country:'Allemagne',city:'Variable',category:'medecine-nucleaire',notes:"Bayerischer Berufsverband der Nuklearmediziner — session d'automne."},
+  {id:'r44',name:'MTR Kongress',typicalMonth:10,country:'Allemagne',city:'Variable',category:'medecine-nucleaire',notes:'Kongress für Medizinische Technologen der Radiologie. mtr-kongress.de'},
+  {id:'r45',name:'jDEGRO',typicalMonth:11,country:'Allemagne',city:'Variable',category:'radiotherapie',notes:'Junior DEGRO — rencontres jeunes radiothérapeutes. degro.org'},
+  {id:'r46',name:'SWDGN',typicalMonth:11,country:'Allemagne',city:'Variable',category:'medecine-nucleaire',notes:'Südwestdeutsche Gesellschaft für Nuklearmedizin. nuklearmedizin.de'},
+  {id:'r47',name:'HBI — Health & Biotech Innovation',typicalMonth:3,country:'France',city:'Paris',category:'healthcare',notes:'Forum innovation santé et biotech. Paris.'},
+  {id:'r48',name:'BDN Jahrestagung',typicalMonth:9,country:'Allemagne',city:'Variable',category:'medecine-nucleaire',notes:'Berufsverband Deutscher Nuklearmediziner — réunion annuelle. nuklearmedizin.de'},
+  {id:'r49',name:'Drei-Länder-Tagung DGN/ÖGN/SGNM',typicalMonth:4,country:'Variable',city:'Variable',category:'medecine-nucleaire',notes:'Congrès trilatéral MN allemand/autrichien/suisse. Alterne avec DGN Jahrestagung. nuklearmedizin.de'},
+  {id:'r50',name:'DGN Summer School',typicalMonth:8,country:'Allemagne',city:'Variable',category:'medecine-nucleaire',notes:"École d'été de la DGN — formation continue. nuklearmedizin.de"},
+  {id:'r51',name:'Cours SEMNIM',typicalMonth:9,country:'Espagne',city:'Variable',category:'formation',notes:'Cours de la Sociedad Española de Medicina Nuclear e Imagen Molecular. semnim.org'},
+  {id:'r52',name:'Convegno Nazionale AIOM Giovani Oncologi',typicalMonth:7,country:'Italie',city:'Variable',category:'oncologie',notes:'Congrès national des jeunes oncologues AIOM. aiom.it'},
+  {id:'r53',name:'Séminaire Esprimed',typicalMonth:9,country:'France',city:'Variable',category:'formation',notes:'Séminaire de formation en médecine nucléaire Esprimed. esprimed.fr'},
+  {id:'r54',name:'ACORAMEN — Sessions printemps',typicalMonth:6,country:'France',city:'Montrouge',category:'formation',notes:'Sessions de formation ACORAMEN (radioprotection, imagerie, etc.). acoramen.net'},
+  {id:'r55',name:'ACORAMEN — Sessions automne',typicalMonth:11,country:'France',city:'Montrouge',category:'formation',notes:"Sessions de formation ACORAMEN (TEP oncologie, PSMA, dosimétrie, etc.). acoramen.net"},
+  {id:'r56',name:'JFR — Journées Françaises de Radiologie',typicalMonth:10,country:'France',city:'Paris',category:'imagerie',notes:'Congrès annuel SFR. jfr.radiologie.fr'},
+  {id:'r57',name:'SEMNIM — Congreso Nacional',typicalMonth:11,country:'Espagne',city:'Variable',category:'medecine-nucleaire',notes:'Congrès annuel de la Société Espagnole de MN. semnim.es'},
+  {id:'r58',name:'BNMS Annual Meeting',typicalMonth:5,country:'Royaume-Uni',city:'Variable',category:'medecine-nucleaire',notes:'British Nuclear Medicine Society. bnms.org.uk'},
+  {id:'r59',name:'SPNM — Congresso Nacional',typicalMonth:6,country:'Portugal',city:'Variable',category:'medecine-nucleaire',notes:'Sociedade Portuguesa de Medicina Nuclear. spnm.pt'},
+  {id:'r60',name:'HNMS Annual Congress',typicalMonth:11,country:'Grèce',city:'Athènes',category:'medecine-nucleaire',notes:'Hellenic Nuclear Medicine Society. hnms.gr'},
+  {id:'r61',name:'OEGN Jahrestagung',typicalMonth:9,country:'Autriche',city:'Variable',category:'medecine-nucleaire',notes:'Österreichische Gesellschaft für Nuklearmedizin. oegn.at'},
+];
+
+// ─── Scraper config ─────────────────────────────────────────────────────────
+// Remplacer par l'URL de l'Azure Function après déploiement
+const SCRAPER_URL = '';   // ex: 'https://lc-scraper.azurewebsites.net/api/scrape'
+
+// Données de démonstration (actives tant que SCRAPER_URL est vide)
+const SCRAPER_DEMO = [
+  {title:'IAEA Technical Meeting on Dosimetry in Theranostics',startDate:'2026-09-15',endDate:'2026-09-17',city:'Vienna',country:'Autriche',category:'theranostique',notes:'Source IAEA. Vienna, Austria',source:'IAEA'},
+  {title:'IAEA Regional Training Course on Nuclear Medicine Applications',startDate:'2026-10-05',endDate:'2026-10-09',city:'Cairo',country:'Égypte',category:'medecine-nucleaire',notes:'Source IAEA. Cairo, Egypt',source:'IAEA'},
+  {title:'IAEA Workshop on PET/CT in Oncology',startDate:'2026-11-10',endDate:'2026-11-12',city:'Vienna',country:'Autriche',category:'medecine-nucleaire',notes:'Source IAEA. Vienna, Austria',source:'IAEA'},
+  {title:'IAEA Training Course on Radiation Therapy Physics',startDate:'2026-11-23',endDate:'2026-11-27',city:'Vienna',country:'Autriche',category:'radiotherapie',notes:'Source IAEA. Vienna, Austria',source:'IAEA'},
+  {title:'IAEA Scientific Meeting on Molecular Imaging Biomarkers',startDate:'2027-02-08',endDate:'2027-02-10',city:'Vienna',country:'Autriche',category:'imagerie',notes:'Source IAEA. Vienna, Austria',source:'IAEA'},
+  {title:'IAEA Workshop on PSMA Theranostics — Clinical Practice',startDate:'2027-01-19',endDate:'2027-01-21',city:'Vienna',country:'Autriche',category:'theranostique',notes:'Source IAEA. Vienna, Austria',source:'IAEA'},
+  {title:'20. Deutsche Kardiodiagnostik-Tage 2028',startDate:'2028-02-05',endDate:'2028-02-07',city:'Leipzig',country:'Allemagne',category:'cardiologie',notes:'Nucléarcardiologie et imagerie cardiaque. nuklearmedizin.de',source:'DGN'},
+  {title:'ASNC 2027',startDate:'2027-09-09',endDate:'2027-09-12',city:'Variable',country:'États-Unis',category:'cardiologie',notes:'American Society of Nuclear Cardiology Annual Meeting. asnc.org',source:'ASNC'},
+];
+
+const SOURCES = [
+  {
+    tier: 1,
+    label: 'Couche 1 — Agrégateurs d\'événements',
+    desc: 'Sites indexant des milliers de congrès médicaux. Point d\'entrée le plus efficace pour le scraping.',
+    sites: [
+      {name:'IAEA Scientific Events', url:'https://www.iaea.org/events', tags:['medecine-nucleaire','theranostique'], desc:'Calendrier officiel AIEA — congrès nucléaire médical mondial.'},
+      {name:'Medscape Medical Conferences', url:'https://www.medscape.com/resource/conferences', tags:['oncologie','healthcare'], desc:'Agrégateur US généraliste multi-spécialités.'},
+      {name:'Healio Conference Coverage', url:'https://www.healio.com/news/medical-meetings', tags:['oncologie','imagerie'], desc:'Couverture live de congrès (oncologie, radiologie, MN).'},
+      {name:'AuntMinnie (US)', url:'https://www.auntminnie.com/index.aspx?sec=conf', tags:['imagerie','medecine-nucleaire'], desc:'Référence imagerie médicale — liste des congrès annuels.'},
+      {name:'AuntMinnie Europe', url:'https://www.auntminnieeurope.com', tags:['imagerie','medecine-nucleaire'], desc:'Version européenne, très orientée EANM/ECR/ESTRO.'},
+    ]
+  },
+  {
+    tier: 2,
+    label: 'Couche 2 — Médias spécialisés',
+    desc: 'Publications et portails d\'actualité par spécialité. Annoncent les congrès et publient des compte-rendus.',
+    sites: [
+      {name:'ITN Online (Imaging Technology News)', url:'https://www.itnonline.com', tags:['imagerie','medecine-nucleaire','theranostique'], desc:'Actualité imagerie, PET-CT, SPECT, nucléaire — annonces de congrès fréquentes.'},
+      {name:'EJNMMI News', url:'https://ejnmmi.springeropen.com', tags:['medecine-nucleaire','theranostique'], desc:'European Journal of Nuclear Medicine — communications scientifiques.'},
+      {name:'OncLive', url:'https://www.onclive.com/conferences', tags:['oncologie'], desc:'Couverture live des congrès en oncologie (ASCO, ESMO, ASTRO…).'},
+      {name:'ASTRO (Radiation Oncology)', url:'https://www.astro.org/Meetings-and-Education', tags:['radiotherapie'], desc:'Société américaine de radiothérapie — agenda des meetings.'},
+      {name:'MedCity News', url:'https://medcitynews.com/category/events', tags:['medtech','healthcare'], desc:'Actualité medtech / startup santé — calendrier des conférences.'},
+      {name:'MobiHealthNews Events', url:'https://www.mobihealthnews.com/events', tags:['medtech','healthcare'], desc:'Digital health et dispositifs médicaux connectés.'},
+      {name:'Diagnostics World News', url:'https://diagnosticsworldnews.com', tags:['imagerie','medecine-nucleaire'], desc:'Diagnostics, in-vitro, biomarqueurs — news et congrès.'},
+      {name:'Le Quotidien du Médecin', url:'https://www.lequotidiendumedecin.fr', tags:['healthcare','formation'], desc:'Presse médicale française — agenda des congrès francophones.'},
+    ]
+  },
+  {
+    tier: 3,
+    label: 'Couche 3 — Sources primaires (sociétés savantes)',
+    desc: 'Sites officiels des sociétés savantes. Scraped en backup si les couches 1 & 2 ne couvrent pas un événement.',
+    sites: [
+      {name:'EANM', url:'https://www.eanm.org/events-education', tags:['medecine-nucleaire','theranostique'], desc:'European Association of Nuclear Medicine.'},
+      {name:'SNMMI', url:'https://www.snmmi.org/MeetingsEvents', tags:['medecine-nucleaire','theranostique'], desc:'Society of Nuclear Medicine and Molecular Imaging (US).'},
+      {name:'CNP-MN (France)', url:'https://www.cnp-mn.fr', tags:['medecine-nucleaire'], desc:'Conseil National Professionnel de Médecine Nucléaire — JFMN, RIV, Hivernales.'},
+      {name:'ACORAMEN', url:'https://www.acoramen.net', tags:['medecine-nucleaire','formation'], desc:'Formations théoriques et pratiques MN en France.'},
+      {name:'DGN (Allemagne)', url:'https://www.nuklearmedizin.de/kongresse', tags:['medecine-nucleaire','cardiologie'], desc:'Deutsche Gesellschaft für Nuklearmedizin — inclut Nucleo-cardio et Kardiodiagnostik-Tage.'},
+      {name:'SEMNIM (Espagne)', url:'https://www.semnim.es/actividad-congresual', tags:['medecine-nucleaire'], desc:'Sociedad Española de Medicina Nuclear e Imagen Molecular.'},
+      {name:'AIMN (Italie)', url:'https://www.aimn.it/events', tags:['medecine-nucleaire'], desc:'Associazione Italiana di Medicina Nucleare.'},
+      {name:'BNMS (Royaume-Uni)', url:'https://www.bnms.org.uk/events', tags:['medecine-nucleaire'], desc:'British Nuclear Medicine Society — congrès annuel UK.'},
+      {name:'SPNM (Portugal)', url:'https://www.spnm.pt', tags:['medecine-nucleaire'], desc:'Sociedade Portuguesa de Medicina Nuclear — congrès annuel Portugal.'},
+      {name:'HNMS (Grèce)', url:'https://www.hnms.gr', tags:['medecine-nucleaire'], desc:'Hellenic Nuclear Medicine Society — congrès annuel Athènes.'},
+      {name:'OEGN (Autriche)', url:'https://www.oegn.at', tags:['medecine-nucleaire'], desc:'Österreichische Gesellschaft für Nuklearmedizin — congrès annuel Autriche.'},
+      {name:'ASNC', url:'https://www.asnc.org', tags:['medecine-nucleaire','cardiologie'], desc:'American Society of Nuclear Cardiology — congrès annuel + guidelines.'},
+      {name:'SFR / JFR (France)', url:'https://www.jfr.radiologie.fr', tags:['imagerie'], desc:'Société Française de Radiologie — Journées Françaises de Radiologie, Paris oct.'},
+      {name:'ESTRO', url:'https://www.estro.org/Events', tags:['radiotherapie'], desc:'European Society for Radiotherapy and Oncology.'},
+      {name:'ESMO', url:'https://www.esmo.org/events', tags:['oncologie'], desc:'European Society for Medical Oncology — congrès annuel + e-learning.'},
+      {name:'RSNA', url:'https://www.rsna.org/annual-meeting', tags:['imagerie'], desc:'Radiological Society of North America — congrès majeur Chicago nov.'},
+      {name:'MEDICA Trade Fair', url:'https://www.medica-tradefair.com', tags:['medtech'], desc:'Plus grand salon médical mondial — Düsseldorf, novembre.'},
+      {name:'HLTH', url:'https://www.hlth.com/events', tags:['healthcare','medtech'], desc:'Conférences innovation santé / digital health (Europe + US).'},
+    ]
+  }
+];
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let events = [];
+let recurring = [];
+let filterCategory = '';
+let filterCountry = '';
+let filterRecurUnconfirmed = false;
+let editingId = null;
+
+// ═══════════════════════════════════════
+// DATA STORE — adapter isolé
+// Pour migrer vers Apps Script : remplacer uniquement les méthodes load() et save()
+// ═══════════════════════════════════════
+const DataStore = {
+  // ── Adapter localStorage ──────────────────────────────────────────────────
+  // Migration Apps Script : remplacer ce bloc par :
+  //   load: function(cb) { google.script.run.withSuccessHandler(cb).getData(); },
+  //   save: function(evts, recurs) { google.script.run.saveData(evts, recurs); }
+  // ─────────────────────────────────────────────────────────────────────────
+  load: function(callback) {
+    const se = localStorage.getItem('lc_events');
+    const sr = localStorage.getItem('lc_recurring');
+    callback({
+      events:    se ? JSON.parse(se) : [...DEFAULT_EVENTS],
+      recurring: sr ? JSON.parse(sr) : [...DEFAULT_RECURRING]
+    });
+  },
+  save: function(evts, recurs) {
+    localStorage.setItem('lc_events',    JSON.stringify(evts));
+    localStorage.setItem('lc_recurring', JSON.stringify(recurs));
+  }
+};
+
+function loadData() {
+  DataStore.load(function(data) {
+    events    = data.events;
+    recurring = data.recurring;
+  });
+}
+
+function saveData() {
+  DataStore.save(events, recurring);
+}
+
+function uid() {
+  return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
+// Échappe les caractères HTML pour éviter les XSS
+function safeText(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ═══════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════
+function formatDateRange(start, end) {
+  if (!start) return '';
+  const s = new Date(start + 'T00:00:00');
+  const e = end ? new Date(end + 'T00:00:00') : null;
+  const d = n => n.toString().padStart(2,'0');
+  if (!e || start === end) return `${d(s.getDate())} ${MONTHS_SHORT[s.getMonth()+1]} ${s.getFullYear()}`;
+  if (s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear())
+    return `${d(s.getDate())}–${d(e.getDate())} ${MONTHS_SHORT[s.getMonth()+1]} ${s.getFullYear()}`;
+  return `${d(s.getDate())} ${MONTHS_SHORT[s.getMonth()+1]} – ${d(e.getDate())} ${MONTHS_SHORT[e.getMonth()+1]} ${e.getFullYear()}`;
+}
+
+function monthKey(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+function monthLabel(key) {
+  const [y, m] = key.split('-');
+  return `${MONTHS_FR[parseInt(m)]} ${y}`;
+}
+
+// ═══════════════════════════════════════
+// ICS EXPORT
+// ═══════════════════════════════════════
+function toICSDate(str) {
+  return str.replace(/-/g,'');
+}
+
+function escapeICS(s) {
+  return (s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+}
+
+function exportICS(ev) {
+  const uid = ev.id + '@luteciacare';
+  const end = ev.endDate || ev.startDate;
+  // Add 1 day to end for all-day events
+  const endDt = new Date(end + 'T00:00:00');
+  endDt.setDate(endDt.getDate() + 1);
+  const endStr = [endDt.getFullYear(), String(endDt.getMonth()+1).padStart(2,'0'), String(endDt.getDate()).padStart(2,'0')].join('');
+  const location = [ev.city, ev.country].filter(Boolean).join(', ');
+  const desc = escapeICS(ev.notes || '');
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Lutecia Care//Calendar//FR',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTART;VALUE=DATE:${toICSDate(ev.startDate)}`,
+    `DTEND;VALUE=DATE:${endStr}`,
+    `SUMMARY:${escapeICS(ev.title)}`,
+    location ? `LOCATION:${escapeICS(location)}` : '',
+    desc ? `DESCRIPTION:${desc}` : '',
+    `CATEGORIES:${escapeICS(CAT_LABELS[ev.category]||ev.category)}`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].filter(Boolean).join('\r\n');
+
+  const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (ev.title.replace(/[^a-z0-9]/gi,'_')) + '.ics';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Invitation Outlook générée ✓');
+}
+
+// ═══════════════════════════════════════
+// MULTI-SELECT & BULK EXPORT
+// ═══════════════════════════════════════
+function toggleSelectMode() {
+  selectMode = !selectMode;
+  selectedIds.clear();
+  const btn = document.getElementById('select-btn');
+  if (btn) btn.textContent = selectMode ? '✕ Annuler' : '☑ Sélectionner';
+  updateBulkBar();
+  renderCalendar();
+}
+
+function toggleSelect(id) {
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  const card = document.getElementById('card-' + id);
+  if (card) {
+    card.classList.toggle('selected', selectedIds.has(id));
+    const cb = card.querySelector('.event-checkbox');
+    if (cb) cb.checked = selectedIds.has(id);
+  }
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  const countEl = document.getElementById('bulk-count');
+  if (!bar) return;
+  if (selectMode && selectedIds.size > 0) {
+    bar.classList.remove('hidden');
+    countEl.textContent = selectedIds.size + ' sélectionné' + (selectedIds.size > 1 ? 's' : '');
+  } else {
+    bar.classList.add('hidden');
+  }
+}
+
+function bulkExportICS() {
+  const selected = events.filter(function(ev) { return selectedIds.has(ev.id); });
+  if (selected.length === 0) { toast('Aucun événement sélectionné'); return; }
+
+  const vevents = selected.map(function(ev) {
+    const end = ev.endDate || ev.startDate;
+    const endDt = new Date(end + 'T00:00:00');
+    endDt.setDate(endDt.getDate() + 1);
+    const endStr = [endDt.getFullYear(), String(endDt.getMonth()+1).padStart(2,'0'), String(endDt.getDate()).padStart(2,'0')].join('');
+    const location = [ev.city, ev.country].filter(Boolean).join(', ');
+    const desc = escapeICS(ev.notes || '');
+    return [
+      'BEGIN:VEVENT',
+      'UID:' + ev.id + '@luteciacare',
+      'DTSTART;VALUE=DATE:' + toICSDate(ev.startDate),
+      'DTEND;VALUE=DATE:' + endStr,
+      'SUMMARY:' + escapeICS(ev.title),
+      location ? 'LOCATION:' + escapeICS(location) : '',
+      desc ? 'DESCRIPTION:' + desc : '',
+      'CATEGORIES:' + escapeICS(CAT_LABELS[ev.category]||ev.category),
+      'END:VEVENT',
+    ].filter(Boolean).join('\r\n');
+  }).join('\r\n');
+
+  const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Lutecia Care//Calendar//FR','CALSCALE:GREGORIAN','METHOD:PUBLISH',vevents,'END:VCALENDAR'].join('\r\n');
+  const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'LuteciaCare_' + selected.length + '_evenements.ics';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✓ ' + selected.length + ' événement' + (selected.length>1?'s exportés':' exporté'));
+  toggleSelectMode();
+}
+
+// ═══════════════════════════════════════
+// ALERTS
+// ═══════════════════════════════════════
+function renderAlerts() {
+  const zone = document.getElementById('alert-zone');
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1; // 1-indexed
+  const currentYear = now.getFullYear();
+  const in4m = new Date(now);
+  in4m.setMonth(in4m.getMonth() + 4);
+
+  const alerts = [];
+  recurring.forEach(r => {
+    // Target year = next year if the month has already passed (or is current month)
+    const targetYear = r.typicalMonth > currentMonth ? currentYear : currentYear + 1;
+    const approxDate = new Date(targetYear, r.typicalMonth - 1, 15);
+
+    // Only alert if the next occurrence is within 4 months
+    if (approxDate > in4m) return;
+
+    // Check if there's already a confirmed event for that year/month
+    const confirmed = events.find(ev => {
+      if (!ev.startDate) return false;
+      const d = new Date(ev.startDate + 'T00:00:00');
+      return d.getFullYear() === targetYear &&
+             d.getMonth() + 1 === r.typicalMonth &&
+             ev.title.toLowerCase().includes(r.name.split(' ')[0].toLowerCase());
+    });
+    if (!confirmed) {
+      alerts.push(`${r.name} — attendu en ${MONTHS_FR[r.typicalMonth]} ${targetYear} — date réelle non confirmée`);
+    }
+  });
+
+  if (alerts.length === 0) { zone.innerHTML = ''; return; }
+  zone.innerHTML = `
+    <div class="alert-banner">
+      <h4>⚠ Événements récurrents à confirmer (dans les 4 mois)</h4>
+      <div class="alert-items">
+        ${alerts.map(a => `<div class="alert-item">${a}</div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+// RENDER CALENDAR
+// ═══════════════════════════════════════
+function renderCalendar() {
+  const container = document.getElementById('event-list-container');
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  let filtered = events.filter(ev => {
+    const d = new Date(ev.startDate + 'T00:00:00');
+    if (d < today) return false; // hide past events
+    if (filterCategory && ev.category !== filterCategory) return false;
+    if (filterCountry && ev.country !== filterCountry) return false;
+    return true;
+  });
+
+  filtered.sort((a,b) => a.startDate.localeCompare(b.startDate));
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><p>Aucun événement à venir</p></div>`;
+    return;
+  }
+
+  // Group by month
+  const groups = {};
+  filtered.forEach(ev => {
+    const k = monthKey(ev.startDate);
+    if (!groups[k]) groups[k] = [];
+    groups[k].push(ev);
+  });
+
+  container.innerHTML = Object.keys(groups).sort().map(k => `
+    <div class="month-group">
+      <div class="month-label">${monthLabel(k)}</div>
+      <div class="event-list">
+        ${groups[k].map(ev => renderEventCard(ev)).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderEventCard(ev) {
+  const color = CAT_COLORS[ev.category] || '#7a6890';
+  const label = CAT_LABELS[ev.category] || ev.category;
+  const dates = formatDateRange(ev.startDate, ev.endDate);
+  const flag = flagImg(ev.country);
+  const cityPart = ev.city ? safeText(ev.city) : '';
+  const countryPart = ev.country ? flag + safeText(ev.country) : '';
+  const loc = [cityPart, countryPart].filter(Boolean).join(', ');
+  const isSelected = selectedIds.has(ev.id);
+  const gridCols = selectMode ? 'grid-template-columns:22px 4px 1fr auto' : '';
+  return `
+    <div class="event-card${isSelected ? ' selected' : ''}" id="card-${ev.id}" style="${gridCols}" ${selectMode ? 'onclick="toggleSelect(\'' + ev.id + '\')"' : ''}>
+      ${selectMode ? '<input type="checkbox" class="event-checkbox"' + (isSelected ? ' checked' : '') + ' onclick="event.stopPropagation();toggleSelect(\'' + ev.id + '\')" style="margin:auto 0">' : ''}
+      <div class="event-bar" style="background:${color}"></div>
+      <div class="event-body">
+        <div class="event-title">${safeText(ev.title)}</div>
+        <div class="event-meta">
+          ${dates ? `<span class="event-dates">${dates}</span>` : ''}
+          ${loc ? `<span class="event-location">· ${loc}</span>` : ''}
+          <span class="cat-badge" style="background:${color}">${label}</span>
+        </div>
+        ${ev.notes ? `<div style="font-size:0.76rem;color:var(--text-muted);margin-top:0.3rem">${safeText(ev.notes)}</div>` : ''}
+        ${ev.participants ? `<div style="font-size:0.76rem;color:var(--text-muted);margin-top:0.2rem">👤 ${safeText(ev.participants)}</div>` : ''}
+      </div>
+      <div class="event-actions">
+        <button class="icon-btn" title="Exporter vers Outlook (.ics)" onclick="event.stopPropagation();exportICS(${JSON.stringify(ev).replace(/"/g,'&quot;')})">📅</button>
+        <button class="icon-btn" title="Modifier" onclick="event.stopPropagation();editEvent('${ev.id}')">✏️</button>
+        <button class="icon-btn danger" title="Supprimer" onclick="event.stopPropagation();deleteEvent('${ev.id}')">🗑</button>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+// RENDER RECURRING
+// ═══════════════════════════════════════
+function syncFilters() {
+  const countrySel = document.getElementById('filter-country');
+  const catSel = document.getElementById('filter-category');
+  if (countrySel) countrySel.value = filterCountry;
+  if (catSel) catSel.value = filterCategory;
+  const show = !!(filterCategory || filterCountry || filterRecurUnconfirmed);
+  const btn = document.getElementById('filter-reset-btn');
+  if (btn) btn.style.display = show ? '' : 'none';
+}
+
+function renderRecurring() {
+  const container = document.getElementById('recur-list-container');
+  if (recurring.length === 0) {
+    container.innerHTML = `<div class="empty"><p>Aucun événement récurrent configuré</p></div>`;
+    return;
+  }
+
+  // Populate filter dropdowns
+  const cats = [...new Set(recurring.map(r => r.category))].sort();
+  const countries = [...new Set(recurring.map(r => r.country).filter(Boolean))].sort((a,b) => a.localeCompare(b,'fr'));
+  const catSel = document.getElementById('recur-filter-cat');
+  const countrySel = document.getElementById('recur-filter-country');
+  if (catSel) {
+    const curCat = filterCategory;
+    catSel.innerHTML = '<option value="">Toutes les spécialités</option>' +
+      cats.map(c => `<option value="${c}"${c===curCat?' selected':''}>${CAT_LABELS[c]||c}</option>`).join('');
+  }
+  if (countrySel) {
+    const curC = filterCountry;
+    countrySel.innerHTML = '<option value="">Tous les pays</option>' +
+      countries.map(c => `<option value="${c}"${c===curC?' selected':''}>${flagImg(c)}${c}</option>`).join('');
+  }
+  const resetBtn = document.getElementById('recur-reset-btn');
+  if (resetBtn) resetBtn.style.display = (filterCategory || filterCountry) ? '' : 'none';
+
+  // Apply filters
+  const now2 = new Date();
+  const curMonth = now2.getMonth() + 1;
+  const curYear = now2.getFullYear();
+  let filtered = [...recurring];
+  if (filterCategory) filtered = filtered.filter(r => r.category === filterCategory);
+  if (filterCountry) filtered = filtered.filter(r => r.country === filterCountry);
+  if (filterRecurUnconfirmed) {
+    filtered = filtered.filter(r => {
+      const targetYear = r.typicalMonth > curMonth ? curYear : curYear + 1;
+      const confirmed = events.find(ev => {
+        if (!ev.startDate) return false;
+        const d = new Date(ev.startDate + 'T00:00:00');
+        return d.getFullYear() === targetYear &&
+               d.getMonth() + 1 === r.typicalMonth &&
+               ev.title.toLowerCase().includes(r.name.split(' ')[0].toLowerCase());
+      });
+      return !confirmed;
+    });
+  }
+  // Sync filter UI
+  syncFilters();
+  syncFilters();
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty"><p>Aucun résultat pour ces filtres.</p></div>`;
+    return;
+  }
+  const sorted = filtered.sort((a,b) => a.typicalMonth - b.typicalMonth);
+  container.innerHTML = `<div class="recur-grid">${sorted.map(r => renderRecurCard(r)).join('')}</div>`;
+}
+
+function renderRecurCard(r) {
+  const color = CAT_BADGE_COLORS[r.category] || '#6b7280';
+  const now = new Date();
+  // Is there a future event that matches?
+  const next = events.find(ev => {
+    if (!ev.startDate) return false;
+    const d = new Date(ev.startDate + 'T00:00:00');
+    if (d < now) return false;
+    return d.getMonth() + 1 === r.typicalMonth &&
+           ev.title.toLowerCase().includes(r.name.split(' ')[0].toLowerCase());
+  });
+  const statusHtml = next
+    ? `<span class="recur-status recur-ok">✓ Confirmé ${formatDateRange(next.startDate, next.endDate)}</span>`
+    : `<span class="recur-status recur-warn">⚠ À confirmer</span>`;
+
+  return `
+    <div class="recur-card">
+      <div class="recur-month-badge" style="background:${color}">
+        <span class="month" style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;opacity:1">${MONTHS_SHORT[r.typicalMonth]}</span>
+      </div>
+      <div class="recur-body">
+        <div class="recur-name">${safeText(r.name)}<span class="cat-badge" style="background:${color};font-size:0.65rem;padding:0.1rem 0.45rem;margin-left:0.5rem;vertical-align:middle">${CAT_LABELS[r.category] || r.category}</span></div>
+        <div class="recur-detail">${[r.city && r.city !== 'Variable' ? safeText(r.city) : '', r.country && r.country !== 'Variable' ? flagImg(r.country) + safeText(r.country) : ''].filter(Boolean).join(', ')}${r.notes ? ' — ' + safeText(r.notes) : ''}</div>
+      </div>
+      ${statusHtml}
+      <button class="icon-btn danger" id="del-recur-${r.id}" title="Supprimer" onclick="confirmDeleteRecur('${r.id}')">🗑</button>
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════
+function deleteEvent(id) {
+  if (!confirm('Supprimer cet événement ?')) return;
+  events = events.filter(e => e.id !== id);
+  saveData(); renderAll(); toast('Événement supprimé');
+}
+
+function confirmDeleteRecur(id) {
+  if (pendingDeleteRecur === id) {
+    // 2e clic = suppression confirmée
+    recurring = recurring.filter(r => r.id !== id);
+    pendingDeleteRecur = null;
+    saveData(); renderRecurring(); toast('Récurrent supprimé');
+  } else {
+    // 1er clic = demande de confirmation inline
+    if (pendingDeleteRecur) {
+      // annule le précédent pending
+      const prev = document.getElementById('del-recur-' + pendingDeleteRecur);
+      if (prev) { prev.textContent = '🗑'; prev.style.cssText = ''; prev.title = 'Supprimer'; }
+    }
+    pendingDeleteRecur = id;
+    const btn = document.getElementById('del-recur-' + id);
+    if (btn) {
+      btn.textContent = 'Supprimer ?';
+      btn.style.cssText = 'width:auto;height:auto;padding:0.25rem 0.6rem;font-size:0.72rem;font-weight:600;color:var(--danger);border-color:var(--danger);border-radius:var(--radius);background:var(--danger-bg);';
+      btn.title = 'Cliquer à nouveau pour confirmer';
+    }
+    // Auto-annulation après 4 secondes
+    setTimeout(() => {
+      if (pendingDeleteRecur === id) {
+        pendingDeleteRecur = null;
+        const b = document.getElementById('del-recur-' + id);
+        if (b) { b.textContent = '🗑'; b.style.cssText = ''; b.title = 'Supprimer'; }
+      }
+    }, 4000);
+  }
+}
+
+function editEvent(id) {
+  const ev = events.find(e => e.id === id);
+  if (!ev) return;
+  editingId = id;
+  document.getElementById('modal-title').textContent = "Modifier l'événement";
+  document.getElementById('f-title').value = ev.title;
+  document.getElementById('f-start').value = ev.startDate;
+  document.getElementById('f-end').value = ev.endDate || '';
+  document.getElementById('f-city').value = ev.city || '';
+  document.getElementById('f-country').value = ev.country || '';
+  document.getElementById('f-category').value = ev.category || 'medecine-nucleaire';
+  document.getElementById('f-notes').value = ev.notes || '';
+  document.getElementById('f-participants').value = ev.participants || '';
+  document.getElementById('modal-event').classList.remove('hidden');
+}
+
+function openModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = 'Nouvel événement';
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-start').value = '';
+  document.getElementById('f-end').value = '';
+  document.getElementById('f-city').value = '';
+  document.getElementById('f-country').value = '';
+  document.getElementById('f-category').value = 'medecine-nucleaire';
+  document.getElementById('f-notes').value = '';
+  document.getElementById('f-participants').value = '';
+  document.getElementById('modal-event').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('modal-event').classList.add('hidden');
+  editingId = null;
+}
+
+function saveEvent() {
+  const title = document.getElementById('f-title').value.trim();
+  const start = document.getElementById('f-start').value;
+  if (!title || !start) { alert('Nom et date de début requis.'); return; }
+  const ev = {
+    id: editingId || uid(),
+    title,
+    startDate: start,
+    endDate: document.getElementById('f-end').value || start,
+    city: document.getElementById('f-city').value.trim(),
+    country: document.getElementById('f-country').value.trim(),
+    category: document.getElementById('f-category').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    participants: document.getElementById('f-participants').value.trim(),
+  };
+  if (editingId) {
+    const idx = events.findIndex(e => e.id === editingId);
+    events[idx] = ev;
+  } else {
+    events.push(ev);
+  }
+  saveData(); closeModal(); renderAll();
+  toast(editingId ? 'Événement modifié ✓' : 'Événement ajouté ✓');
+}
+
+function openModalRecur() {
+  document.getElementById('rf-name').value = '';
+  document.getElementById('rf-month').value = '1';
+  document.getElementById('rf-category').value = 'medecine-nucleaire';
+  document.getElementById('rf-country').value = '';
+  document.getElementById('rf-city').value = '';
+  document.getElementById('rf-notes').value = '';
+  document.getElementById('modal-recur').classList.remove('hidden');
+}
+
+function closeModalRecur() { document.getElementById('modal-recur').classList.add('hidden'); }
+
+function saveRecur() {
+  const name = document.getElementById('rf-name').value.trim();
+  if (!name) { alert('Nom requis.'); return; }
+  recurring.push({
+    id: uid(), name,
+    typicalMonth: parseInt(document.getElementById('rf-month').value),
+    category: document.getElementById('rf-category').value,
+    country: document.getElementById('rf-country').value.trim(),
+    city: document.getElementById('rf-city').value.trim(),
+    notes: document.getElementById('rf-notes').value.trim(),
+  });
+  saveData(); closeModalRecur(); renderRecurring(); toast('Événement récurrent ajouté ✓');
+}
+
+function applyFilters() {
+  filterCategory = document.getElementById('filter-category').value;
+  filterCountry = document.getElementById('filter-country').value;
+  renderFilters();
+  syncFilters();
+  const active = document.querySelector('.view.active');
+  if (active && active.id === 'view-recurring') renderRecurring();
+  else renderCalendar();
+}
+
+function resetFilters() {
+  filterCategory = ''; filterCountry = '';
+  filterRecurUnconfirmed = false;
+  const unchk = document.getElementById('recur-filter-unconfirmed');
+  if (unchk) unchk.checked = false;
+  filterCategory = '';
+  filterCountry = '';
+  renderFilters();
+  syncFilters();
+  const active = document.querySelector('.view.active');
+  if (active && active.id === 'view-recurring') renderRecurring();
+  else renderCalendar();
+}
+
+function renderFilters() {
+  // Country select
+  const sel = document.getElementById('filter-country');
+  const current = sel ? sel.value : filterCountry;
+  const countries = [...new Set(events.map(e => e.country).filter(Boolean))].sort((a,b) => a.localeCompare(b,'fr'));
+  if (sel) sel.innerHTML = '<option value="">🌍 Tous les pays</option>' +
+    countries.map(c => '<option value="' + c + '"' + (c===current?' selected':'') + '>' + c + '</option>').join('');
+  // Flag preview next to country select
+  const flagPrev = document.getElementById('country-flag-preview');
+  if (flagPrev) flagPrev.innerHTML = current ? flagImg(current) : '';
+  // Category select
+  const catSel = document.getElementById('filter-category');
+  const curCat = catSel ? catSel.value : filterCategory;
+  const cats = [...new Set(events.map(e => e.category).filter(Boolean))].sort((a,b) => (CAT_LABELS[a]||a).localeCompare(CAT_LABELS[b]||b,'fr'));
+  if (catSel) catSel.innerHTML = '<option value="">Toutes les spécialités</option>' +
+    cats.map(c => '<option value="' + c + '"' + (c===curCat?' selected':'') + '>' + (CAT_LABELS[c]||c) + '</option>').join('');
+}
+
+// ═══════════════════════════════════════
+// SCRAPER
+// ═══════════════════════════════════════
+let scraperResults = [];
+
+async function launchScraper() {
+  const btn = document.querySelector('[onclick="launchScraper()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Scraping…'; }
+  try {
+    let results;
+    if (!SCRAPER_URL) {
+      await new Promise(r => setTimeout(r, 900));
+      results = { events: SCRAPER_DEMO, count: SCRAPER_DEMO.length, errors: [], demo: true };
+    } else {
+      const r = await fetch(SCRAPER_URL);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      results = await r.json();
+    }
+    openScraperModal(results);
+  } catch (err) {
+    toast('Erreur scraper : ' + err.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🔍 Lancer le scraping'; }
+  }
+}
+
+function openScraperModal(results) {
+  scraperResults = results.events || [];
+  const isDemoMode = results.demo === true;
+  document.getElementById('scraper-modal-title').textContent =
+    isDemoMode ? ('🧪 D\xe9mo — ' + scraperResults.length + ' \xe9v\xe9nements simul\xe9s') : ('🔍 ' + scraperResults.length + ' \xe9v\xe9nements trouv\xe9s');
+  const existingKeys = new Set(events.map(e => e.title.toLowerCase().replace(/\s+/g,'').slice(0,25)));
+  scraperResults.forEach(ev => {
+    ev._isDuplicate = existingKeys.has(ev.title.toLowerCase().replace(/\s+/g,'').slice(0,25));
+  });
+  const newCount = scraperResults.filter(e => !e._isDuplicate).length;
+  document.getElementById('scraper-status').innerHTML =
+    isDemoMode
+      ? '<span style="color:var(--warning);font-weight:600">Mode d\xe9mo</span> — <b>' + newCount + '</b> nouveaux \xb7 <b>' + (scraperResults.length - newCount) + '</b> d\xe9j\xe0 pr\xe9sents.'
+      : '<b>' + newCount + '</b> nouveaux \xb7 <b>' + (scraperResults.length - newCount) + '</b> d\xe9j\xe0 pr\xe9sents.';
+  renderScraperList();
+  document.getElementById('modal-scraper').classList.remove('hidden');
+}
+
+function renderScraperList() {
+  const container = document.getElementById('scraper-event-list');
+  if (scraperResults.length === 0) {
+    container.innerHTML = '<div class="empty"><p>Aucun \xe9v\xe9nement trouv\xe9.</p></div>'; return;
+  }
+  container.innerHTML = scraperResults.map(function(ev, i) {
+    const color = CAT_COLORS[ev.category] || '#999';
+    const label = CAT_LABELS[ev.category] || ev.category;
+    const dates = formatDateRange(ev.startDate, ev.endDate);
+    const loc = [ev.city, ev.country].filter(Boolean).join(', ');
+    const dup = ev._isDuplicate ? '<span class="scraper-duplicate">d\xe9j\xe0 pr\xe9sent</span>' : '';
+    return '<div class="scraper-event">'
+      + '<input type="checkbox" id="sc-' + i + '" ' + (ev._isDuplicate ? '' : 'checked') + ' onchange="updateScraperCount()">'
+      + '<div class="scraper-event-body">'
+      + '<div class="scraper-event-title">' + ev.title + '</div>'
+      + '<div class="scraper-event-meta"><span>' + dates + '</span>'
+      + (loc ? '<span>\xb7 ' + loc + '</span>' : '')
+      + '<span class="cat-badge" style="background:' + color + '">' + label + '</span>' + dup
+      + '<span style="font-size:0.68rem;color:var(--text-muted)">' + (ev.source || '') + '</span>'
+      + '</div></div></div>';
+  }).join('');
+  updateScraperCount();
+}
+
+function updateScraperCount() {
+  const checked = scraperResults.filter(function(_, i) { return document.getElementById('sc-' + i) && document.getElementById('sc-' + i).checked; }).length;
+  document.getElementById('scraper-selection-count').textContent = checked + ' s\xe9lectionn\xe9' + (checked !== 1 ? 's' : '');
+  document.getElementById('scraper-import-btn').textContent = 'Importer' + (checked > 0 ? ' (' + checked + ')' : '');
+}
+
+function selectAllScraper(val) {
+  scraperResults.forEach(function(_, i) { var cb = document.getElementById('sc-' + i); if (cb) cb.checked = val; });
+  updateScraperCount();
+}
+
+function importScraperSelection() {
+  const selected = scraperResults.filter(function(ev, i) {
+    var cb = document.getElementById('sc-' + i);
+    return cb && cb.checked && !ev._isDuplicate;
+  });
+  if (selected.length === 0) { toast('Aucun nouvel \xe9v\xe9nement s\xe9lectionn\xe9.'); return; }
+  selected.forEach(function(ev) {
+    events.push({ id: uid(), title: ev.title, startDate: ev.startDate, endDate: ev.endDate || ev.startDate, city: ev.city || '', country: ev.country || '', category: ev.category || 'autre', notes: ev.notes || '' });
+  });
+  saveData(); closeScraperModal(); renderAll();
+  toast('✓ ' + selected.length + ' \xe9v\xe9nement' + (selected.length > 1 ? 's import\xe9s' : ' import\xe9'));
+}
+
+function closeScraperModal() {
+  document.getElementById('modal-scraper').classList.add('hidden');
+  scraperResults = [];
+}
+
+// ═══════════════════════════════════════
+// RENDER SOURCES
+// ═══════════════════════════════════════
+function renderSources() {
+  const container = document.getElementById('sources-container');
+  container.innerHTML = SOURCES.map(function(tier) {
+    const sitesHtml = tier.sites.map(function(s) {
+      const tags = s.tags.map(function(t) {
+        return '<span class="source-tag" style="background:' + (CAT_COLORS[t]||'#999') + '">' + (CAT_LABELS[t]||t) + '</span>';
+      }).join('');
+      return '<div class="source-card"><a href="' + s.url + '" target="_blank" rel="noopener">' + s.name + ' ↗</a>'
+        + '<div class="source-card-meta">' + tags + '<span style="margin-left:0.25rem">' + s.desc + '</span></div></div>';
+    }).join('');
+    return '<div class="sources-tier">'
+      + '<div class="sources-tier-title"><span class="sources-tier-badge">' + tier.tier + '</span>' + tier.label + '</div>'
+      + '<p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem">' + tier.desc + '</p>'
+      + '<div class="sources-grid">' + sitesHtml + '</div></div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t) {
+    t.classList.toggle('active', t.getAttribute('onclick') === "switchTab('" + name + "')");
+  });
+  document.getElementById('view-' + name).classList.add('active');
+  // Toggle "À confirmer" checkbox visibility
+  const wrap = document.getElementById('filter-unconfirmed-wrap');
+  if (wrap) wrap.style.display = (name === 'recurring') ? 'flex' : 'none';
+  // Show/hide filter bar (hide on sources tab)
+  const bar = document.getElementById('filter-bar');
+  if (bar) bar.style.display = (name === 'sources') ? 'none' : '';
+  if (name === 'recurring') renderRecurring();
+  else if (name === 'calendar') renderCalendar();
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(function() { el.remove(); }, 2800);
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+function renderAll() {
+  renderFilters();
+  renderAlerts();
+  renderCalendar();
+  renderRecurring();
+  renderSources();
+}
+
+// ═══════════════════════════════════════
+// INIT — point d'entrée unique
+// DataStore.load est appelé ici ; le rendu ne démarre qu'une fois les données prêtes.
+// Migration Apps Script : aucun changement ici — seul DataStore.load change.
+// ═══════════════════════════════════════
+function initApp() {
+  DataStore.load(function(data) {
+    events    = data.events;
+    recurring = data.recurring;
+    renderAll();
+  });
+}
+
+document.getElementById('modal-event').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.getElementById('modal-recur').addEventListener('click', function(e) { if (e.target === this) closeModalRecur(); });
+document.getElementById('modal-scraper').addEventListener('click', function(e) { if (e.target === this) closeScraperModal(); });
+
+initApp();
+</script>
+</body>
+</html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
